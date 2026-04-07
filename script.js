@@ -1,22 +1,7 @@
-// Инициализация Telegram Web App
 const tg = window.Telegram.WebApp;
 tg.expand();
 tg.ready();
 
-// DOM элементы
-const minion = document.getElementById('minion');
-const bananasSpan = document.getElementById('bananas');
-const levelSpan = document.getElementById('level');
-const energySpan = document.getElementById('energy');
-const energyMaxSpan = document.getElementById('energyMax');
-const expFill = document.getElementById('expFill');
-const expText = document.getElementById('expText');
-const clickPowerSpan = document.getElementById('clickPower');
-const prestigeBonusSpan = document.getElementById('prestigeBonus');
-const totalBananasSpan = document.getElementById('totalBananas');
-const energyFill = document.getElementById('energyFill');
-
-// Данные пользователя
 let userData = {
     user_id: null,
     total_bananas: 0,
@@ -37,42 +22,42 @@ let upgrades = {
 };
 
 let clicksCount = 0;
+let pendingRequest = false;
 
-// Загрузка данных
-async function loadUserData() {
-    tg.sendData(JSON.stringify({ action: 'get_user_data' }));
-}
+const elements = {
+    bananas: document.getElementById('bananas'),
+    level: document.getElementById('level'),
+    energy: document.getElementById('energy'),
+    energyMax: document.getElementById('energyMax'),
+    expFill: document.getElementById('expFill'),
+    expText: document.getElementById('expText'),
+    clickPower: document.getElementById('clickPower'),
+    prestigeBonus: document.getElementById('prestigeBonus'),
+    totalBananas: document.getElementById('totalBananas'),
+    energyFill: document.getElementById('energyFill')
+};
 
-// Обновление UI
 function updateUI() {
-    // Основная статистика
-    bananasSpan.textContent = Math.floor(userData.total_bananas).toLocaleString();
-    levelSpan.textContent = userData.level;
-    energySpan.textContent = userData.energy_current;
-    energyMaxSpan.textContent = userData.energy_max;
+    if (elements.bananas) elements.bananas.textContent = Math.floor(userData.total_bananas).toLocaleString();
+    if (elements.level) elements.level.textContent = userData.level;
+    if (elements.energy) elements.energy.textContent = userData.energy_current;
+    if (elements.energyMax) elements.energyMax.textContent = userData.energy_max;
     
-    // Сила клика с бонусом
     const totalClickPower = Math.floor(userData.click_power * userData.prestige_bonus);
-    clickPowerSpan.textContent = `💪 x${totalClickPower}`;
-    prestigeBonusSpan.textContent = `✨ +${Math.floor((userData.prestige_bonus - 1) * 100)}%`;
+    if (elements.clickPower) elements.clickPower.textContent = `💪 x${totalClickPower}`;
+    if (elements.prestigeBonus) elements.prestigeBonus.textContent = `✨ +${Math.floor((userData.prestige_bonus - 1) * 100)}%`;
     
-    // Опыт
     const expNeeded = userData.level * 100;
     const expPercent = (userData.experience / expNeeded) * 100;
-    expFill.style.width = `${expPercent}%`;
-    expText.textContent = `${Math.floor(userData.experience)}/${expNeeded}`;
+    if (elements.expFill) elements.expFill.style.width = `${expPercent}%`;
+    if (elements.expText) elements.expText.textContent = `${Math.floor(userData.experience)}/${expNeeded}`;
     
-    // Энергия
     const energyPercent = (userData.energy_current / userData.energy_max) * 100;
-    if (energyFill) energyFill.style.width = `${energyPercent}%`;
+    if (elements.energyFill) elements.energyFill.style.width = `${energyPercent}%`;
     
-    // Общая статистика
-    if (totalBananasSpan) totalBananasSpan.textContent = Math.floor(userData.total_bananas).toLocaleString();
+    if (elements.totalBananas) elements.totalBananas.textContent = Math.floor(userData.total_bananas).toLocaleString();
     
-    // Обновляем стоимость улучшений
     updateUpgradeCosts();
-    
-    // Обновляем статистику на вкладке
     updateStatsTab();
 }
 
@@ -87,27 +72,46 @@ function updateUpgradeCosts() {
     const energyRegenCost = Math.floor(150 * Math.pow(1.5, energyRegenLevel));
     const bonusBananasCost = Math.floor(200 * Math.pow(1.5, bonusBananasLevel));
     
-    document.getElementById('cost_click_power').querySelector('.cost-value').textContent = clickPowerCost;
-    document.getElementById('cost_energy_max').querySelector('.cost-value').textContent = energyMaxCost;
-    document.getElementById('cost_energy_regen').querySelector('.cost-value').textContent = energyRegenCost;
-    document.getElementById('cost_bonus_bananas').querySelector('.cost-value').textContent = bonusBananasCost;
+    const costClick = document.getElementById('cost_click_power');
+    const costEnergy = document.getElementById('cost_energy_max');
+    const costRegen = document.getElementById('cost_energy_regen');
+    const costBonus = document.getElementById('cost_bonus_bananas');
     
-    document.getElementById('level_click_power').textContent = `Ур. ${clickPowerLevel}`;
-    document.getElementById('level_energy_max').textContent = `Ур. ${energyMaxLevel}`;
-    document.getElementById('level_energy_regen').textContent = `Ур. ${energyRegenLevel}`;
-    document.getElementById('level_bonus_bananas').textContent = `Ур. ${bonusBananasLevel}`;
+    if (costClick) costClick.querySelector('.cost-value').textContent = clickPowerCost;
+    if (costEnergy) costEnergy.querySelector('.cost-value').textContent = energyMaxCost;
+    if (costRegen) costRegen.querySelector('.cost-value').textContent = energyRegenCost;
+    if (costBonus) costBonus.querySelector('.cost-value').textContent = bonusBananasCost;
+    
+    const levelClick = document.getElementById('level_click_power');
+    const levelEnergy = document.getElementById('level_energy_max');
+    const levelRegen = document.getElementById('level_energy_regen');
+    const levelBonus = document.getElementById('level_bonus_bananas');
+    
+    if (levelClick) levelClick.textContent = `Ур. ${clickPowerLevel}`;
+    if (levelEnergy) levelEnergy.textContent = `Ур. ${energyMaxLevel}`;
+    if (levelRegen) levelRegen.textContent = `Ур. ${energyRegenLevel}`;
+    if (levelBonus) levelBonus.textContent = `Ур. ${bonusBananasLevel}`;
 }
 
 function updateStatsTab() {
     const expNeeded = userData.level * 100;
-    document.getElementById('playerName').textContent = tg.initDataUnsafe?.user?.first_name || 'Игрок';
-    document.getElementById('statLevel').textContent = userData.level;
-    document.getElementById('statExp').textContent = `${Math.floor(userData.experience)}/${expNeeded}`;
-    document.getElementById('statBananas').textContent = Math.floor(userData.total_bananas).toLocaleString();
-    document.getElementById('statClickPower').textContent = Math.floor(userData.click_power * userData.prestige_bonus);
-    document.getElementById('statPrestige').textContent = userData.prestige_count;
-    document.getElementById('statBonus').textContent = `+${Math.floor((userData.prestige_bonus - 1) * 100)}%`;
-    document.getElementById('statClicks').textContent = clicksCount.toLocaleString();
+    const playerNameSpan = document.getElementById('playerName');
+    const statLevelSpan = document.getElementById('statLevel');
+    const statExpSpan = document.getElementById('statExp');
+    const statBananasSpan = document.getElementById('statBananas');
+    const statClickPowerSpan = document.getElementById('statClickPower');
+    const statPrestigeSpan = document.getElementById('statPrestige');
+    const statBonusSpan = document.getElementById('statBonus');
+    const statClicksSpan = document.getElementById('statClicks');
+    
+    if (playerNameSpan) playerNameSpan.textContent = tg.initDataUnsafe?.user?.first_name || 'Игрок';
+    if (statLevelSpan) statLevelSpan.textContent = userData.level;
+    if (statExpSpan) statExpSpan.textContent = `${Math.floor(userData.experience)}/${expNeeded}`;
+    if (statBananasSpan) statBananasSpan.textContent = Math.floor(userData.total_bananas).toLocaleString();
+    if (statClickPowerSpan) statClickPowerSpan.textContent = Math.floor(userData.click_power * userData.prestige_bonus);
+    if (statPrestigeSpan) statPrestigeSpan.textContent = userData.prestige_count;
+    if (statBonusSpan) statBonusSpan.textContent = `+${Math.floor((userData.prestige_bonus - 1) * 100)}%`;
+    if (statClicksSpan) statClicksSpan.textContent = clicksCount.toLocaleString();
 }
 
 function showFloatingNumber(text, x, y) {
@@ -120,7 +124,7 @@ function showFloatingNumber(text, x, y) {
     setTimeout(() => div.remove(), 600);
 }
 
-function showRipple(x, y) {
+function showRipple() {
     const ripple = document.querySelector('.click-ripple');
     if (ripple) {
         ripple.classList.remove('active');
@@ -130,6 +134,8 @@ function showRipple(x, y) {
 }
 
 function handleClick(event) {
+    if (pendingRequest) return;
+    
     if (userData.energy_current <= 0) {
         showFloatingNumber('❌ Нет энергии!', event.clientX, event.clientY);
         return;
@@ -140,13 +146,17 @@ function handleClick(event) {
     const totalGain = Math.floor(clickValue * bonusMultiplier);
     
     showFloatingNumber(`+${totalGain} 🍌`, event.clientX, event.clientY);
-    showRipple(event.clientX, event.clientY);
+    showRipple();
     
-    minion.classList.add('minion-click');
-    setTimeout(() => minion.classList.remove('minion-click'), 150);
+    const minion = document.getElementById('minion');
+    if (minion) {
+        minion.classList.add('minion-click');
+        setTimeout(() => minion.classList.remove('minion-click'), 150);
+    }
     
     clicksCount++;
     
+    pendingRequest = true;
     tg.sendData(JSON.stringify({
         action: 'click',
         click_power: userData.click_power,
@@ -154,7 +164,6 @@ function handleClick(event) {
     }));
     
     userData.energy_current--;
-    userData.total_bananas += totalGain;
     updateUI();
 }
 
@@ -168,13 +177,19 @@ function startEnergyRegen() {
     }, 1000);
 }
 
-// Обработка покупки улучшений
+function loadUserData() {
+    tg.sendData(JSON.stringify({ action: 'get_user_data' }));
+}
+
 document.querySelectorAll('.upgrade-card').forEach(card => {
     card.addEventListener('click', (e) => {
         e.stopPropagation();
+        if (pendingRequest) return;
+        
         const upgradeType = card.dataset.upgrade;
         if (!upgradeType) return;
         
+        pendingRequest = true;
         tg.sendData(JSON.stringify({
             action: 'buy_upgrade',
             upgrade_type: upgradeType
@@ -182,7 +197,6 @@ document.querySelectorAll('.upgrade-card').forEach(card => {
     });
 });
 
-// Вкладки
 document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const tabId = btn.dataset.tab;
@@ -191,14 +205,15 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         
         btn.classList.add('active');
-        document.getElementById(`tab-${tabId}`).classList.add('active');
+        const tabContent = document.getElementById(`tab-${tabId}`);
+        if (tabContent) tabContent.classList.add('active');
     });
 });
 
-// Обработка сообщений от бота
 tg.onEvent('message', (message) => {
     try {
         const data = JSON.parse(message.data);
+        console.log('Получены данные:', data);
         
         if (data.user) {
             userData = {
@@ -226,18 +241,41 @@ tg.onEvent('message', (message) => {
             showFloatingNumber(data.error, window.innerWidth/2, 200);
         }
         
+        if (data.new_energy !== undefined) {
+            userData.energy_current = data.new_energy;
+        }
+        
+        if (data.total_bananas !== undefined) {
+            userData.total_bananas = data.total_bananas;
+        }
+        
+        if (data.click_power !== undefined) {
+            userData.click_power = data.click_power;
+        }
+        
+        if (data.energy_max !== undefined) {
+            userData.energy_max = data.energy_max;
+        }
+        
+        if (data.upgrades) {
+            upgrades = data.upgrades;
+        }
+        
         updateUI();
+        pendingRequest = false;
         
     } catch (e) {
         console.error('Ошибка парсинга:', e);
+        pendingRequest = false;
     }
 });
 
-// Инициализация
+const minionElement = document.getElementById('minion');
+if (minionElement) {
+    minionElement.addEventListener('click', handleClick);
+}
+
 loadUserData();
 startEnergyRegen();
 
-minion.addEventListener('click', handleClick);
-
-// Показываем имя пользователя
-console.log('User:', tg.initDataUnsafe?.user);
+console.log('Mini App загружен!');
