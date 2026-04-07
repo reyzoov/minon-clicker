@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -9,162 +9,80 @@
 </head>
 <body>
     <div class="container">
-        <!-- Шапка с статистикой -->
         <div class="header">
-            <div class="stats-row">
-                <div class="stat-card">
-                    <span class="stat-icon">🍌</span>
-                    <span id="bananas" class="stat-value">0</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">⭐️</span>
-                    <span id="level" class="stat-value">1</span>
-                </div>
-                <div class="stat-card">
-                    <span class="stat-icon">⚡️</span>
-                    <span id="energy" class="stat-value">100</span>
-                    <span class="stat-sep">/</span>
-                    <span id="energyMax">100</span>
-                </div>
+            <div class="stat">
+                <span>🍌</span>
+                <span id="bananas">0</span>
             </div>
-            <div class="exp-bar">
-                <div id="expFill" class="exp-fill"></div>
-                <span id="expText" class="exp-text">0/100</span>
+            <div class="stat">
+                <span>⭐️</span>
+                <span id="level">1</span>
+            </div>
+            <div class="stat">
+                <span>⚡️</span>
+                <span id="energy">100</span>
+                <span>/</span>
+                <span id="energyMax">100</span>
             </div>
         </div>
-
-        <!-- Кликабельный миньон -->
-        <div class="click-area">
-            <div id="minion" class="minion">
-                <div class="minion-face">🐵</div>
-                <div class="minion-goggle">👓</div>
-                <div class="click-ripple"></div>
-            </div>
-            <div class="click-info">
-                <span id="clickPower" class="click-power">💪 x1</span>
-                <span id="prestigeBonus" class="prestige-badge">✨ +0%</span>
-            </div>
+        
+        <div class="exp-bar">
+            <div id="expFill" class="exp-fill"></div>
+            <span id="expText">0/100</span>
         </div>
-
-        <!-- Вкладки -->
+        
+        <div class="minion" id="minion">
+            🐵
+            <div class="glasses">👓</div>
+        </div>
+        
+        <div class="click-info">
+            <span>💪 x<span id="clickPower">1</span></span>
+            <span>✨ +<span id="bonus">0</span>%</span>
+        </div>
+        
         <div class="tabs">
-            <button class="tab-btn active" data-tab="clicker">🍌 Кликер</button>
-            <button class="tab-btn" data-tab="upgrades">🛠 Прокачки</button>
-            <button class="tab-btn" data-tab="stats">📊 Статистика</button>
+            <button class="tab active" data-tab="clicker">🍌 Кликер</button>
+            <button class="tab" data-tab="upgrades">🛠 Прокачки</button>
         </div>
-
-        <!-- Вкладка Кликер -->
-        <div id="tab-clicker" class="tab-content active">
+        
+        <div id="clicker" class="tab-content active">
             <div class="energy-info">
                 <div class="energy-bar">
                     <div id="energyFill" class="energy-fill"></div>
                 </div>
-                <span class="energy-text">⚡️ Энергия</span>
+                <span>Энергия восстанавливается: +1/сек</span>
             </div>
-            <div class="tip">
-                💡 Нажимай на миньона, чтобы зарабатывать бананы!
-            </div>
+            <div class="tip">👇 КЛИКАЙ ПО МИНЬОНУ 👇</div>
         </div>
-
-        <!-- Вкладка Прокачки -->
-        <div id="tab-upgrades" class="tab-content">
-            <div class="upgrades-grid">
-                <div class="upgrade-card" data-upgrade="click_power">
-                    <div class="upgrade-icon">💪</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Сила клика</div>
-                        <div class="upgrade-desc">+1 банан за клик</div>
-                        <div class="upgrade-level" id="level_click_power">Ур. 0</div>
-                    </div>
-                    <div class="upgrade-cost" id="cost_click_power">
-                        <span class="cost-value">100</span>
-                        <span class="cost-icon">🍌</span>
-                    </div>
-                </div>
-
-                <div class="upgrade-card" data-upgrade="energy_max">
-                    <div class="upgrade-icon">⚡️</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Макс. энергия</div>
-                        <div class="upgrade-desc">+10 к энергии</div>
-                        <div class="upgrade-level" id="level_energy_max">Ур. 0</div>
-                    </div>
-                    <div class="upgrade-cost" id="cost_energy_max">
-                        <span class="cost-value">100</span>
-                        <span class="cost-icon">🍌</span>
-                    </div>
-                </div>
-
-                <div class="upgrade-card" data-upgrade="energy_regen">
-                    <div class="upgrade-icon">🔋</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Реген энергии</div>
-                        <div class="upgrade-desc">+1 энергия/сек</div>
-                        <div class="upgrade-level" id="level_energy_regen">Ур. 0</div>
-                    </div>
-                    <div class="upgrade-cost" id="cost_energy_regen">
-                        <span class="cost-value">150</span>
-                        <span class="cost-icon">🍌</span>
-                    </div>
-                </div>
-
-                <div class="upgrade-card" data-upgrade="bonus_bananas">
-                    <div class="upgrade-icon">💰</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Бонус бананов</div>
-                        <div class="upgrade-desc">+5% ко всем бананам</div>
-                        <div class="upgrade-level" id="level_bonus_bananas">Ур. 0</div>
-                    </div>
-                    <div class="upgrade-cost" id="cost_bonus_bananas">
-                        <span class="cost-value">200</span>
-                        <span class="cost-icon">🍌</span>
-                    </div>
-                </div>
+        
+        <div id="upgrades" class="tab-content">
+            <div class="upgrade" data-type="click">
+                <div>💪 Сила клика</div>
+                <div>+1 банан</div>
+                <div>Ур. <span id="clickLvl">0</span></div>
+                <button id="clickBtn">🍌 <span id="clickCost">100</span></button>
             </div>
-            <div class="total-bananas-info">
-                💰 Всего бананов: <span id="totalBananas">0</span>
+            <div class="upgrade" data-type="energy">
+                <div>⚡️ Макс. энергия</div>
+                <div>+10 энергии</div>
+                <div>Ур. <span id="energyLvl">0</span></div>
+                <button id="energyBtn">🍌 <span id="energyCost">100</span></button>
             </div>
-        </div>
-
-        <!-- Вкладка Статистика -->
-        <div id="tab-stats" class="tab-content">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <span class="stat-label">👤 Игрок</span>
-                    <span class="stat-value" id="playerName">-</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">📈 Уровень</span>
-                    <span class="stat-value" id="statLevel">1</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">⭐️ Опыт</span>
-                    <span class="stat-value" id="statExp">0/100</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">🍌 Бананов</span>
-                    <span class="stat-value" id="statBananas">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">💪 Сила клика</span>
-                    <span class="stat-value" id="statClickPower">1</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">🔄 Перерождений</span>
-                    <span class="stat-value" id="statPrestige">0</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">✨ Бонус</span>
-                    <span class="stat-value" id="statBonus">+0%</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">🎯 Всего кликов</span>
-                    <span class="stat-value" id="statClicks">0</span>
-                </div>
+            <div class="upgrade" data-type="regen">
+                <div>🔋 Реген энергии</div>
+                <div>+1/сек</div>
+                <div>Ур. <span id="regenLvl">0</span></div>
+                <button id="regenBtn">🍌 <span id="regenCost">150</span></button>
+            </div>
+            <div class="upgrade" data-type="bonus">
+                <div>💰 Бонус бананов</div>
+                <div>+5% к доходу</div>
+                <div>Ур. <span id="bonusLvl">0</span></div>
+                <button id="bonusBtn">🍌 <span id="bonusCost">200</span></button>
             </div>
         </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
