@@ -2,149 +2,440 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Minion Clicker</title>
-    <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            padding: 16px;
+            background: var(--tg-theme-bg-color, #1a1a2e);
+            color: var(--tg-theme-text-color, #ffffff);
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .stats {
+            background: var(--tg-theme-secondary-bg-color, #16213e);
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stat-card {
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 14px;
+        }
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .minion {
+            background: linear-gradient(135deg, #f9a826, #f6c445);
+            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .minion:active {
+            transform: scale(0.95);
+        }
+        .minion span {
+            font-size: 80px;
+        }
+        .minion p {
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+            color: #5a3e1b;
+        }
+        .upgrades {
+            background: var(--tg-theme-secondary-bg-color, #16213e);
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+        .upgrade-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255,255,255,0.05);
+            margin-bottom: 10px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .upgrade-item:active {
+            background: rgba(255,255,255,0.1);
+        }
+        .upgrade-name {
+            font-weight: bold;
+        }
+        .upgrade-cost {
+            color: #f9a826;
+            font-weight: bold;
+        }
+        .energy-bar {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            height: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .energy-fill {
+            background: #4caf50;
+            height: 100%;
+            width: 100%;
+            transition: width 0.3s;
+        }
+        .click-animation {
+            position: fixed;
+            pointer-events: none;
+            font-size: 24px;
+            font-weight: bold;
+            color: #f9a826;
+            animation: floatUp 0.8s ease-out forwards;
+            z-index: 1000;
+        }
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(0.5);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(1.5);
+            }
+        }
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: fadeOut 2s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+        button {
+            background: var(--tg-theme-button-color, #f9a826);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .level-up {
+            animation: levelPulse 0.5s ease;
+        }
+        @keyframes levelPulse {
+            0% { transform: scale(1); background: #f9a826; }
+            50% { transform: scale(1.05); background: #ffd700; }
+            100% { transform: scale(1); background: #f9a826; }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Шапка -->
-        <div class="header">
-            <div class="stat-card">
-                <div class="stat-icon">🍌</div>
-                <div class="stat-value" id="bananas">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⭐️</div>
-                <div class="stat-value" id="level">1</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon">⚡️</div>
-                <div class="stat-value" id="energy">100</div>
-                <div class="stat-sep">/</div>
-                <div class="stat-value" id="energyMax">100</div>
-            </div>
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-label">🍌 БАНАНОВ</div>
+            <div class="stat-value" id="bananas">0</div>
         </div>
-        
-        <!-- Полоса опыта -->
-        <div class="exp-container">
-            <div class="exp-bar">
-                <div class="exp-fill" id="expFill"></div>
-            </div>
-            <div class="exp-text" id="expText">0/100</div>
+        <div class="stat-card">
+            <div class="stat-label">⚡️ ЭНЕРГИЯ</div>
+            <div class="stat-value" id="energy">100</div>
         </div>
-        
-        <!-- Миньон -->
-        <div class="minion-container">
-            <div class="minion" id="minion">
-                <div class="minion-face">🐵</div>
-                <div class="minion-glasses">👓</div>
-                <div class="click-ripple"></div>
-            </div>
-            <div class="minion-info">
-                <div class="info-item">💪 x<span id="clickPower">1</span></div>
-                <div class="info-item">✨ +<span id="bonus">0</span>%</div>
-            </div>
+        <div class="stat-card">
+            <div class="stat-label">📊 УРОВЕНЬ</div>
+            <div class="stat-value" id="level">1</div>
         </div>
-        
-        <!-- Вкладки -->
-        <div class="tabs">
-            <button class="tab-btn active" data-tab="clicker">🍌 Кликер</button>
-            <button class="tab-btn" data-tab="upgrades">🛠 Прокачки</button>
-            <button class="tab-btn" data-tab="leaderboard">🏆 Топ</button>
-        </div>
-        
-        <!-- Вкладка Кликер -->
-        <div class="tab-content active" id="tab-clicker">
-            <div class="energy-info">
-                <div class="energy-bar">
-                    <div class="energy-fill" id="energyFill"></div>
-                </div>
-                <div class="energy-text">⚡️ Восстановление: +<span id="regenSpeed">1</span>/сек</div>
-            </div>
-            <div class="offline-info">
-                <div class="offline-icon">🤖</div>
-                <div class="offline-text">Офлайн кликер: <span id="offlineLevel">0</span> ур.</div>
-                <div class="offline-rate">+<span id="offlineRate">0.1</span> 🍌/сек</div>
-            </div>
-            <div class="tip">👇 КЛИКАЙ ПО МИНЬОНУ 👇</div>
-        </div>
-        
-        <!-- Вкладка Прокачки -->
-        <div class="tab-content" id="tab-upgrades">
-            <div class="upgrades-grid">
-                <div class="upgrade-card" data-type="click">
-                    <div class="upgrade-icon">💪</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Сила клика</div>
-                        <div class="upgrade-desc">+1 банан за клик</div>
-                        <div class="upgrade-level">Ур. <span id="clickLvl">0</span></div>
-                    </div>
-                    <button class="upgrade-btn" data-type="click">
-                        🍌 <span id="clickCost">100</span>
-                    </button>
-                </div>
-                
-                <div class="upgrade-card" data-type="energy">
-                    <div class="upgrade-icon">⚡️</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Макс. энергия</div>
-                        <div class="upgrade-desc">+10 к энергии</div>
-                        <div class="upgrade-level">Ур. <span id="energyLvl">0</span></div>
-                    </div>
-                    <button class="upgrade-btn" data-type="energy">
-                        🍌 <span id="energyCost">100</span>
-                    </button>
-                </div>
-                
-                <div class="upgrade-card" data-type="regen">
-                    <div class="upgrade-icon">🔋</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Реген энергии</div>
-                        <div class="upgrade-desc">+1 энергия/сек</div>
-                        <div class="upgrade-level">Ур. <span id="regenLvl">0</span></div>
-                    </div>
-                    <button class="upgrade-btn" data-type="regen">
-                        🍌 <span id="regenCost">150</span>
-                    </button>
-                </div>
-                
-                <div class="upgrade-card" data-type="bonus">
-                    <div class="upgrade-icon">💰</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Бонус бананов</div>
-                        <div class="upgrade-desc">+5% к доходу</div>
-                        <div class="upgrade-level">Ур. <span id="bonusLvl">0</span></div>
-                    </div>
-                    <button class="upgrade-btn" data-type="bonus">
-                        🍌 <span id="bonusCost">200</span>
-                    </button>
-                </div>
-                
-                <div class="upgrade-card" data-type="offline">
-                    <div class="upgrade-icon">🤖</div>
-                    <div class="upgrade-info">
-                        <div class="upgrade-name">Офлайн кликер</div>
-                        <div class="upgrade-desc">+0.05 🍌/сек в офлайне</div>
-                        <div class="upgrade-level">Ур. <span id="offlineLvl">0</span></div>
-                    </div>
-                    <button class="upgrade-btn" data-type="offline">
-                        🍌 <span id="offlineCost">300</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Вкладка Топ -->
-        <div class="tab-content" id="tab-leaderboard">
-            <div class="leaderboard-list" id="leaderboardList">
-                <div class="loading">Загрузка...</div>
-            </div>
-            <button class="refresh-btn" id="refreshLeaderboard">🔄 Обновить</button>
+        <div class="stat-card">
+            <div class="stat-label">💪 СИЛА</div>
+            <div class="stat-value" id="clickPower">1</div>
         </div>
     </div>
-    
-    <script src="script.js"></script>
+    <div class="energy-bar">
+        <div class="energy-fill" id="energyFill" style="width: 100%"></div>
+    </div>
+
+    <div class="minion" id="minion">
+        <span>🐵</span>
+        <p>КЛИКАЙ!</p>
+    </div>
+
+    <div class="upgrades">
+        <h3 style="margin: 0 0 12px 0;">⬆️ УЛУЧШЕНИЯ</h3>
+        <div class="upgrade-item" data-upgrade="click">
+            <div><span class="upgrade-name">💪 Сила клика</span><br><small>ур. <span id="clickLevel">0</span></small></div>
+            <div class="upgrade-cost" id="clickCost">10 🍌</div>
+        </div>
+        <div class="upgrade-item" data-upgrade="energy">
+            <div><span class="upgrade-name">⚡️ Макс. энергия</span><br><small>ур. <span id="energyLevel">0</span></small></div>
+            <div class="upgrade-cost" id="energyCost">15 🍌</div>
+        </div>
+        <div class="upgrade-item" data-upgrade="regen">
+            <div><span class="upgrade-name">🔋 Регенерация</span><br><small>ур. <span id="regenLevel">0</span></small></div>
+            <div class="upgrade-cost" id="regenCost">20 🍌</div>
+        </div>
+    </div>
+
+    <button id="prestigeBtn" style="background: #9b59b6;">🔄 ПЕРЕРОДИТЬСЯ (нужен 10 уровень)</button>
+
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        
+        // Локальное состояние (временное хранилище)
+        let gameData = {
+            bananas: 100,
+            energy: 100,
+            maxEnergy: 100,
+            level: 1,
+            exp: 0,
+            clickPower: 1,
+            prestigeCount: 0,
+            prestigeBonus: 1.0,
+            upgrades: {
+                click: 0,
+                energy: 0,
+                regen: 0,
+                bonus: 0,
+                offline: 0
+            }
+        };
+        
+        // Функция сохранения (в localStorage)
+        function saveGame() {
+            localStorage.setItem('minionClicker', JSON.stringify(gameData));
+        }
+        
+        // Функция загрузки
+        function loadGame() {
+            const saved = localStorage.getItem('minionClicker');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    gameData = { ...gameData, ...data };
+                } catch(e) {}
+            }
+            updateUI();
+        }
+        
+        // Обновление интерфейса
+        function updateUI() {
+            document.getElementById('bananas').innerText = Math.floor(gameData.bananas);
+            document.getElementById('energy').innerText = Math.floor(gameData.energy);
+            document.getElementById('level').innerText = gameData.level;
+            const totalPower = Math.floor(gameData.clickPower * gameData.prestigeBonus);
+            document.getElementById('clickPower').innerText = totalPower;
+            
+            const energyPercent = (gameData.energy / gameData.maxEnergy) * 100;
+            document.getElementById('energyFill').style.width = energyPercent + '%';
+            
+            document.getElementById('clickLevel').innerText = gameData.upgrades.click;
+            document.getElementById('energyLevel').innerText = gameData.upgrades.energy;
+            document.getElementById('regenLevel').innerText = gameData.upgrades.regen;
+            
+            document.getElementById('clickCost').innerText = getUpgradeCost('click') + ' 🍌';
+            document.getElementById('energyCost').innerText = getUpgradeCost('energy') + ' 🍌';
+            document.getElementById('regenCost').innerText = getUpgradeCost('regen') + ' 🍌';
+            
+            if (gameData.level >= 10) {
+                document.getElementById('prestigeBtn').style.opacity = '1';
+            } else {
+                document.getElementById('prestigeBtn').style.opacity = '0.5';
+            }
+        }
+        
+        // Стоимость улучшения
+        function getUpgradeCost(upgrade) {
+            const level = gameData.upgrades[upgrade];
+            const baseCosts = { click: 10, energy: 15, regen: 20 };
+            return Math.floor(baseCosts[upgrade] * Math.pow(1.5, level));
+        }
+        
+        // Покупка улучшения
+        function buyUpgrade(upgrade) {
+            const cost = getUpgradeCost(upgrade);
+            if (gameData.bananas >= cost) {
+                gameData.bananas -= cost;
+                gameData.upgrades[upgrade]++;
+                
+                if (upgrade === 'click') {
+                    gameData.clickPower++;
+                } else if (upgrade === 'energy') {
+                    gameData.maxEnergy += 25;
+                    gameData.energy += 25;
+                } else if (upgrade === 'regen') {
+                    // регенерация обрабатывается в updateEnergy
+                }
+                
+                saveGame();
+                updateUI();
+                showToast(`✅ ${upgrade === 'click' ? 'Сила клика' : upgrade === 'energy' ? 'Энергия' : 'Регенерация'} улучшена!`);
+            } else {
+                showToast(`❌ Не хватает бананов! Нужно ${cost}`);
+            }
+        }
+        
+        // Добавление опыта и повышение уровня
+        function addExperience(amount) {
+            let expNeeded = gameData.level * 100;
+            gameData.exp += amount;
+            let leveledUp = false;
+            
+            while (gameData.exp >= expNeeded) {
+                gameData.exp -= expNeeded;
+                gameData.level++;
+                expNeeded = gameData.level * 100;
+                leveledUp = true;
+            }
+            
+            if (leveledUp) {
+                showToast(`🎉 УРОВЕНЬ ${gameData.level}! +10 🍌 бонус!`);
+                gameData.bananas += 10;
+                document.getElementById('minion').classList.add('level-up');
+                setTimeout(() => document.getElementById('minion').classList.remove('level-up'), 500);
+            }
+            
+            return leveledUp;
+        }
+        
+        // Регенерация энергии
+        function updateEnergy() {
+            const regenBonus = gameData.upgrades.regen * 0.5;
+            const regenRate = 1 + regenBonus;
+            let newEnergy = Math.min(gameData.energy + regenRate, gameData.maxEnergy);
+            if (newEnergy > gameData.energy) {
+                gameData.energy = newEnergy;
+                updateUI();
+            }
+        }
+        
+        // Клик по миньону
+        function clickMinion() {
+            if (gameData.energy <= 0) {
+                showToast("❌ Нет энергии! Подожди немного...");
+                return false;
+            }
+            
+            const power = Math.floor(gameData.clickPower * gameData.prestigeBonus);
+            const gain = power;
+            
+            gameData.energy--;
+            gameData.bananas += gain;
+            addExperience(gain);
+            
+            saveGame();
+            updateUI();
+            
+            // Анимация "+число"
+            const animationDiv = document.createElement('div');
+            animationDiv.className = 'click-animation';
+            animationDiv.innerText = `+${gain} 🍌`;
+            animationDiv.style.left = (Math.random() * window.innerWidth) + 'px';
+            animationDiv.style.top = (window.innerHeight / 2) + 'px';
+            document.body.appendChild(animationDiv);
+            setTimeout(() => animationDiv.remove(), 800);
+            
+            return true;
+        }
+        
+        // Перерождение
+        function doPrestige() {
+            if (gameData.level >= 10) {
+                gameData.prestigeCount++;
+                gameData.prestigeBonus += 0.1;
+                gameData.bananas = 100;
+                gameData.level = 1;
+                gameData.exp = 0;
+                gameData.clickPower = 1;
+                gameData.maxEnergy = 100;
+                gameData.energy = 100;
+                gameData.upgrades = { click: 0, energy: 0, regen: 0, bonus: 0, offline: 0 };
+                
+                saveGame();
+                updateUI();
+                showToast(`✨ ПЕРЕРОЖДЕНИЕ! Бонус +${Math.round((gameData.prestigeBonus - 1) * 100)}% к доходу!`);
+            } else {
+                showToast(`❌ Нужен 10 уровень! Сейчас ${gameData.level}`);
+            }
+        }
+        
+        // Всплывающее сообщение
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.innerText = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+        
+        // Регенерация каждые 3 секунды
+        setInterval(() => {
+            updateEnergy();
+            saveGame();
+        }, 3000);
+        
+        // Обработчики событий
+        document.getElementById('minion').addEventListener('click', clickMinion);
+        
+        document.querySelectorAll('.upgrade-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const upgrade = item.dataset.upgrade;
+                if (upgrade) buyUpgrade(upgrade);
+            });
+        });
+        
+        document.getElementById('prestigeBtn').addEventListener('click', doPrestige);
+        
+        // Загрузка сохранений
+        loadGame();
+        
+        // Отправка данных в Telegram (опционально)
+        tg.MainButton.setText("🐵 Играть");
+        tg.MainButton.show();
+        tg.MainButton.onClick(() => {
+            clickMinion();
+        });
+        
+        console.log("Minion Clicker загружен!");
+    </script>
 </body>
 </html>
