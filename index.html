@@ -514,7 +514,7 @@
 
 <div class="prestige-progress-box">
     <div class="bar-bg"><div class="prestige-fill" id="prestigeFill" style="width: 0%"></div></div>
-    <div class="bar-text"><span>🔄 До перерождения</span><span id="prestigeNeededText">100,000 🍌</span></div>
+    <div class="bar-text"><span>🔄 До перерождения (нужен уровень <span id="requiredLevel">25</span>)</span><span id="prestigeNeededText">25 уровень</span></div>
 </div>
 
 <div class="minion-wrap">
@@ -536,7 +536,7 @@
 <div class="tab-content active" id="tab-clicker">
     <div class="offline-card">
         🍌 Жми на миньона!<div style="margin-top:8px;">Пассивный доход: <strong id="passiveIncome">0</strong> 🍌/сек</div>
-        <div style="margin-top:8px;">🤖 Автокликер не тратит энергию!</div>
+        <div style="margin-top:8px;">🤖 Автокликер не тратит энергию! (🔒 доступен после 5 перерождений)</div>
         <div style="margin-top:8px;">✨ Бонус престижа: x<span id="prestigeMult">1</span></div>
         <div style="margin-top:8px;">🔥 Комбо множитель: x<span id="comboMult">1</span></div>
     </div>
@@ -545,7 +545,7 @@
 
 <div class="tab-content" id="tab-upgrades">
     <div class="upgrade-list" id="upgradesList"></div>
-    <button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужно <span id="prestigeCost">100,000</span> 🍌)</button>
+    <button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужен уровень <span id="prestigeRequiredLevel">25</span>)</button>
 </div>
 
 <div class="tab-content" id="tab-shop">
@@ -607,7 +607,10 @@
         const userName = tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username || "Миньон";
         
         function getPrestigeMultiplier() { return Math.pow(2, gameData.prestigeCount); }
-        function getPrestigeCost() { return 100000 * Math.pow(2, gameData.prestigeCount); }
+        // Требуемый уровень для перерождения: 25 + 25 * количество перерождений
+        function getRequiredLevelForPrestige() {
+            return 25 + (25 * gameData.prestigeCount);
+        }
 
         let gameData = {
             userId, username: userName,
@@ -658,6 +661,13 @@
             else if (upgradeId === 'click50') level = gameData.clickPower50;
             else level = gameData.upgrades[upgradeId] || 0;
             if (level >= 25) { showToast("❌ Макс. уровень 25!", "#E74C3C"); return; }
+            
+            // Автокликер доступен только после 5 перерождений
+            if (upgradeId === 'auto' && gameData.prestigeCount < 5) {
+                showToast("❌ Автокликер доступен после 5 перерождений!", "#E74C3C");
+                return;
+            }
+            
             const cost = getUpgradeCost(upgradeId, level);
             if (gameData.bananas >= cost) {
                 gameData.bananas -= cost;
@@ -745,21 +755,25 @@
         
         function restartAutoClicker() {
             if (autoClickerInterval) clearInterval(autoClickerInterval);
-            if (gameData.upgrades.auto > 0) {
+            if (gameData.upgrades.auto > 0 && gameData.prestigeCount >= 5) {
                 const speed = 1 + gameData.upgrades.auto * 0.05;
                 const interval = Math.max(0.3, 1 / speed);
                 autoClickerInterval = setInterval(() => {
                     if (gameData.energy > 0) clickMinion();
                 }, interval * 1000);
+            } else if (gameData.upgrades.auto > 0 && gameData.prestigeCount < 5) {
+                // Если автокликер куплен, но перерождений меньше 5 - не работаем
+                if (autoClickerInterval) clearInterval(autoClickerInterval);
+                autoClickerInterval = null;
             }
         }
         
         function doPrestige() {
-            const needed = getPrestigeCost();
-            if (gameData.bananas >= needed) {
-                if (confirm(`Переродиться за ${needed.toLocaleString()} 🍌? Бонус x2 навсегда!`)) {
+            const requiredLevel = getRequiredLevelForPrestige();
+            if (gameData.level >= requiredLevel) {
+                if (confirm(`Переродиться? Требуется уровень ${requiredLevel}. Уровень станет 1, бананы сохранятся, но прокачки сбросятся. Бонус x2 навсегда!`)) {
                     gameData.prestigeCount++;
-                    gameData.bananas -= needed;
+                    // Уровень сбрасывается, бананы НЕ ТРАТЯТСЯ (остаются)
                     gameData.level = 1;
                     gameData.exp = 0;
                     gameData.clickPower1 = 0; gameData.clickPower5 = 0; gameData.clickPower10 = 0; gameData.clickPower25 = 0; gameData.clickPower50 = 0;
@@ -770,7 +784,7 @@
                     showToast(`✨ ПЕРЕРОЖДЕНИЕ! x${getPrestigeMultiplier()} к силе!`, "#8E44AD");
                 }
             } else {
-                showToast(`❌ Нужно ${needed.toLocaleString()} 🍌`, "#E74C3C");
+                showToast(`❌ Нужен ${requiredLevel} уровень (сейчас ${gameData.level})`, "#E74C3C");
             }
         }
         
@@ -861,7 +875,7 @@
         }
         
         function updateUI() {
-            const needed = getPrestigeCost();
+            const requiredLevel = getRequiredLevelForPrestige();
             document.getElementById('bananas').innerText = Math.floor(gameData.bananas).toLocaleString();
             document.getElementById('level').innerText = gameData.level;
             document.getElementById('clickPower').innerText = Math.floor(getTotalClickPower()*getPrestigeMultiplier()*getComboMultiplier());
@@ -872,10 +886,14 @@
             const expNeeded = gameData.level*100;
             document.getElementById('expFill').style.width = (gameData.exp/expNeeded*100)+'%';
             document.getElementById('expText').innerText = `${Math.floor(gameData.exp)}/${expNeeded}`;
-            const prestigePercent = Math.min(100, (gameData.bananas/needed)*100);
+            
+            // Прогресс до перерождения (по уровню)
+            const prestigePercent = Math.min(100, (gameData.level / requiredLevel) * 100);
             document.getElementById('prestigeFill').style.width = prestigePercent+'%';
-            document.getElementById('prestigeNeededText').innerHTML = gameData.bananas>=needed?"Доступно!":`${(needed-gameData.bananas).toLocaleString()} 🍌`;
-            document.getElementById('prestigeCost').innerText = needed.toLocaleString();
+            document.getElementById('prestigeNeededText').innerHTML = gameData.level >= requiredLevel ? "Доступно!" : `${requiredLevel - gameData.level} уровень`;
+            document.getElementById('requiredLevel').innerText = requiredLevel;
+            document.getElementById('prestigeRequiredLevel').innerText = requiredLevel;
+            
             document.getElementById('playerName').innerHTML = gameData.username;
             document.getElementById('totalClicks').innerHTML = gameData.totalClicks.toLocaleString();
             document.getElementById('prestigeBonus').innerHTML = `+${Math.round((getPrestigeMultiplier()-1)*100)}%`;
@@ -904,7 +922,7 @@
                 {id:'bonus',name:'💰 Бонус',desc:'+5% доход',lvl:gameData.upgrades.bonus},
                 {id:'offline',name:'🤖 Офлайн',desc:'+0.05/сек',lvl:gameData.upgrades.offline},
                 {id:'crit',name:'⚡ Крит',desc:'+5% шанс x2',lvl:gameData.upgrades.crit},
-                {id:'auto',name:'🎯 Автокликер',desc:'1 клик/сек (не тратит энергию!)',lvl:gameData.upgrades.auto},
+                {id:'auto',name:'🎯 Автокликер',desc:'1 клик/сек (🔒 нужно 5 перерождений!)',lvl:gameData.upgrades.auto},
                 {id:'luck',name:'🍀 Удача',desc:'+3% доп.награда',lvl:gameData.upgrades.luck},
                 {id:'shield',name:'🛡️ Защита',desc:'-2% потери энергии',lvl:gameData.upgrades.shield},
                 {id:'double',name:'✨ Удвоение',desc:'+5% к комбо',lvl:gameData.upgrades.double},
@@ -913,9 +931,10 @@
             upList.innerHTML = '';
             for(let u of ups){
                 const cost = getUpgradeCost(u.id, u.lvl);
+                const isAutoLocked = (u.id === 'auto' && gameData.prestigeCount < 5);
                 const div = document.createElement('div'); div.className='item-card';
-                div.innerHTML = `<div class="item-info"><div class="item-name">${u.name}</div><div class="item-desc">${u.desc}</div><div class="item-level">Ур.${u.lvl}/25</div></div><div class="item-cost">${cost.toLocaleString()}🍌</div>`;
-                div.onclick = () => buyUpgrade(u.id);
+                div.innerHTML = `<div class="item-info"><div class="item-name">${u.name}</div><div class="item-desc">${u.desc}</div><div class="item-level">Ур.${u.lvl}/25</div>${isAutoLocked ? '<div style="font-size:10px;color:#E74C3C;">🔒 Требуется 5 перерождений</div>' : ''}</div><div class="item-cost">${isAutoLocked ? '🔒 ЗАБЛОКИРОВАНО' : cost.toLocaleString()+'🍌'}</div>`;
+                div.onclick = () => { if(!isAutoLocked) buyUpgrade(u.id); else showToast("❌ Автокликер доступен после 5 перерождений!", "#E74C3C"); };
                 upList.appendChild(div);
             }
             
@@ -946,7 +965,7 @@
             else leaderDiv.innerHTML = leaders.slice(0,20).map((p,i)=>`<div class="leaderboard-item"><div class="rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div><div class="leader-name">${p.username}</div><div class="leader-stats">🍌 ${Math.floor(p.bananas).toLocaleString()} 📊 ${p.level} ур. 🔄 ${p.prestigeCount}</div></div>`).join('');
             
             const prestigeBtn = document.getElementById('prestigeBtn');
-            if(gameData.bananas>=needed){ prestigeBtn.classList.remove('btn-disabled'); prestigeBtn.disabled=false; }
+            if(gameData.level >= requiredLevel){ prestigeBtn.classList.remove('btn-disabled'); prestigeBtn.disabled=false; }
             else{ prestigeBtn.classList.add('btn-disabled'); prestigeBtn.disabled=true; }
         }
         
