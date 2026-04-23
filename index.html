@@ -296,6 +296,41 @@
             pirate: { name: '🏴‍☠️ Пират миньон', price: 100000, img: 'minion_pirate.jpg' }
         };
         
+        const wheelRewards = [1000,2000,5000,10000,500,200,5000,1000,20000,100];
+        function initWheel() {
+            const wheel = document.getElementById('wheel'); if (!wheel) return;
+            wheel.innerHTML = '<div class="wheel-center"></div>';
+            const segmentAngle = 360 / wheelRewards.length;
+            for (let i = 0; i < wheelRewards.length; i++) {
+                const segment = document.createElement('div'); segment.className = 'wheel-segment';
+                const colors = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8','#F7DC6F','#BB8FCE','#F9E79F'];
+                segment.style.backgroundColor = colors[i % colors.length];
+                segment.style.transform = `rotate(${i * segmentAngle}deg)`;
+                segment.style.width = '50%'; segment.style.height = '50%'; segment.style.left = '50%'; segment.style.top = '50%';
+                segment.style.transformOrigin = '0% 100%';
+                segment.style.display = 'flex'; segment.style.alignItems = 'center'; segment.style.justifyContent = 'center';
+                segment.style.fontSize = '14px'; segment.style.fontWeight = 'bold'; segment.style.color = '#2C3E50';
+                segment.innerText = `${wheelRewards[i]}`;
+                wheel.appendChild(segment);
+            }
+            document.getElementById('wheelRewards').innerHTML = wheelRewards.map(r => `<span style="background:#2C3E50; padding:2px 6px; border-radius:10px;">+${r}🍌</span>`).join('');
+        }
+        
+        function spinWheel() {
+            if (gameData.bananas < 5000) { showToast(`❌ Нужно 5000 🍌 для крутки!`, "#E74C3C"); return; }
+            gameData.bananas -= 5000;
+            const wheel = document.getElementById('wheel');
+            const randomIndex = Math.floor(Math.random() * wheelRewards.length);
+            const reward = wheelRewards[randomIndex];
+            const segmentAngle = 360 / wheelRewards.length;
+            wheel.style.transform = `rotate(${360*5 + (360 - (randomIndex * segmentAngle + segmentAngle/2))}deg)`;
+            setTimeout(() => {
+                gameData.bananas += reward; updateUI(); syncToCloud();
+                showToast(`🎡 Колесо принесло +${reward} 🍌!`, "#2ECC71");
+                wheel.style.transform = ''; initWheel();
+            }, 3000);
+        }
+        
         const achievementsList = {
             click100: { name: "🎯 Первые 100 кликов", reward: 500, condition: () => gameData.totalClicks >= 100 },
             click1000: { name: "🔥 1000 кликов", reward: 2000, condition: () => gameData.totalClicks >= 1000 },
@@ -304,7 +339,6 @@
             bananas100k: { name: "💰 100,000 бананов", reward: 5000, condition: () => gameData.totalEarned >= 100000 },
             farm10: { name: "🌱 Садовод", reward: 3000, condition: () => gameData.upgrades.farmTree >= 10 }
         };
-        
         function checkAchievements() {
             for (let [id, ach] of Object.entries(achievementsList))
                 if (!gameData.achievements[id] && ach.condition()) {
@@ -312,7 +346,6 @@
                     showToast(`🏆 Достижение "${ach.name}"! +${ach.reward} 🍌`, "#FFD700"); syncToCloud();
                 }
         }
-        
         function renderAchievements() {
             const container = document.getElementById('achievementsList');
             container.innerHTML = '';
@@ -507,39 +540,6 @@
             } else {
                 showToast(`❌ Нужен уровень ${requiredLevel} и ${requiredBananas.toLocaleString()} 🍌`, "#E74C3C");
             }
-        }
-        
-        const wheelRewards = [1000,2000,5000,10000,500,200,5000,1000,20000,100];
-        function initWheel() {
-            const wheel = document.getElementById('wheel'); if (!wheel) return;
-            wheel.innerHTML = '<div class="wheel-center"></div>';
-            const segmentAngle = 360 / wheelRewards.length;
-            for (let i = 0; i < wheelRewards.length; i++) {
-                const segment = document.createElement('div'); segment.className = 'wheel-segment';
-                segment.style.backgroundColor = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8','#F7DC6F','#BB8FCE','#F9E79F'][i%10];
-                segment.style.transform = `rotate(${i * segmentAngle}deg)`;
-                segment.style.width = '50%'; segment.style.height = '50%'; segment.style.left = '50%'; segment.style.top = '50%';
-                segment.style.transformOrigin = '0% 100%';
-                segment.style.display = 'flex'; segment.style.alignItems = 'center'; segment.style.justifyContent = 'center';
-                segment.style.fontSize = '14px'; segment.style.fontWeight = 'bold'; segment.style.color = '#2C3E50';
-                segment.innerText = `${wheelRewards[i]}`;
-                wheel.appendChild(segment);
-            }
-            document.getElementById('wheelRewards').innerHTML = wheelRewards.map(r => `<span style="background:#2C3E50; padding:2px 6px; border-radius:10px;">+${r}🍌</span>`).join('');
-        }
-        function spinWheel() {
-            if (gameData.bananas < 5000) { showToast(`❌ Нужно 5000 🍌 для крутки!`, "#E74C3C"); return; }
-            gameData.bananas -= 5000;
-            const wheel = document.getElementById('wheel');
-            const randomIndex = Math.floor(Math.random() * wheelRewards.length);
-            const reward = wheelRewards[randomIndex];
-            const segmentAngle = 360 / wheelRewards.length;
-            wheel.style.transform = `rotate(${360*5 + (360 - (randomIndex * segmentAngle + segmentAngle/2))}deg)`;
-            setTimeout(() => {
-                gameData.bananas += reward; updateUI(); syncToCloud();
-                showToast(`🎡 Колесо принесло +${reward} 🍌!`, "#2ECC71");
-                wheel.style.transform = ''; initWheel();
-            }, 3000);
         }
         
         let currentGameDifficulty = 'medium';
