@@ -135,7 +135,10 @@
         }
         @keyframes fadeToast { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
         .sync-status { text-align: center; font-size: 11px; margin-top: 15px; color: white; background: rgba(0,0,0,0.5); padding: 6px; border-radius: 40px; font-weight: 500; }
-        .click-animation { position: fixed; pointer-events: none; font-size: 28px; font-weight: 700; color: #FFD700; text-shadow: 2px 2px 0 #2C3E50; animation: floatUp 0.6s ease-out forwards; z-index: 1000; }
+        .click-animation {
+            position: fixed; pointer-events: none; font-size: 28px; font-weight: 700; color: #FFD700;
+            text-shadow: 2px 2px 0 #2C3E50; animation: floatUp 0.6s ease-out forwards; z-index: 1000;
+        }
         @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.8); } 100% { opacity: 0; transform: translateY(-80px) scale(1.5); } }
         .level-up { animation: levelGlow 0.5s ease; }
         @keyframes levelGlow { 0% { text-shadow: 0 0 0 #FFD700; } 100% { text-shadow: 0 0 20px #FFD700; } }
@@ -161,17 +164,28 @@
         .banana-box { display: inline-block; width: 70px; padding: 15px; margin: 10px; background: #FFD700; border-radius: 15px; cursor: pointer; font-size: 30px; transition: 0.05s; color: #2C3E50; }
         .banana-box:active { transform: scale(0.95); }
         .difficulty-btn { background: #3498DB; color: white; padding: 8px 16px; margin: 5px; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; }
-        .wheel-container { position: relative; width: 200px; height: 200px; margin: 0 auto; }
-        .wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; overflow: hidden; transition: transform 3s ease-out; box-shadow: 0 0 10px rgba(0,0,0,0.3); cursor: pointer; }
-        .wheel-segment { position: absolute; width: 50%; height: 50%; transform-origin: 0% 100%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #FFD700; border-radius: 50%; z-index: 10; }
-        .spin-btn { background: #8E44AD; color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 100%; }
-        .wheel-rewards { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; font-size: 10px; text-align: center; justify-content: center; }
+        .wheel-container { position: relative; width: 220px; height: 220px; margin: 0 auto; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; overflow: hidden; transition: transform 4s cubic-bezier(0.2, 0.9, 0.1, 1.1); cursor: pointer; }
+        .wheel-segment { position: absolute; width: 50%; height: 50%; transform-origin: 0% 100%; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; }
+        .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: #FFD700; border-radius: 50%; z-index: 10; box-shadow: 0 0 5px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .spin-btn { background: #8E44AD; color: white; border: none; padding: 12px 20px; border-radius: 30px; font-weight: bold; margin-top: 15px; cursor: pointer; width: 100%; transition: transform 0.1s; }
+        .spin-btn:active { transform: scale(0.97); }
+        .wheel-rewards { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; font-size: 11px; text-align: center; justify-content: center; }
+        .reward-badge { background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 20px; color: #FFD700; }
         .achievement-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(0,0,0,0.6); border-radius: 15px; margin-bottom: 8px; }
         .developer { text-align: center; font-size: 10px; margin-top: 20px; opacity: 0.7; color: white; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 4px; }
+        .click-number {
+            display: inline-block;
+            animation: bounce 0.3s ease;
+        }
+        @keyframes bounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); color: #FFD700; }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
@@ -253,7 +267,7 @@
 <div class="game-overlay hidden" id="gameOverlay"></div>
 <div class="game-modal hidden" id="gameModal"><h3>🍌 Угадай банан!</h3><p>В каком ящике спрятан банан?</p><div id="bananaBoxes" style="display:flex; justify-content:center; flex-wrap:wrap;"></div><div style="margin-top:10px;"><button class="difficulty-btn" data-diff="easy">😊 Лёгкий</button><button class="difficulty-btn" data-diff="medium">😐 Средний</button><button class="difficulty-btn" data-diff="hard">😤 Сложный</button></div><button id="closeGameBtn" style="margin-top:15px; background:#E74C3C; padding:8px 20px; border:none; border-radius:20px; color:white; font-weight:600;">Закрыть</button></div>
 <div class="game-overlay hidden" id="wheelOverlay"></div>
-<div class="game-modal hidden" id="wheelModal"><h3>🎡 КОЛЕСО ФОРТУНЫ</h3><div class="wheel-container"><div class="wheel" id="wheel"><div class="wheel-center"></div></div></div><button class="spin-btn" id="spinWheelBtn">КРУТИТЬ (за 5000🍌)</button><div class="wheel-rewards" id="wheelRewards"></div><button id="closeWheelBtn" style="margin-top:10px; background:#E74C3C; padding:8px 20px; border:none; border-radius:20px; color:white; font-weight:600;">Закрыть</button></div>
+<div class="game-modal hidden" id="wheelModal"><h3>🎡 КОЛЕСО ФОРТУНЫ</h3><div class="wheel-container"><div class="wheel" id="wheel"></div></div><button class="spin-btn" id="spinWheelBtn">🎡 КРУТИТЬ (за 5000🍌)</button><div class="wheel-rewards" id="wheelRewards"></div><button id="closeWheelBtn" style="margin-top:10px; background:#E74C3C; padding:8px 20px; border:none; border-radius:20px; color:white; font-weight:600;">Закрыть</button></div>
 
 <script>
     (function() {
@@ -289,6 +303,69 @@
             robot: { name: '🤖 Робо-миньон', price: 50000, img: 'minion_robot.jpg' },
             pirate: { name: '🏴‍☠️ Пират миньон', price: 100000, img: 'minion_pirate.jpg' }
         };
+        
+        const wheelRewards = [
+            { name: "🍌 100", value: 100, color: "#FF6B6B" },
+            { name: "🍌 500", value: 500, color: "#4ECDC4" },
+            { name: "🍌 200", value: 200, color: "#45B7D1" },
+            { name: "🍌 1000", value: 1000, color: "#96CEB4" },
+            { name: "🍌 50", value: 50, color: "#FFEAA7" },
+            { name: "🍌 2000", value: 2000, color: "#DDA0DD" },
+            { name: "🍌 300", value: 300, color: "#98D8C8" },
+            { name: "🍌 5000", value: 5000, color: "#F7DC6F" },
+            { name: "🍌 10000", value: 10000, color: "#BB8FCE" },
+            { name: "🍌 100000", value: 100000, color: "#F9E79F" }
+        ];
+        
+        function initWheel() {
+            const wheel = document.getElementById('wheel'); if (!wheel) return;
+            wheel.innerHTML = '<div class="wheel-center">🎡</div>';
+            const segmentAngle = 360 / wheelRewards.length;
+            for (let i = 0; i < wheelRewards.length; i++) {
+                const segment = document.createElement('div'); segment.className = 'wheel-segment';
+                segment.style.backgroundColor = wheelRewards[i].color;
+                segment.style.transform = `rotate(${i * segmentAngle}deg)`;
+                segment.style.width = '50%'; segment.style.height = '50%';
+                segment.style.left = '50%'; segment.style.top = '50%';
+                segment.style.transformOrigin = '0% 100%';
+                segment.style.display = 'flex';
+                segment.style.alignItems = 'center';
+                segment.style.justifyContent = 'center';
+                segment.style.fontSize = i === 9 ? "12px" : "14px";
+                segment.style.fontWeight = 'bold';
+                segment.style.color = '#2C3E50';
+                segment.innerText = wheelRewards[i].value >= 1000 ? `${wheelRewards[i].value/1000}k` : `${wheelRewards[i].value}`;
+                wheel.appendChild(segment);
+            }
+            const rewardsDiv = document.getElementById('wheelRewards');
+            rewardsDiv.innerHTML = wheelRewards.map(r => `<span class="reward-badge">${r.name}</span>`).join('');
+        }
+        
+        function spinWheel() {
+            if (gameData.bananas < 5000) {
+                showToast(`❌ Нужно 5000 🍌 для крутки!`, "#E74C3C");
+                return;
+            }
+            gameData.bananas -= 5000;
+            updateUI();
+            syncToCloud();
+            
+            const wheel = document.getElementById('wheel');
+            const randomIndex = Math.floor(Math.random() * wheelRewards.length);
+            const reward = wheelRewards[randomIndex].value;
+            const segmentAngle = 360 / wheelRewards.length;
+            const targetRotation = 360 * 5 + (360 - (randomIndex * segmentAngle + segmentAngle/2));
+            wheel.style.transform = `rotate(${targetRotation}deg)`;
+            
+            setTimeout(() => {
+                gameData.bananas += reward;
+                updateUI();
+                syncToCloud();
+                showToast(`🎡 Колесо принесло +${reward.toLocaleString()} 🍌!`, "#2ECC71");
+                wheel.style.transform = '';
+                initWheel();
+            }, 3000);
+        }
         
         const achievementsList = {
             click100: { name: "🎯 Первые 100 кликов", reward: 500, condition: () => gameData.totalClicks >= 100 },
@@ -500,39 +577,6 @@
             } else showToast(`❌ Нужен уровень ${reqLevel} и ${reqBananas.toLocaleString()} 🍌`, "#E74C3C");
         }
         
-        const wheelRewards = [1000,2000,5000,10000,500,200,5000,1000,20000,100];
-        function initWheel() {
-            const wheel = document.getElementById('wheel'); if (!wheel) return;
-            wheel.innerHTML = '<div class="wheel-center"></div>';
-            const segmentAngle = 360 / wheelRewards.length;
-            for (let i = 0; i < wheelRewards.length; i++) {
-                const segment = document.createElement('div'); segment.className = 'wheel-segment';
-                segment.style.backgroundColor = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8','#F7DC6F','#BB8FCE','#F9E79F'][i%10];
-                segment.style.transform = `rotate(${i * segmentAngle}deg)`;
-                segment.style.width = '50%'; segment.style.height = '50%'; segment.style.left = '50%'; segment.style.top = '50%';
-                segment.style.transformOrigin = '0% 100%';
-                segment.style.display = 'flex'; segment.style.alignItems = 'center'; segment.style.justifyContent = 'center';
-                segment.style.fontSize = '14px'; segment.style.fontWeight = 'bold'; segment.style.color = '#2C3E50';
-                segment.innerText = `${wheelRewards[i]}`;
-                wheel.appendChild(segment);
-            }
-            document.getElementById('wheelRewards').innerHTML = wheelRewards.map(r => `<span style="background:#2C3E50; padding:2px 6px; border-radius:10px;">+${r}🍌</span>`).join('');
-        }
-        function spinWheel() {
-            if (gameData.bananas < 5000) { showToast(`❌ Нужно 5000 🍌 для крутки!`, "#E74C3C"); return; }
-            gameData.bananas -= 5000;
-            const wheel = document.getElementById('wheel');
-            const randomIndex = Math.floor(Math.random() * wheelRewards.length);
-            const reward = wheelRewards[randomIndex];
-            const segmentAngle = 360 / wheelRewards.length;
-            wheel.style.transform = `rotate(${360*5 + (360 - (randomIndex * segmentAngle + segmentAngle/2))}deg)`;
-            setTimeout(() => {
-                gameData.bananas += reward; updateUI(); syncToCloud();
-                showToast(`🎡 Колесо принесло +${reward} 🍌!`, "#2ECC71");
-                wheel.style.transform = ''; initWheel();
-            }, 3000);
-        }
-        
         let currentGameDifficulty = 'medium';
         function startBananaGame() {
             const modal = document.getElementById('gameModal'), overlay = document.getElementById('gameOverlay');
@@ -584,8 +628,49 @@
             if(gameData.energy>gameData.maxEnergy) gameData.energy=gameData.maxEnergy;
             updateUI();
         }
-        function syncToCloud() { if(tg.CloudStorage) tg.CloudStorage.setItem('minionClickerCloud_'+userId, JSON.stringify(gameData),()=>{}); }
-        function loadFromCloud() { if(tg.CloudStorage) tg.CloudStorage.getItem('minionClickerCloud_'+userId, (err,val)=>{ if(!err&&val) try { Object.assign(gameData, JSON.parse(val)); updateUI(); saveToLocal(); } catch(e){} restartAutoClicker(); }); }
+        
+        function syncToCloud() { 
+            if(tg.CloudStorage) {
+                const saveData = {
+                    bananas: gameData.bananas, level: gameData.level, exp: gameData.exp,
+                    totalClicks: gameData.totalClicks, prestigeCount: gameData.prestigeCount,
+                    maxEnergy: gameData.maxEnergy, energy: gameData.energy,
+                    clickPower1: gameData.clickPower1, clickPower5: gameData.clickPower5,
+                    clickPower10: gameData.clickPower10, clickPower25: gameData.clickPower25,
+                    clickPower50: gameData.clickPower50, clickMastery: gameData.clickMastery,
+                    explosive: gameData.explosive, farmIncome: gameData.farmIncome,
+                    upgrades: gameData.upgrades, achievements: gameData.achievements,
+                    dailyStreak: gameData.dailyStreak, lastDaily: gameData.lastDaily,
+                    ownedSkins: gameData.ownedSkins, activeSkin: gameData.activeSkin,
+                    totalEarned: gameData.totalEarned, referralCode: gameData.referralCode
+                };
+                tg.CloudStorage.setItem('minionClickerCloud_'+userId, JSON.stringify(saveData), () => {
+                    document.getElementById('syncStatus').innerHTML = "✅ Сохранено в облаке";
+                    setTimeout(() => {
+                        if(document.getElementById('syncStatus').innerHTML.includes("✅"))
+                            document.getElementById('syncStatus').innerHTML = "🔄 Синхронизировано";
+                    }, 2000);
+                });
+            }
+        }
+        
+        function loadFromCloud() { 
+            if(tg.CloudStorage) {
+                tg.CloudStorage.getItem('minionClickerCloud_'+userId, (err, val) => { 
+                    if(!err && val) { 
+                        try { 
+                            const cloud = JSON.parse(val);
+                            Object.assign(gameData, cloud);
+                            updateUI(); 
+                            saveToLocal(); 
+                            restartAutoClicker();
+                            updateFarmIncome();
+                            document.getElementById('syncStatus').innerHTML = "☁️ Загружено из облака";
+                        } catch(e){} 
+                    }
+                }); 
+            }
+        }
         
         function renderUpgradesList(containerId, upgradesList) {
             const container = document.getElementById(containerId); if (!container) return;
@@ -703,28 +788,45 @@
         
         function showFloating(text, isCritical){
             const div = document.createElement('div'); div.className='click-animation';
-            div.innerText = `+${text}🍌`; if(isCritical) div.innerText = `💥 ${text}🍌`;
+            div.innerText = `+${text.toLocaleString()} 🍌`;
+            if(isCritical) div.innerText = `💥 КРИТ! +${text.toLocaleString()} 🍌`;
             div.style.left = (Math.random()*(window.innerWidth-100)+50)+'px';
             div.style.top = (window.innerHeight/2)+'px';
             document.body.appendChild(div); setTimeout(()=>div.remove(),600);
         }
+        
         function showToast(msg,bg){
             const toast = document.createElement('div'); toast.className='toast';
             toast.innerText = msg; toast.style.background = bg;
             document.body.appendChild(toast); setTimeout(()=>toast.remove(),2000);
         }
-        function createFloatingBananas(){ setInterval(()=>{ const b=document.createElement('div'); b.className='banana-particle'; b.style.left=Math.random()*window.innerWidth+'px'; b.style.width=(20+Math.random()*30)+'px'; b.style.height=(20+Math.random()*30)+'px'; document.body.appendChild(b); setTimeout(()=>b.remove(),8000); },10000); }
+        
+        function createFloatingBananas(){ 
+            setInterval(()=>{ 
+                const b=document.createElement('div'); b.className='banana-particle'; 
+                b.style.left=Math.random()*window.innerWidth+'px'; 
+                b.style.width=(20+Math.random()*30)+'px'; 
+                b.style.height=(20+Math.random()*30)+'px'; 
+                document.body.appendChild(b); 
+                setTimeout(()=>b.remove(),8000); 
+            }, 15000); 
+        }
         
         function init(){
-            loadFromLocal(); loadFromCloud(); createFloatingBananas(); updateFarmIncome();
+            loadFromLocal(); 
+            loadFromCloud(); 
+            createFloatingBananas(); 
+            updateFarmIncome();
             setInterval(()=>{
                 if(gameData.energy<gameData.maxEnergy){
                     let regen = 1 + gameData.upgrades.regen*0.5 + gameData.upgrades.recovery*0.3;
-                    gameData.energy = Math.min(gameData.maxEnergy, gameData.energy+regen); updateUI();
+                    gameData.energy = Math.min(gameData.maxEnergy, gameData.energy+regen); 
+                    updateUI();
                 }
             },1000);
-            setInterval(()=>syncToCloud(),30000);
-            restartAutoClicker(); initWheel();
+            setInterval(()=>syncToCloud(), 30000);
+            restartAutoClicker(); 
+            initWheel();
         }
         
         document.getElementById('minion').addEventListener('click', clickMinion);
@@ -732,26 +834,57 @@
         document.getElementById('claimOfflineBtn').addEventListener('click', claimOfflineManual);
         document.getElementById('dailyBonusBtn').addEventListener('click', dailyBonus);
         document.getElementById('bananaGameBtn').addEventListener('click', startBananaGame);
-        document.getElementById('wheelBtn').addEventListener('click', () => { document.getElementById('wheelModal').classList.remove('hidden'); document.getElementById('wheelOverlay').classList.remove('hidden'); initWheel(); });
+        document.getElementById('wheelBtn').addEventListener('click', () => { 
+            document.getElementById('wheelModal').classList.remove('hidden'); 
+            document.getElementById('wheelOverlay').classList.remove('hidden'); 
+            initWheel(); 
+        });
         document.getElementById('spinWheelBtn').addEventListener('click', spinWheel);
-        document.getElementById('closeWheelBtn').addEventListener('click', () => { document.getElementById('wheelModal').classList.add('hidden'); document.getElementById('wheelOverlay').classList.add('hidden'); });
-        document.getElementById('closeGameBtn').addEventListener('click', ()=>{ document.getElementById('gameModal').classList.add('hidden'); document.getElementById('gameOverlay').classList.add('hidden'); });
-        document.querySelectorAll('.difficulty-btn').forEach(btn=>{ btn.addEventListener('click',()=>{ currentGameDifficulty = btn.dataset.diff; showToast(`Сложность: ${btn.innerText}`, "#3498DB"); }); });
-        document.getElementById('copyReferralBtn').addEventListener('click',()=>{ navigator.clipboard.writeText(document.getElementById('referralLink').innerText); showToast("📋 Ссылка скопирована!", "#3498DB"); });
-        document.getElementById('syncCloudBtn').addEventListener('click',()=>{ syncToCloud(); showToast("☁️ Синхронизация!", "#3498DB"); });
-        document.getElementById('themeToggle').addEventListener('click',()=>{ document.body.classList.toggle('dark-theme'); document.getElementById('themeToggle').innerText = document.body.classList.contains('dark-theme')?'☀️':'🌙'; });
-        document.querySelectorAll('.upgrade-cat').forEach(cat=>{ cat.addEventListener('click',()=>{
-            document.querySelectorAll('.upgrade-cat').forEach(c=>c.classList.remove('active'));
-            document.querySelectorAll('.upgrade-category-content').forEach(c=>c.classList.remove('active'));
-            cat.classList.add('active');
-            document.getElementById(`upgradeCat${cat.dataset.cat.charAt(0).toUpperCase()+cat.dataset.cat.slice(1)}`).classList.add('active');
-        }); });
-        document.querySelectorAll('.tab').forEach(tab=>{ tab.addEventListener('click',()=>{
-            document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
-        }); });
+        document.getElementById('closeWheelBtn').addEventListener('click', () => { 
+            document.getElementById('wheelModal').classList.add('hidden'); 
+            document.getElementById('wheelOverlay').classList.add('hidden'); 
+        });
+        document.getElementById('closeGameBtn').addEventListener('click', ()=>{ 
+            document.getElementById('gameModal').classList.add('hidden'); 
+            document.getElementById('gameOverlay').classList.add('hidden'); 
+        });
+        document.querySelectorAll('.difficulty-btn').forEach(btn=>{ 
+            btn.addEventListener('click',()=>{ 
+                currentGameDifficulty = btn.dataset.diff; 
+                showToast(`Сложность: ${btn.innerText}`, "#3498DB"); 
+            }); 
+        });
+        document.getElementById('copyReferralBtn').addEventListener('click',()=>{ 
+            navigator.clipboard.writeText(document.getElementById('referralLink').innerText); 
+            showToast("📋 Ссылка скопирована!", "#3498DB"); 
+        });
+        document.getElementById('syncCloudBtn').addEventListener('click',()=>{ 
+            syncToCloud(); 
+            showToast("☁️ Принудительная синхронизация выполнена!", "#3498DB"); 
+        });
+        document.getElementById('themeToggle').addEventListener('click',()=>{ 
+            document.body.classList.toggle('dark-theme'); 
+            document.getElementById('themeToggle').innerText = document.body.classList.contains('dark-theme')?'☀️':'🌙'; 
+        });
+        
+        document.querySelectorAll('.upgrade-cat').forEach(cat=>{ 
+            cat.addEventListener('click',()=>{
+                document.querySelectorAll('.upgrade-cat').forEach(c=>c.classList.remove('active'));
+                document.querySelectorAll('.upgrade-category-content').forEach(c=>c.classList.remove('active'));
+                cat.classList.add('active');
+                document.getElementById(`upgradeCat${cat.dataset.cat.charAt(0).toUpperCase()+cat.dataset.cat.slice(1)}`).classList.add('active');
+            }); 
+        });
+        
+        document.querySelectorAll('.tab').forEach(tab=>{ 
+            tab.addEventListener('click',()=>{
+                document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+            }); 
+        });
+        
         init();
     })();
 </script>
