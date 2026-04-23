@@ -15,11 +15,25 @@
         }
 
         body {
-            background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
+            background: url('bg.jpg') no-repeat center center fixed;
+            background-size: cover;
             font-family: 'Comic Neue', 'Segoe UI', 'Comic Sans MS', cursive;
             min-height: 100vh;
             padding: 16px 16px 80px;
             color: #2C3E50;
+            position: relative;
+        }
+        
+        /* Затемнение фона для читаемости текста */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1;
         }
 
         /* Шапка */
@@ -77,29 +91,29 @@
             color: white;
         }
 
-        /* Миньон */
+        /* Миньон с картинкой */
         .minion-wrap {
             display: flex;
             justify-content: center;
             margin: 20px 0;
         }
         .minion {
-            width: 200px;
-            height: 200px;
-            background: radial-gradient(circle at 30% 35%, #FFE135, #FFC107);
-            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            width: 220px;
+            height: 220px;
             cursor: pointer;
             transition: transform 0.05s linear;
-            box-shadow: 0 15px 25px rgba(0,0,0,0.3);
-            border: 3px solid white;
+            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3));
         }
-        .minion:active { transform: scale(0.96); }
-        .minion-face { font-size: 75px; }
-        .minion-glasses { font-size: 30px; margin-top: -20px; }
+        .minion:active {
+            transform: scale(0.96);
+        }
+        .minion-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 30px;
+            pointer-events: none;
+        }
 
         /* Табы */
         .tabs {
@@ -204,6 +218,14 @@
         .leader-name { flex: 1; font-weight: bold; color: #2C3E50; }
         .leader-stats { color: #F39C12; font-weight: bold; font-size: 12px; text-align: right; }
 
+        /* Банан в балансе */
+        .banana-icon {
+            width: 24px;
+            height: 24px;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+
         .click-animation {
             position: fixed;
             pointer-events: none;
@@ -242,8 +264,8 @@
             text-align: center;
             font-size: 11px;
             margin-top: 15px;
-            color: #2C3E50;
-            background: rgba(255,255,255,0.7);
+            color: white;
+            background: rgba(0,0,0,0.5);
             padding: 6px;
             border-radius: 40px;
         }
@@ -270,7 +292,7 @@
 <body>
 
 <div class="stats-grid">
-    <div class="stat-card"><div class="stat-label">🍌 БАНАНЫ</div><div class="stat-value" id="bananas">0</div></div>
+    <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="banana-icon" alt="🍌"> БАНАНЫ</div><div class="stat-value" id="bananas">0</div></div>
     <div class="stat-card"><div class="stat-label">📊 УРОВЕНЬ</div><div class="stat-value" id="level">1</div></div>
     <div class="stat-card"><div class="stat-label">💪 СИЛА</div><div class="stat-value" id="clickPower">1</div></div>
     <div class="stat-card"><div class="stat-label">🔄 ПРЕСТИЖ</div><div class="stat-value" id="prestigeCount">0</div></div>
@@ -287,8 +309,7 @@
 
 <div class="minion-wrap">
     <div class="minion" id="minion">
-        <div class="minion-face">🐵</div>
-        <div class="minion-glasses">👓</div>
+        <img src="minion.clicker.jpg" alt="Миньон" class="minion-img" id="minionImg">
     </div>
 </div>
 
@@ -332,16 +353,13 @@
 
 <script>
     (function() {
-        // ==================== TELEGRAM WEBAPP ====================
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
-        // ==================== ПОЛЬЗОВАТЕЛЬ ====================
         const userId = tg.initDataUnsafe?.user?.id || `demo_${Math.random().toString(36).substr(2, 8)}`;
         const userName = tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username || "Миньон";
 
-        // ==================== СТАРТОВЫЕ ДАННЫЕ ====================
         let gameData = {
             userId: userId,
             username: userName,
@@ -357,20 +375,15 @@
             lastOnline: Date.now(),
             lastDaily: null,
             dailyStreak: 0,
-            upgrades: {
-                click: 0, energy: 0, regen: 0,
-                bonus: 0, offline: 0, crit: 0, auto: 0
-            },
+            upgrades: { click:0, energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0 },
             tasks: { task1: false, task2: false, task3: false },
-            referralCode: null,
+            referralCode: Math.random().toString(36).substr(2, 8).toUpperCase(),
             referrals: [],
             referralBonusPercent: 0
         };
 
         let autoClickerInterval = null;
-        let energyInterval = null;
 
-        // ==================== СОХРАНЕНИЕ И ЗАГРУЗКА ====================
         function saveToLocal() {
             gameData.lastOnline = Date.now();
             localStorage.setItem('minionClicker_' + userId, JSON.stringify(gameData));
@@ -386,37 +399,13 @@
             }
             if (!gameData.upgrades) gameData.upgrades = { click:0, energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0 };
             if (!gameData.tasks) gameData.tasks = { task1: false, task2: false, task3: false };
-            if (!gameData.referrals) gameData.referrals = [];
-            if (!gameData.referralCode) gameData.referralCode = Math.random().toString(36).substr(2, 8).toUpperCase();
             if (gameData.energy > gameData.maxEnergy) gameData.energy = gameData.maxEnergy;
             updateUI();
         }
 
-        // Облачная синхронизация через Telegram CloudStorage
         function syncToCloud() {
-            if (!tg.CloudStorage) {
-                document.getElementById('syncStatus').innerHTML = "⚠️ Облако не поддерживается, данные только локально";
-                return;
-            }
-            const cloudData = {
-                bananas: gameData.bananas, level: gameData.level, exp: gameData.exp,
-                totalClicks: gameData.totalClicks, clickPower: gameData.clickPower,
-                prestigeCount: gameData.prestigeCount, prestigeBonus: gameData.prestigeBonus,
-                maxEnergy: gameData.maxEnergy, energy: gameData.energy,
-                upgrades: gameData.upgrades, tasks: gameData.tasks,
-                dailyStreak: gameData.dailyStreak, lastDaily: gameData.lastDaily,
-                referralBonusPercent: gameData.referralBonusPercent, referrals: gameData.referrals,
-                username: gameData.username
-            };
-            tg.CloudStorage.setItem('minionClickerCloud_' + userId, JSON.stringify(cloudData), (err) => {
-                if (!err) {
-                    document.getElementById('syncStatus').innerHTML = "✅ Сохранено в облаке";
-                    setTimeout(() => {
-                        if(document.getElementById('syncStatus').innerHTML.includes("✅"))
-                            document.getElementById('syncStatus').innerHTML = "🔄 Синхронизировано";
-                    }, 2000);
-                }
-            });
+            if (!tg.CloudStorage) return;
+            tg.CloudStorage.setItem('minionClickerCloud_' + userId, JSON.stringify(gameData), () => {});
         }
 
         function loadFromCloud() {
@@ -425,38 +414,16 @@
                 if (!err && value) {
                     try {
                         const cloud = JSON.parse(value);
-                        if (cloud.bananas !== undefined) Object.assign(gameData, cloud);
+                        Object.assign(gameData, cloud);
                         updateUI();
                         saveToLocal();
-                        document.getElementById('syncStatus').innerHTML = "☁️ Загружено из облака";
                     } catch(e) {}
-                } else {
-                    updateUI();
                 }
             });
         }
 
-        function autoSync() {
-            saveToLocal();
-            syncToCloud();
-        }
+        function autoSync() { saveToLocal(); syncToCloud(); }
 
-        // ==================== ОФЛАЙН ДОХОД ====================
-        function checkOfflineIncome() {
-            const now = Date.now();
-            const secondsOffline = Math.min((now - gameData.lastOnline) / 1000, 8 * 3600);
-            const offlineRate = 0.1 + (gameData.upgrades.offline * 0.05);
-            const earned = Math.floor(secondsOffline * offlineRate);
-            if (earned > 0) {
-                gameData.bananas += earned;
-                showToast(`🎁 +${earned} 🍌 офлайн дохода!`, "#2ECC71");
-                autoSync();
-            }
-            gameData.lastOnline = now;
-            updateUI();
-        }
-
-        // ==================== ПРОКАЧКИ ====================
         function getUpgradeCost(upgradeId) {
             const level = gameData.upgrades[upgradeId];
             const base = { click:10, energy:15, regen:20, bonus:25, offline:30, crit:50, auto:100 }[upgradeId];
@@ -468,15 +435,12 @@
             if (gameData.bananas >= cost) {
                 gameData.bananas -= cost;
                 gameData.upgrades[upgradeId]++;
-                
                 if (upgradeId === 'click') gameData.clickPower++;
                 if (upgradeId === 'energy') { gameData.maxEnergy += 25; gameData.energy += 25; }
                 if (upgradeId === 'auto') restartAutoClicker();
-                
                 updateUI();
                 autoSync();
-                showToast(`✅ Улучшение куплено!`, "#2ECC71");
-                
+                showToast(`✅ ${upgradeId} улучшена!`, "#2ECC71");
                 if (!gameData.tasks.task2 && gameData.upgrades[upgradeId] >= 1) {
                     gameData.tasks.task2 = true;
                     showToast("📋 Задание 'Купи улучшение' выполнено!", "#3498DB");
@@ -487,16 +451,19 @@
             }
         }
 
-        // ==================== КЛИК ====================
         function clickMinion() {
             if (gameData.energy <= 0) {
                 showToast("❌ Нет энергии!", "#E74C3C");
                 return;
             }
             
+            // Анимация картинки миньона при клике
+            const minionImg = document.getElementById('minionImg');
+            minionImg.style.transform = 'scale(0.95)';
+            setTimeout(() => { minionImg.style.transform = 'scale(1)'; }, 150);
+            
             let gain = Math.floor(gameData.clickPower * gameData.prestigeBonus);
             gain = Math.floor(gain * (1 + gameData.upgrades.bonus * 0.05 + gameData.referralBonusPercent / 100));
-            
             let isCritical = false;
             if (Math.random() < gameData.upgrades.crit * 0.05) {
                 gain *= 2;
@@ -508,7 +475,6 @@
             gameData.bananas += gain;
             gameData.totalClicks++;
             
-            // Опыт и уровень
             let expNeeded = gameData.level * 100;
             gameData.exp += gain;
             if (gameData.exp >= expNeeded) {
@@ -516,9 +482,6 @@
                 gameData.level++;
                 gameData.bananas += 100;
                 showToast(`🎉 УРОВЕНЬ ${gameData.level}! +100 🍌`, "#8E44AD");
-                const minionDiv = document.getElementById('minion');
-                minionDiv.style.transform = "scale(1.1)";
-                setTimeout(() => minionDiv.style.transform = "", 200);
             }
             
             updateUI();
@@ -526,19 +489,10 @@
             showFloating(gain, isCritical);
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             
-            if (!gameData.tasks.task1 && gameData.bananas >= 1000) {
-                gameData.tasks.task1 = true;
-                showToast("📋 Задание 'Накопи 1000 бананов' выполнено!", "#3498DB");
-                autoSync();
-            }
-            if (!gameData.tasks.task3 && gameData.level >= 5) {
-                gameData.tasks.task3 = true;
-                showToast("📋 Задание 'Достигни 5 уровня' выполнено!", "#3498DB");
-                autoSync();
-            }
+            if (!gameData.tasks.task1 && gameData.bananas >= 1000) { gameData.tasks.task1 = true; autoSync(); }
+            if (!gameData.tasks.task3 && gameData.level >= 5) { gameData.tasks.task3 = true; autoSync(); }
         }
 
-        // ==================== ПЕРЕРОЖДЕНИЕ ====================
         function doPrestige() {
             if (gameData.level >= 10) {
                 if (confirm("Переродиться? Уровень станет 1, прокачки сбросятся, но бонус +10% останется навсегда!")) {
@@ -561,80 +515,15 @@
             }
         }
 
-        // ==================== АВТОКЛИКЕР ====================
         function restartAutoClicker() {
             if (autoClickerInterval) clearInterval(autoClickerInterval);
             if (gameData.upgrades.auto > 0) {
-                const interval = Math.max(0.8, 2 - (gameData.upgrades.auto * 0.1));
                 autoClickerInterval = setInterval(() => {
                     if (gameData.energy > 0) clickMinion();
-                }, interval * 1000);
+                }, 1000);
             }
         }
 
-        // ==================== ЭНЕРГИЯ ====================
-        function startEnergyRegen() {
-            if (energyInterval) clearInterval(energyInterval);
-            energyInterval = setInterval(() => {
-                const regenRate = 1 + (gameData.upgrades.regen * 0.5);
-                gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + regenRate);
-                document.getElementById('energyFill').style.width = (gameData.energy / gameData.maxEnergy * 100) + '%';
-                document.getElementById('energy').innerText = Math.floor(gameData.energy);
-            }, 1000);
-        }
-
-        // ==================== ЕЖЕДНЕВНЫЙ БОНУС ====================
-        function dailyBonus() {
-            const now = new Date();
-            const last = gameData.lastDaily ? new Date(gameData.lastDaily) : null;
-            let streak = gameData.dailyStreak;
-            
-            if (last && (now - last) >= 48 * 3600000) {
-                streak = 0;
-            } else if (last && (now - last) >= 24 * 3600000) {
-                streak = Math.min(streak + 1, 6);
-            } else if (!last) {
-                streak = 0;
-            } else {
-                showToast("❌ Бонус уже получен сегодня!", "#E74C3C");
-                return;
-            }
-            
-            const rewards = [100, 200, 500, 1000, 2000, 5000, 10000];
-            const reward = rewards[streak];
-            gameData.bananas += reward;
-            gameData.dailyStreak = streak + 1;
-            gameData.lastDaily = now;
-            updateUI();
-            autoSync();
-            showToast(`🎁 Ежедневный бонус: +${reward} 🍌 (день ${streak + 1})`, "#2ECC71");
-        }
-
-        // ==================== ЗАДАНИЯ ====================
-        function claimTask(taskId) {
-            const rewards = { task1: 500, task2: 1000, task3: 2000 };
-            if (gameData.tasks[taskId]) {
-                showToast("❌ Задание уже выполнено!", "#E74C3C");
-                return;
-            }
-            
-            let canClaim = false;
-            if (taskId === 'task1' && gameData.bananas >= 1000) canClaim = true;
-            if (taskId === 'task2' && Object.values(gameData.upgrades).some(l => l > 0)) canClaim = true;
-            if (taskId === 'task3' && gameData.level >= 5) canClaim = true;
-            
-            if (canClaim) {
-                gameData.tasks[taskId] = true;
-                gameData.bananas += rewards[taskId];
-                updateUI();
-                autoSync();
-                showToast(`✅ +${rewards[taskId]} 🍌`, "#2ECC71");
-            } else {
-                showToast("❌ Условие не выполнено!", "#E74C3C");
-            }
-        }
-
-        // ==================== ОФЛАЙН (ручной) ====================
         function claimOfflineManual() {
             const now = Date.now();
             const secondsOffline = Math.min((now - gameData.lastOnline) / 1000, 8 * 3600);
@@ -652,27 +541,47 @@
             saveToLocal();
         }
 
-        // ==================== РЕФЕРАЛЫ ====================
-        function getReferralLink() {
-            const botUsername = tg.initDataUnsafe?.user?.username || "minion_bot";
-            return `https://t.me/${botUsername}?start=${gameData.referralCode}`;
+        function dailyBonus() {
+            const now = new Date();
+            const last = gameData.lastDaily ? new Date(gameData.lastDaily) : null;
+            let streak = gameData.dailyStreak;
+            
+            if (last && (now - last) >= 48 * 3600000) streak = 0;
+            else if (last && (now - last) >= 24 * 3600000) streak = Math.min(streak + 1, 6);
+            else if (!last) streak = 0;
+            else { showToast("❌ Бонус уже получен сегодня!", "#E74C3C"); return; }
+            
+            const rewards = [100, 200, 500, 1000, 2000, 5000, 10000];
+            const reward = rewards[streak];
+            gameData.bananas += reward;
+            gameData.dailyStreak = streak + 1;
+            gameData.lastDaily = now;
+            updateUI();
+            autoSync();
+            showToast(`🎁 Ежедневный бонус: +${reward} 🍌 (день ${streak + 1})`, "#2ECC71");
         }
 
-        function checkReferral() {
-            const startParam = tg.initDataUnsafe?.start_param;
-            if (startParam && startParam !== gameData.referralCode && !gameData.referredBy && startParam !== userId) {
-                gameData.referredBy = startParam;
-                gameData.bananas += 500;
-                gameData.referralBonusPercent += 1;
+        function claimTask(taskId) {
+            const rewards = { task1: 500, task2: 1000, task3: 2000 };
+            if (gameData.tasks[taskId]) { showToast("❌ Задание уже выполнено!", "#E74C3C"); return; }
+            
+            let canClaim = false;
+            if (taskId === 'task1' && gameData.bananas >= 1000) canClaim = true;
+            if (taskId === 'task2' && Object.values(gameData.upgrades).some(l => l > 0)) canClaim = true;
+            if (taskId === 'task3' && gameData.level >= 5) canClaim = true;
+            
+            if (canClaim) {
+                gameData.tasks[taskId] = true;
+                gameData.bananas += rewards[taskId];
                 updateUI();
                 autoSync();
-                showToast("🎉 +500 бананов за приглашение!", "#2ECC71");
+                showToast(`✅ +${rewards[taskId]} 🍌`, "#2ECC71");
+            } else {
+                showToast("❌ Условие не выполнено!", "#E74C3C");
             }
         }
 
-        // ==================== UI ОБНОВЛЕНИЕ ====================
         function updateUI() {
-            // Основные показатели
             document.getElementById('bananas').innerText = Math.floor(gameData.bananas).toLocaleString();
             document.getElementById('level').innerText = gameData.level;
             document.getElementById('clickPower').innerText = Math.floor(gameData.clickPower * gameData.prestigeBonus);
@@ -688,16 +597,10 @@
             document.getElementById('playerName').innerHTML = gameData.username;
             document.getElementById('totalClicks').innerHTML = gameData.totalClicks.toLocaleString();
             document.getElementById('prestigeBonus').innerHTML = `+${Math.round((gameData.prestigeBonus-1)*100)}%`;
-            
-            const offlineRate = 0.1 + (gameData.upgrades.offline * 0.05);
-            document.getElementById('offlineRateProfile').innerHTML = offlineRate.toFixed(2);
-            const passiveIncome = (gameData.upgrades.auto * 0.5) + offlineRate;
-            document.getElementById('passiveIncome').innerHTML = passiveIncome.toFixed(1);
-            
+            document.getElementById('passiveIncome').innerHTML = ((gameData.upgrades.auto * 0.5) + (0.1 + gameData.upgrades.offline * 0.05)).toFixed(1);
             document.getElementById('referralCount').innerHTML = gameData.referrals.length;
-            document.getElementById('referralLink').innerHTML = getReferralLink();
+            document.getElementById('referralLink').innerHTML = `https://t.me/minion_bot?start=${gameData.referralCode}`;
             
-            // Кнопка перерождения
             const prestigeBtn = document.getElementById('prestigeBtn');
             if (gameData.level >= 10) {
                 prestigeBtn.classList.remove('btn-disabled');
@@ -708,8 +611,7 @@
             }
             
             // Прокачки
-            const upgradesList = document.getElementById('upgradesList');
-            const upgrades = [
+            const updates = [
                 { id: 'click', name: '💪 Сила клика', desc: '+1 банан/клик' },
                 { id: 'energy', name: '⚡ Макс. энергия', desc: '+25 к макс. энергии' },
                 { id: 'regen', name: '🔋 Регенерация', desc: '+0.5 энергии/сек' },
@@ -718,83 +620,51 @@
                 { id: 'crit', name: '⚡ Критический удар', desc: '+5% шанс x2' },
                 { id: 'auto', name: '🎯 Автокликер', desc: '1 клик/сек' }
             ];
-            upgradesList.innerHTML = '';
-            for (let up of upgrades) {
+            const container = document.getElementById('upgradesList');
+            container.innerHTML = '';
+            for (let up of updates) {
                 const level = gameData.upgrades[up.id];
                 const cost = getUpgradeCost(up.id);
                 const div = document.createElement('div');
                 div.className = 'item-card';
                 div.innerHTML = `<div class="item-info"><div class="item-name">${up.name}</div><div class="item-desc">${up.desc}</div><div class="item-level">Ур. ${level}/10</div></div><div class="item-cost">${cost} 🍌</div>`;
-                div.addEventListener('click', (e) => { e.stopPropagation(); buyUpgrade(up.id); });
-                upgradesList.appendChild(div);
+                div.addEventListener('click', () => buyUpgrade(up.id));
+                container.appendChild(div);
             }
             
             // Задания
-            const tasksList = document.getElementById('tasksList');
-            const tasks = [
-                { id: 'task1', name: '📋 Накопи 1000 бананов', reward: 500, condition: gameData.bananas >= 1000 },
-                { id: 'task2', name: '📋 Купи любое улучшение', reward: 1000, condition: Object.values(gameData.upgrades).some(l => l > 0) },
-                { id: 'task3', name: '📋 Достигни 5 уровня', reward: 2000, condition: gameData.level >= 5 }
-            ];
-            tasksList.innerHTML = '';
-            for (let t of tasks) {
-                const claimed = gameData.tasks[t.id];
-                const div = document.createElement('div');
-                div.className = 'item-card';
-                div.innerHTML = `<div><div class="item-name">${t.name}</div><div class="item-desc">Награда: ${t.reward} 🍌</div></div>${!claimed ? `<button class="task-claim task-btn" data-task="${t.id}">ЗАБРАТЬ</button>` : '<div>✅ Выполнено</div>'}`;
-                tasksList.appendChild(div);
-            }
+            const tasksDiv = document.getElementById('tasksList');
+            tasksDiv.innerHTML = `
+                <div class="item-card"><div><div class="item-name">📋 Накопи 1000 бананов</div><div class="item-desc">Награда: 500 🍌</div></div>${!gameData.tasks.task1 ? '<button class="task-claim task-btn" data-task="task1">ЗАБРАТЬ</button>' : '<div>✅ Выполнено</div>'}</div>
+                <div class="item-card"><div><div class="item-name">📋 Купи улучшение</div><div class="item-desc">Награда: 1000 🍌</div></div>${!gameData.tasks.task2 ? '<button class="task-claim task-btn" data-task="task2">ЗАБРАТЬ</button>' : '<div>✅ Выполнено</div>'}</div>
+                <div class="item-card"><div><div class="item-name">📋 Достигни 5 уровня</div><div class="item-desc">Награда: 2000 🍌</div></div>${!gameData.tasks.task3 ? '<button class="task-claim task-btn" data-task="task3">ЗАБРАТЬ</button>' : '<div>✅ Выполнено</div>'}</div>
+            `;
             document.querySelectorAll('.task-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => { e.stopPropagation(); claimTask(btn.dataset.task); });
+                btn.addEventListener('click', () => claimTask(btn.dataset.task));
             });
             
             // Календарь
             const rewards = [100, 200, 500, 1000, 2000, 5000, 10000];
             const streak = gameData.dailyStreak;
-            const calendarDiv = document.getElementById('dailyCalendar');
-            calendarDiv.innerHTML = rewards.map((r, i) => `<div class="day-card ${i < streak ? 'claimed' : i === streak ? 'current' : ''}">${i+1}<br>${r}</div>`).join('');
+            document.getElementById('dailyCalendar').innerHTML = rewards.map((r, i) => `<div class="day-card ${i < streak ? 'claimed' : i === streak ? 'current' : ''}">${i+1}<br>${r}</div>`).join('');
             
-            // Таблица лидеров (локальная)
-            const leaderboardDiv = document.getElementById('leaderboardList');
-            try {
-                let allPlayers = [];
-                for (let i = 0; i < localStorage.length; i++) {
-                    const key = localStorage.key(i);
-                    if (key && key.startsWith('minionClicker_')) {
-                        try {
-                            const data = JSON.parse(localStorage.getItem(key));
-                            if (data && data.username) {
-                                allPlayers.push({
-                                    username: data.username,
-                                    bananas: data.bananas || 0,
-                                    level: data.level || 1,
-                                    prestigeCount: data.prestigeCount || 0
-                                });
-                            }
-                        } catch(e) {}
-                    }
+            // Лидерборд
+            const leaders = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('minionClicker_')) {
+                    try {
+                        const data = JSON.parse(localStorage.getItem(key));
+                        if (data && data.username) leaders.push(data);
+                    } catch(e) {}
                 }
-                if (!allPlayers.find(p => p.username === gameData.username)) {
-                    allPlayers.push({
-                        username: gameData.username,
-                        bananas: gameData.bananas,
-                        level: gameData.level,
-                        prestigeCount: gameData.prestigeCount
-                    });
-                }
-                allPlayers.sort((a, b) => b.bananas - a.bananas);
-                const top20 = allPlayers.slice(0, 20);
-                if (top20.length === 0) {
-                    leaderboardDiv.innerHTML = '<div class="offline-card">🏆 Пока никого</div>';
-                } else {
-                    leaderboardDiv.innerHTML = top20.map((p, idx) => `<div class="leaderboard-item"><div class="rank">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx+1}`}</div><div class="leader-name">${p.username}</div><div class="leader-stats">🍌 ${Math.floor(p.bananas).toLocaleString()} 📊 ${p.level} ур. 🔄 ${p.prestigeCount}</div></div>`).join('');
-                }
-            } catch(e) {
-                leaderboardDiv.innerHTML = '<div class="offline-card">🏆 Ошибка загрузки</div>';
             }
+            leaders.sort((a,b) => b.bananas - a.bananas);
+            const leaderDiv = document.getElementById('leaderboardList');
+            if (leaders.length === 0) leaderDiv.innerHTML = '<div class="offline-card">🏆 Пока никого</div>';
+            else leaderDiv.innerHTML = leaders.slice(0,20).map((p, i) => `<div class="leaderboard-item"><div class="rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div><div class="leader-name">${p.username}</div><div class="leader-stats">🍌 ${Math.floor(p.bananas).toLocaleString()} 📊 ${p.level} ур. 🔄 ${p.prestigeCount}</div></div>`).join('');
         }
 
-        // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
         function showFloating(text, isCritical) {
             const div = document.createElement('div');
             div.className = 'click-animation';
@@ -815,46 +685,38 @@
             setTimeout(() => toast.remove(), 2000);
         }
 
-        // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-        function init() {
-            loadFromLocal();
-            loadFromCloud();
-            checkReferral();
-            checkOfflineIncome();
-            startEnergyRegen();
-            restartAutoClicker();
-            updateUI();
-            
-            setInterval(() => autoSync(), 30000);
-        }
-
-        // ==================== СОБЫТИЯ ====================
         document.getElementById('minion').addEventListener('click', clickMinion);
         document.getElementById('prestigeBtn').addEventListener('click', doPrestige);
         document.getElementById('claimOfflineBtn').addEventListener('click', claimOfflineManual);
         document.getElementById('dailyBonusBtn').addEventListener('click', dailyBonus);
         document.getElementById('copyReferralBtn').addEventListener('click', () => {
-            navigator.clipboard.writeText(getReferralLink());
+            navigator.clipboard.writeText(document.getElementById('referralLink').innerText);
             showToast("📋 Ссылка скопирована!", "#3498DB");
         });
-        document.getElementById('syncCloudBtn').addEventListener('click', () => {
-            syncToCloud();
-            showToast("☁️ Синхронизация выполнена!", "#3498DB");
-        });
+        document.getElementById('syncCloudBtn').addEventListener('click', () => { syncToCloud(); showToast("☁️ Синхронизация выполнена!", "#3498DB"); });
 
-        // Табы
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 tab.classList.add('active');
                 document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
-                if (tab.dataset.tab === 'leaderboard') updateUI();
-                if (tab.dataset.tab === 'profile') updateUI();
             });
         });
 
-        init();
+        loadFromLocal();
+        loadFromCloud();
+        
+        setInterval(() => {
+            if (gameData.energy < gameData.maxEnergy) {
+                const regenRate = 1 + (gameData.upgrades.regen * 0.5);
+                gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + regenRate);
+                updateUI();
+            }
+        }, 1000);
+        
+        restartAutoClicker();
+        updateUI();
     })();
 </script>
 </body>
