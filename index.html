@@ -53,10 +53,7 @@
         body.dark-theme::before { background: rgba(0, 0, 0, 0.8); }
         body.dark-theme .stat-card, body.dark-theme .energy-box, body.dark-theme .exp-box,
         body.dark-theme .prestige-progress-box, body.dark-theme .offline-card, body.dark-theme .tabs,
-        body.dark-theme .upgrade-category-tabs, body.dark-theme .item-card,
-        body.dark-theme .leaderboard-item, body.dark-theme .achievement-item,
-        body.dark-theme .referral-link, body.dark-theme .day-card,
-        body.dark-theme .skin-item, body.dark-theme .skin-item.active { background: rgba(0, 0, 0, 0.7); }
+        body.dark-theme .upgrade-category-tabs { background: rgba(0, 0, 0, 0.7); }
 
         @keyframes floatBanana {
             0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
@@ -243,7 +240,7 @@
 
 <div class="energy-box"><div class="bar-bg"><div class="energy-fill" id="energyFill" style="width: 100%"></div></div><div class="bar-text"><span>⚡ Энергия</span><span id="energy">100</span> / <span id="maxEnergy">100</span></div></div>
 <div class="exp-box"><div class="bar-bg"><div class="exp-fill" id="expFill" style="width: 0%"></div></div><div class="bar-text"><span>⭐ Опыт</span><span id="expText">0 / 100</span></div></div>
-<div class="prestige-progress-box"><div class="bar-bg"><div class="prestige-fill" id="prestigeFill" style="width: 0%"></div></div><div class="bar-text"><span>🔄 До перерождения (нужен уровень <span id="requiredLevel">25</span> и <span id="requiredBananas">100,000</span> 🍌)</span><span id="prestigeNeededText">25 ур / 100k🍌</span></div></div>
+<div class="prestige-progress-box"><div class="bar-bg"><div class="prestige-fill" id="prestigeFill" style="width: 0%"></div></div><div class="bar-text"><span>🔄 До перерождения (нужен уровень <span id="requiredLevel">25</span> и <span id="requiredBananas">100,000</span> 🍌)</span><span id="prestigeNeededText">25 уровень / 100k🍌</span></div></div>
 
 <div class="minion-wrap">
     <div class="minion" id="minion"><img src="minion.clicker.jpg" alt="Миньон" class="minion-img" id="minionImg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2745%27 fill=%27%23FFD700%27/%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E🐵%3C/text%3E%3C/svg%3E'"></div>
@@ -348,6 +345,7 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
+
         const userId = tg.initDataUnsafe?.user?.id || `demo_${Math.random().toString(36).substr(2, 8)}`;
         const userName = tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username || "Миньон";
         
