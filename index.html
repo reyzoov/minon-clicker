@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>🍌 Minion Clicker | Миньон Кликер</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Шрифт Marua -->
     <style>
         @font-face {
             font-family: 'Marua';
@@ -25,272 +24,106 @@
             font-weight: 700;
             font-style: normal;
         }
-    </style>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Marua', 'Segoe UI', sans-serif;
             min-height: 100vh;
             padding: 16px 16px 80px;
             color: #fff;
-            position: relative;
-            transition: all 0.3s ease;
-            font-weight: 400;
             background: url('bg.jpg') no-repeat center center fixed;
             background-size: cover;
+            position: relative;
         }
-        
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: -1;
-        }
-        
-        /* ТЁМНАЯ ТЕМА */
-        body.dark-theme::before {
-            background: rgba(0, 0, 0, 0.8);
-        }
-        
-        body.dark-theme .stat-card,
-        body.dark-theme .energy-box,
-        body.dark-theme .exp-box,
-        body.dark-theme .prestige-progress-box,
-        body.dark-theme .offline-card,
-        body.dark-theme .tabs {
-            background: rgba(0, 0, 0, 0.7);
-        }
-        
-        body.dark-theme .item-card {
-            background: rgba(30, 30, 50, 0.95);
-            color: #FFD700;
-        }
-        
-        body.dark-theme .item-name { color: #FFD700; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: -1; }
+        body.dark-theme::before { background: rgba(0, 0, 0, 0.8); }
+        body.dark-theme .stat-card, body.dark-theme .energy-box, body.dark-theme .exp-box,
+        body.dark-theme .prestige-progress-box, body.dark-theme .offline-card, body.dark-theme .tabs,
+        body.dark-theme .upgrade-category-tabs, body.dark-theme .item-card,
+        body.dark-theme .leaderboard-item, body.dark-theme .achievement-item,
+        body.dark-theme .referral-link, body.dark-theme .day-card,
+        body.dark-theme .skin-item, body.dark-theme .skin-item.active { background: rgba(0, 0, 0, 0.7); }
+        body.dark-theme .item-card .item-name { color: #FFD700; }
 
-        /* Плавающие бананы */
         @keyframes floatBanana {
             0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
             100% { transform: translateY(-100px) rotate(360deg); opacity: 1; }
         }
         .banana-particle {
-            position: fixed;
-            width: 30px;
-            height: 30px;
-            background: url('banana.jpg') no-repeat center;
-            background-size: contain;
-            pointer-events: none;
-            z-index: 999;
-            animation: floatBanana 8s linear infinite;
+            position: fixed; width: 30px; height: 30px; background: url('banana.jpg') no-repeat center;
+            background-size: contain; pointer-events: none; z-index: 999; animation: floatBanana 8s linear infinite;
         }
-
-        /* КАРТОЧКИ СТАТИСТИКИ С КАРТИНКОЙ banana.jpg */
-        .stats-grid {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+        .stats-grid { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
         .stat-card {
-            flex: 1;
-            background: rgba(44, 62, 80, 0.85);
-            backdrop-filter: blur(8px);
-            border-radius: 28px;
-            padding: 10px 6px;
-            text-align: center;
-            color: white;
-            border: 1px solid #FFD700;
-            min-width: 70px;
+            flex: 1; background: rgba(44, 62, 80, 0.85); backdrop-filter: blur(8px); border-radius: 28px;
+            padding: 10px 6px; text-align: center; color: white; border: 1px solid #FFD700; min-width: 70px;
         }
-        .stat-label {
-            font-size: 11px;
-            opacity: 0.9;
-            letter-spacing: 0.5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            margin-bottom: 4px;
-        }
-        .stat-icon {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-        }
+        .stat-label { font-size: 11px; opacity: 0.9; display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 4px; }
+        .stat-icon { width: 20px; height: 20px; object-fit: contain; }
         .stat-value { font-size: 22px; font-weight: 700; color: #FFD700; }
 
-        /* ПОЛОСКИ */
         .energy-box, .exp-box, .prestige-progress-box {
-            background: rgba(44, 62, 80, 0.85);
-            backdrop-filter: blur(8px);
-            border-radius: 30px;
-            padding: 12px 16px;
-            margin-bottom: 12px;
+            background: rgba(44, 62, 80, 0.85); backdrop-filter: blur(8px); border-radius: 30px;
+            padding: 12px 16px; margin-bottom: 12px;
         }
-        .bar-bg {
-            background: rgba(0,0,0,0.3);
-            border-radius: 20px;
-            height: 12px;
-            overflow: hidden;
-        }
+        .bar-bg { background: rgba(0,0,0,0.3); border-radius: 20px; height: 12px; overflow: hidden; }
         .energy-fill { background: linear-gradient(90deg, #4cd964, #34c759); width: 100%; height: 100%; transition: width 0.2s; }
         .exp-fill { background: linear-gradient(90deg, #FFD700, #FFA500); width: 0%; height: 100%; transition: width 0.2s; }
         .prestige-fill { background: linear-gradient(90deg, #8E44AD, #9B59B6); width: 0%; height: 100%; transition: width 0.2s; }
-        .bar-text {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 6px;
-            font-size: 12px;
-            color: white;
-            font-weight: 500;
-            align-items: center;
-        }
+        .bar-text { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: white; font-weight: 500; align-items: center; }
 
-        /* МИНЬОН */
-        .minion-wrap {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-            position: relative;
-        }
-        .minion {
-            width: 220px;
-            height: 220px;
-            cursor: pointer;
-            transition: transform 0.05s linear;
-            filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3));
-        }
+        .minion-wrap { display: flex; justify-content: center; margin: 20px 0; position: relative; }
+        .minion { width: 220px; height: 220px; cursor: pointer; transition: transform 0.05s linear; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.3)); }
         .minion:active { transform: scale(0.96); }
-        .minion-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            border-radius: 30px;
-            pointer-events: none;
-        }
-        
+        .minion-img { width: 100%; height: 100%; object-fit: contain; border-radius: 30px; pointer-events: none; }
         .combo-counter {
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #FFD700;
-            color: #2C3E50;
-            padding: 6px 16px;
-            border-radius: 40px;
-            font-weight: 700;
-            font-size: 14px;
-            white-space: nowrap;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);
+            background: #FFD700; color: #2C3E50; padding: 6px 16px; border-radius: 40px;
+            font-weight: 700; font-size: 14px; white-space: nowrap; box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
-
-        /* КНОПКА ТЕМЫ */
         .theme-toggle {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: rgba(44,62,80,0.8);
-            border: none;
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            font-size: 24px;
-            cursor: pointer;
-            z-index: 100;
-            backdrop-filter: blur(5px);
+            position: fixed; top: 10px; right: 10px; background: rgba(44,62,80,0.8); border: none;
+            border-radius: 50%; width: 45px; height: 45px; font-size: 24px; cursor: pointer; z-index: 100; backdrop-filter: blur(5px);
         }
-
-        /* ТАБЫ */
         .tabs {
-            display: flex;
-            gap: 6px;
-            background: rgba(44, 62, 80, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 8px;
-            border-radius: 40px;
-            margin: 20px 0 12px;
-            flex-wrap: wrap;
+            display: flex; gap: 6px; background: rgba(44, 62, 80, 0.9); backdrop-filter: blur(10px);
+            padding: 8px; border-radius: 40px; margin: 20px 0 12px; flex-wrap: wrap;
         }
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 8px 4px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 11px;
-            color: rgba(255,255,255,0.7);
-            transition: 0.2s;
-        }
-        .tab.active {
-            background: #FFD700;
-            color: #2C3E50;
-        }
-        .tab-content {
-            display: none;
-            animation: fade 0.2s ease;
-        }
+        .tab { flex: 1; text-align: center; padding: 8px 4px; border-radius: 30px; cursor: pointer;
+            font-weight: 700; font-size: 11px; color: rgba(255,255,255,0.7); transition: 0.2s; }
+        .tab.active { background: #FFD700; color: #2C3E50; }
+        .tab-content { display: none; animation: fade 0.2s ease; }
         .tab-content.active { display: block; }
         @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
-        /* ПРОКАЧКИ */
-        .upgrade-list, .shop-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-height: 450px;
-            overflow-y: auto;
-            padding-right: 4px;
+        .upgrade-category-tabs {
+            display: flex; gap: 6px; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px);
+            padding: 6px; border-radius: 30px; margin-bottom: 12px; flex-wrap: wrap;
         }
-        .item-card {
-            background: rgba(255,255,255,0.9);
-            border-radius: 24px;
-            padding: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 6px solid #FFD700;
-            cursor: pointer;
-            transition: 0.05s linear;
+        .upgrade-cat {
+            flex: 1; text-align: center; padding: 6px 4px; border-radius: 25px; cursor: pointer;
+            font-weight: 600; font-size: 10px; color: rgba(255,255,255,0.8); transition: 0.2s;
         }
-        .item-card:active { transform: scale(0.98); background: rgba(255,255,255,1); }
-        .item-info { flex: 1; }
-        .item-name { font-weight: 700; font-size: 14px; color: #2C3E50; }
-        .item-desc { font-size: 10px; color: #7F8C8D; margin: 4px 0; }
-        .item-level { font-size: 11px; color: #F39C12; font-weight: 700; }
-        .item-cost {
-            background: #3498DB;
-            color: white;
-            padding: 6px 14px;
-            border-radius: 40px;
-            font-weight: 700;
-            font-size: 13px;
-        }
+        .upgrade-cat.active { background: #FFD700; color: #2C3E50; }
+        .upgrade-category-content { display: none; }
+        .upgrade-category-content.active { display: block; }
 
-        /* КНОПКИ */
+        .upgrade-list, .shop-list { display: flex; flex-direction: column; gap: 10px; max-height: 450px; overflow-y: auto; padding-right: 4px; }
+        .item-card {
+            background: transparent; backdrop-filter: blur(4px); border-radius: 24px; padding: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); border-left: 6px solid #FFD700;
+            cursor: pointer; transition: 0.05s linear;
+        }
+        .item-card:active { transform: scale(0.98); background: rgba(0,0,0,0.2); }
+        .item-info { flex: 1; }
+        .item-name { font-weight: 700; font-size: 14px; color: #FFD700; text-shadow: 1px 1px 0 #000; }
+        .item-desc { font-size: 10px; color: #eee; margin: 4px 0; text-shadow: 1px 1px 0 #000; }
+        .item-level { font-size: 11px; color: #FFD700; font-weight: 700; }
+        .item-cost { background: #3498DB; color: white; padding: 6px 14px; border-radius: 40px; font-weight: 700; font-size: 13px; }
+
         .btn-prestige, .task-claim, .game-btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 40px;
-            color: white;
-            font-weight: 700;
-            font-size: 16px;
-            margin-top: 15px;
-            cursor: pointer;
-            transition: transform 0.05s;
+            width: 100%; padding: 14px; border: none; border-radius: 40px; color: white;
+            font-weight: 700; font-size: 16px; margin-top: 15px; cursor: pointer; transition: transform 0.05s;
         }
         .btn-prestige { background: #8E44AD; }
         .task-claim { background: #2ECC71; }
@@ -298,194 +131,52 @@
         .btn-prestige:active, .task-claim:active, .game-btn:active { transform: scale(0.97); }
         .btn-disabled { background: #95A5A6; opacity: 0.6; pointer-events: none; }
 
-        /* КАРТОЧКИ */
-        .offline-card {
-            background: rgba(44,62,80,0.85);
-            backdrop-filter: blur(8px);
-            border-radius: 30px;
-            padding: 20px;
-            text-align: center;
-            color: white;
-            margin-bottom: 15px;
-        }
-        
+        .offline-card { background: rgba(44,62,80,0.85); backdrop-filter: blur(8px); border-radius: 30px; padding: 20px; text-align: center; color: white; margin-bottom: 15px; }
         .toast {
-            position: fixed;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #2C3E50;
-            color: #FFD700;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-size: 14px;
-            font-weight: 600;
-            z-index: 1100;
-            animation: fadeToast 2s forwards;
-            white-space: nowrap;
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #2C3E50;
+            color: #FFD700; padding: 10px 20px; border-radius: 40px; font-size: 14px; font-weight: 600;
+            z-index: 1100; animation: fadeToast 2s forwards; white-space: nowrap;
         }
-        @keyframes fadeToast {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
-        }
-        
-        .sync-status {
-            text-align: center;
-            font-size: 11px;
-            margin-top: 15px;
-            color: white;
-            background: rgba(0,0,0,0.5);
-            padding: 6px;
-            border-radius: 40px;
-            font-weight: 500;
-        }
-        
-        .click-animation {
-            position: fixed;
-            pointer-events: none;
-            font-size: 28px;
-            font-weight: 700;
-            color: #FFD700;
-            text-shadow: 2px 2px 0 #2C3E50;
-            animation: floatUp 0.6s ease-out forwards;
-            z-index: 1000;
-        }
-        @keyframes floatUp {
-            0% { opacity: 1; transform: translateY(0) scale(0.8); }
-            100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
-        }
-        
-        .level-up {
-            animation: levelGlow 0.5s ease;
-        }
-        @keyframes levelGlow {
-            0% { text-shadow: 0 0 0 #FFD700; }
-            100% { text-shadow: 0 0 20px #FFD700; }
-        }
-        
-        .particle {
-            position: fixed;
-            width: 8px;
-            height: 8px;
-            background: #FFD700;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: particleFly 0.5s ease-out forwards;
-            z-index: 1001;
-        }
-        @keyframes particleFly {
-            to { transform: translate(var(--x, 0), var(--y, -50px)); opacity: 0; }
-        }
-        
+        @keyframes fadeToast { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        .sync-status { text-align: center; font-size: 11px; margin-top: 15px; color: white; background: rgba(0,0,0,0.5); padding: 6px; border-radius: 40px; font-weight: 500; }
+        .click-animation { position: fixed; pointer-events: none; font-size: 28px; font-weight: 700; color: #FFD700; text-shadow: 2px 2px 0 #2C3E50; animation: floatUp 0.6s ease-out forwards; z-index: 1000; }
+        @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.8); } 100% { opacity: 0; transform: translateY(-80px) scale(1.5); } }
+        .level-up { animation: levelGlow 0.5s ease; }
+        @keyframes levelGlow { 0% { text-shadow: 0 0 0 #FFD700; } 100% { text-shadow: 0 0 20px #FFD700; } }
+        .particle { position: fixed; width: 8px; height: 8px; background: #FFD700; border-radius: 50%; pointer-events: none; animation: particleFly 0.5s ease-out forwards; z-index: 1001; }
+        @keyframes particleFly { to { transform: translate(var(--x, 0), var(--y, -50px)); opacity: 0; } }
         .daily-calendar { display: flex; gap: 8px; overflow-x: auto; padding: 8px 0; }
-        .day-card {
-            background: #2C3E50;
-            color: #FFD700;
-            border-radius: 16px;
-            padding: 10px;
-            text-align: center;
-            min-width: 60px;
-            font-weight: 600;
-        }
+        .day-card { background: rgba(44,62,80,0.85); backdrop-filter: blur(4px); color: #FFD700; border-radius: 16px; padding: 10px; text-align: center; min-width: 60px; font-weight: 600; }
         .day-card.claimed { background: #1A252F; opacity: 0.5; }
         .day-card.current { border: 2px solid #FFD700; transform: scale(1.02); }
-        
-        .referral-link {
-            background: white;
-            padding: 12px;
-            border-radius: 30px;
-            word-break: break-all;
-            margin: 12px 0;
-            font-size: 12px;
-        }
-        
-        .leaderboard-item {
-            background: rgba(255,255,255,0.9);
-            border-radius: 20px;
-            padding: 12px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
-        }
+        .referral-link { background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); padding: 12px; border-radius: 30px; word-break: break-all; margin: 12px 0; font-size: 12px; color: #FFD700; }
+        .leaderboard-item { background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); border-radius: 20px; padding: 12px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
         .rank { font-size: 24px; width: 45px; text-align: center; }
-        .leader-name { flex: 1; font-weight: 700; color: #2C3E50; }
-        .leader-stats { color: #F39C12; font-weight: 700; font-size: 12px; text-align: right; }
-        
+        .leader-name { flex: 1; font-weight: 700; color: #FFD700; text-shadow: 1px 1px 0 #000; }
+        .leader-stats { color: #eee; font-weight: 700; font-size: 12px; text-align: right; text-shadow: 1px 1px 0 #000; }
         .skin-item {
-            display: inline-block;
-            width: calc(33% - 10px);
-            margin: 5px;
-            text-align: center;
-            background: transparent;
-            border-radius: 20px;
-            padding: 10px;
-            cursor: pointer;
-            transition: 0.1s;
-            color: white;
+            display: inline-block; width: calc(33% - 10px); margin: 5px; text-align: center;
+            background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); border-radius: 20px;
+            padding: 10px; cursor: pointer; transition: 0.1s; color: white;
         }
         .skin-item:active { transform: scale(0.97); }
-        .skin-item.active { border: 2px solid #FFD700; background: rgba(0,0,0,0.3); border-radius: 20px; }
+        .skin-item.active { border: 2px solid #FFD700; background: rgba(0,0,0,0.7); border-radius: 20px; }
         .skin-preview { width: 60px; height: 60px; object-fit: contain; border-radius: 15px; background: transparent; }
-        
-        /* МОДАЛКИ */
-        .game-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            border-radius: 30px;
-            padding: 20px;
-            z-index: 2000;
-            width: 85%;
-            max-width: 350px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
+        .game-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.9); border-radius: 30px; padding: 20px; z-index: 2000; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: #FFD700; }
         .game-modal.hidden { display: none; }
-        .game-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1999;
-        }
+        .game-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1999; }
         .game-overlay.hidden { display: none; }
-        .banana-box {
-            display: inline-block;
-            width: 70px;
-            padding: 15px;
-            margin: 10px;
-            background: #FFD700;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 30px;
-            transition: 0.05s;
-        }
+        .banana-box { display: inline-block; width: 70px; padding: 15px; margin: 10px; background: #FFD700; border-radius: 15px; cursor: pointer; font-size: 30px; transition: 0.05s; color: #2C3E50; }
         .banana-box:active { transform: scale(0.95); }
-        .difficulty-btn {
-            background: #3498DB;
-            color: white;
-            padding: 8px 16px;
-            margin: 5px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        
-        .developer {
-            text-align: center;
-            font-size: 10px;
-            margin-top: 20px;
-            opacity: 0.7;
-            color: white;
-        }
-        
+        .difficulty-btn { background: #3498DB; color: white; padding: 8px 16px; margin: 5px; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; }
+        .wheel-container { position: relative; width: 200px; height: 200px; margin: 0 auto; }
+        .wheel { width: 100%; height: 100%; border-radius: 50%; position: relative; overflow: hidden; transition: transform 3s ease-out; box-shadow: 0 0 10px rgba(0,0,0,0.3); cursor: pointer; }
+        .wheel-segment { position: absolute; width: 50%; height: 50%; transform-origin: 0% 100%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .wheel-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: #FFD700; border-radius: 50%; z-index: 10; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+        .spin-btn { background: #8E44AD; color: white; border: none; padding: 10px 20px; border-radius: 30px; font-weight: bold; margin-top: 10px; cursor: pointer; width: 100%; }
+        .wheel-rewards { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; font-size: 10px; text-align: center; justify-content: center; }
+        .achievement-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); border-radius: 15px; margin-bottom: 8px; }
+        .developer { text-align: center; font-size: 10px; margin-top: 20px; opacity: 0.7; color: white; }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 4px; }
@@ -494,35 +185,17 @@
 <body>
 
 <button class="theme-toggle" id="themeToggle">🌙</button>
-
 <div class="stats-grid">
     <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="stat-icon" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E🍌%3C/text%3E%3C/svg%3E'"> БАНАНЫ</div><div class="stat-value" id="bananas">0</div></div>
     <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="stat-icon" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E⭐%3C/text%3E%3C/svg%3E'"> УРОВЕНЬ</div><div class="stat-value" id="level">1</div></div>
     <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="stat-icon" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E💪%3C/text%3E%3C/svg%3E'"> СИЛА</div><div class="stat-value" id="clickPower">1</div></div>
     <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="stat-icon" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E🔄%3C/text%3E%3C/svg%3E'"> ПРЕСТИЖ</div><div class="stat-value" id="prestigeCount">0</div></div>
 </div>
+<div class="energy-box"><div class="bar-bg"><div class="energy-fill" id="energyFill" style="width: 100%"></div></div><div class="bar-text"><span>⚡ Энергия</span><span id="energy">100</span> / <span id="maxEnergy">100</span></div></div>
+<div class="exp-box"><div class="bar-bg"><div class="exp-fill" id="expFill" style="width: 0%"></div></div><div class="bar-text"><span>⭐ Опыт</span><span id="expText">0 / 100</span></div></div>
+<div class="prestige-progress-box"><div class="bar-bg"><div class="prestige-fill" id="prestigeFill" style="width: 0%"></div></div><div class="bar-text"><span>🔄 До перерождения (нужен уровень <span id="requiredLevel">25</span> и <span id="requiredBananas">100,000</span> 🍌)</span><span id="prestigeNeededText">25 ур / 100k🍌</span></div></div>
 
-<div class="energy-box">
-    <div class="bar-bg"><div class="energy-fill" id="energyFill" style="width: 100%"></div></div>
-    <div class="bar-text"><span>⚡ Энергия</span><span id="energy">100</span> / <span id="maxEnergy">100</span></div>
-</div>
-
-<div class="exp-box">
-    <div class="bar-bg"><div class="exp-fill" id="expFill" style="width: 0%"></div></div>
-    <div class="bar-text"><span>⭐ Опыт</span><span id="expText">0 / 100</span></div>
-</div>
-
-<div class="prestige-progress-box">
-    <div class="bar-bg"><div class="prestige-fill" id="prestigeFill" style="width: 0%"></div></div>
-    <div class="bar-text"><span>🔄 До перерождения (нужен уровень <span id="requiredLevel">25</span>)</span><span id="prestigeNeededText">25 уровень</span></div>
-</div>
-
-<div class="minion-wrap">
-    <div class="minion" id="minion">
-        <img src="minion.clicker.jpg" alt="Миньон" class="minion-img" id="minionImg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2745%27 fill=%27%23FFD700%27/%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E🐵%3C/text%3E%3C/svg%3E'">
-    </div>
-    <div class="combo-counter" id="comboCounter">🔥 x1</div>
-</div>
+<div class="minion-wrap"><div class="minion" id="minion"><img src="minion.clicker.jpg" alt="Миньон" class="minion-img" id="minionImg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2745%27 fill=%27%23FFD700%27/%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E🐵%3C/text%3E%3C/svg%3E'"></div><div class="combo-counter" id="comboCounter">🔥 x1</div></div>
 
 <div class="tabs">
     <div class="tab active" data-tab="clicker">🍌 Кликер</div>
@@ -534,33 +207,33 @@
 </div>
 
 <div class="tab-content active" id="tab-clicker">
-    <div class="offline-card">
-        🍌 Жми на миньона!<div style="margin-top:8px;">Пассивный доход: <strong id="passiveIncome">0</strong> 🍌/сек</div>
-        <div style="margin-top:8px;">🤖 Автокликер не тратит энергию! (🔒 доступен после 5 перерождений)</div>
-        <div style="margin-top:8px;">✨ Бонус престижа: x<span id="prestigeMult">1</span></div>
-        <div style="margin-top:8px;">🔥 Комбо множитель: x<span id="comboMult">1</span></div>
-    </div>
+    <div class="offline-card">🍌 Жми на миньона!<div style="margin-top:8px;">Пассивный доход: <strong id="passiveIncome">0</strong> 🍌/сек</div><div style="margin-top:8px;">🤖 Автокликер не тратит энергию! (🔒 доступен после 5 перерождений)</div><div style="margin-top:8px;">✨ Бонус престижа: x<span id="prestigeMult">1</span></div><div style="margin-top:8px;">🔥 Комбо множитель: x<span id="comboMult">1</span></div><div style="margin-top:8px;">🌱 Доход от фермы: <span id="farmIncome">0</span> 🍌/сек</div></div>
     <button class="task-claim" id="dailyBonusBtn">🎁 Ежедневный бонус</button>
 </div>
 
 <div class="tab-content" id="tab-upgrades">
-    <div class="upgrade-list" id="upgradesList"></div>
-    <button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужен уровень <span id="prestigeRequiredLevel">25</span>)</button>
+    <div class="upgrade-category-tabs">
+        <div class="upgrade-cat active" data-cat="combat">💪 Боевые</div>
+        <div class="upgrade-cat" data-cat="energy">⚡ Энергия</div>
+        <div class="upgrade-cat" data-cat="economy">💰 Экономика</div>
+        <div class="upgrade-cat" data-cat="special">🌟 Особые</div>
+        <div class="upgrade-cat" data-cat="farm">🏭 Ферма</div>
+    </div>
+    <div id="upgradeCatCombat" class="upgrade-category-content active"><div class="upgrade-list" id="upgradesCombat"></div></div>
+    <div id="upgradeCatEnergy" class="upgrade-category-content"><div class="upgrade-list" id="upgradesEnergy"></div></div>
+    <div id="upgradeCatEconomy" class="upgrade-category-content"><div class="upgrade-list" id="upgradesEconomy"></div></div>
+    <div id="upgradeCatSpecial" class="upgrade-category-content"><div class="upgrade-list" id="upgradesSpecial"></div></div>
+    <div id="upgradeCatFarm" class="upgrade-category-content"><div class="upgrade-list" id="upgradesFarm"></div></div>
+    <button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужно <span id="prestigeCost">100,000</span> 🍌 и уровень <span id="prestigeRequiredLevel">25</span>)</button>
 </div>
 
-<div class="tab-content" id="tab-shop">
-    <div class="shop-list" id="shopList"></div>
-</div>
-
+<div class="tab-content" id="tab-shop"><div class="shop-list" id="shopList"></div></div>
 <div class="tab-content" id="tab-games">
     <div class="offline-card">🎮 ВЕСЁЛЫЕ ИГРЫ 🎮</div>
     <button class="game-btn" id="bananaGameBtn">🍌 УГАДАЙ БАНАН (выбор сложности)</button>
+    <button class="game-btn" id="wheelBtn" style="margin-top:10px; background:#9B59B6;">🎡 КОЛЕСО ФОРТУНЫ</button>
 </div>
-
-<div class="tab-content" id="tab-leaderboard">
-    <div id="leaderboardList"><div class="offline-card">🏆 Загрузка...</div></div>
-</div>
-
+<div class="tab-content" id="tab-leaderboard"><div id="leaderboardList"><div class="offline-card">🏆 Загрузка...</div></div></div>
 <div class="tab-content" id="tab-profile">
     <div class="offline-card">
         <div>👤 <span id="playerName">-</span></div>
@@ -568,6 +241,9 @@
         <div>✨ Бонус престижа: <span id="prestigeBonus">+0%</span> (x<span id="prestigeMultProfile">1</span>)</div>
         <div>🤖 Офлайн ставка: <span id="offlineRateProfile">0.1</span> 🍌/сек</div>
         <button class="task-claim" id="claimOfflineBtn">🎁 ЗАБРАТЬ ОФЛАЙН</button>
+        <hr style="margin:12px 0; border-color:#FFD700;">
+        <div>🏆 ДОСТИЖЕНИЯ</div>
+        <div id="achievementsList"></div>
         <hr style="margin:12px 0; border-color:#FFD700;">
         <div>📅 Ежедневный бонус</div>
         <div id="dailyCalendar" class="daily-calendar"></div>
@@ -579,57 +255,47 @@
         <button class="btn-prestige" id="syncCloudBtn" style="margin-top:12px;">☁️ Синхронизировать</button>
     </div>
 </div>
-
 <div class="sync-status" id="syncStatus">🔄 Инициализация...</div>
 <div class="developer">Разработчик @reeizoov</div>
 
-<!-- Модалка Угадай банан -->
 <div class="game-overlay hidden" id="gameOverlay"></div>
-<div class="game-modal hidden" id="gameModal">
-    <h3>🍌 Угадай банан!</h3>
-    <p>В каком ящике спрятан банан?</p>
-    <div id="bananaBoxes" style="display:flex; justify-content:center; flex-wrap:wrap;"></div>
-    <div style="margin-top:10px;">
-        <button class="difficulty-btn" data-diff="easy">😊 Лёгкий</button>
-        <button class="difficulty-btn" data-diff="medium">😐 Средний</button>
-        <button class="difficulty-btn" data-diff="hard">😤 Сложный</button>
-    </div>
-    <button id="closeGameBtn" style="margin-top:15px; background:#E74C3C; padding:8px 20px; border:none; border-radius:20px; color:white; font-weight:600;">Закрыть</button>
-</div>
+<div class="game-modal hidden" id="gameModal"><h3>🍌 Угадай банан!</h3><p>В каком ящике спрятан банан?</p><div id="bananaBoxes" style="display:flex; justify-content:center; flex-wrap:wrap;"></div><div style="margin-top:10px;"><button class="difficulty-btn" data-diff="easy">😊 Лёгкий</button><button class="difficulty-btn" data-diff="medium">😐 Средний</button><button class="difficulty-btn" data-diff="hard">😤 Сложный</button></div><button id="closeGameBtn" style="margin-top:15px; background:#E74C3C; padding:8px 20px; border:none; border-radius:20px; color:white; font-weight:600;">Закрыть</button></div>
+<div class="game-overlay hidden" id="wheelOverlay"></div>
+<div class="game-modal hidden" id="wheelModal"><h3>🎡 КОЛЕСО ФОРТУНЫ</h3><div class="wheel-container"><div class="wheel" id="wheel"><div class="wheel-center"></div></div></div><button class="spin-btn" id="spinWheelBtn">КРУТИТЬ (за 5000🍌)</button><div class="wheel-rewards" id="wheelRewards"></div><button id="closeWheelBtn" style="margin-top:10px; background:#E74C3C; padding:8px 20px; border:none; border-radius:20px; color:white; font-weight:600;">Закрыть</button></div>
 
 <script>
     (function() {
         const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-
+        tg.ready(); tg.expand();
         const userId = tg.initDataUnsafe?.user?.id || `demo_${Math.random().toString(36).substr(2, 8)}`;
         const userName = tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username || "Миньон";
         
-        function getPrestigeMultiplier() { return Math.pow(2, gameData.prestigeCount); }
-        // Требуемый уровень для перерождения: 25 + 25 * количество перерождений
-        function getRequiredLevelForPrestige() {
-            return 25 + (25 * gameData.prestigeCount);
+        // Функции для безопасной работы с числами
+        function safeNumber(value, defaultValue = 0) {
+            const num = Number(value);
+            return isNaN(num) ? defaultValue : num;
         }
+        
+        function getPrestigeMultiplier() { return Math.pow(2, safeNumber(gameData.prestigeCount)); }
+        function getRequiredLevel() { return 25 + 25 * safeNumber(gameData.prestigeCount); }
+        function getRequiredBananas() { return 100000 * Math.pow(2, safeNumber(gameData.prestigeCount)); }
 
         let gameData = {
-            userId, username: userName,
-            bananas: 100, level: 1, exp: 0, totalClicks: 0,
+            userId, username: userName, bananas: 100, level: 1, exp: 0, totalClicks: 0, farmIncome: 0,
             clickPower1: 0, clickPower5: 0, clickPower10: 0, clickPower25: 0, clickPower50: 0,
-            prestigeCount: 0, maxEnergy: 100, energy: 100,
-            lastOnline: Date.now(), lastDaily: null, dailyStreak: 0,
-            combo: 0, lastClickTime: 0,
-            activeSkin: 'default', ownedSkins: ['default'],
-            upgrades: { energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0, double:0, mega:0 },
-            tasks: { task1: false, task2: false, task3: false },
-            referralCode: Math.random().toString(36).substr(2, 8).toUpperCase(),
-            referrals: [], referralBonusPercent: 0, totalEarned: 0
+            clickMastery: 0, explosive: 0, prestigeCount: 0, maxEnergy: 100, energy: 100,
+            lastOnline: Date.now(), lastDaily: null, dailyStreak: 0, combo: 0, lastClickTime: 0,
+            activeSkin: 'default', ownedSkins: ['default'], totalEarned: 0,
+            upgrades: {
+                energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0, double:0, mega:0,
+                efficiency:0, recovery:0, vampire:0, bank:0, investment:0, luckyClick:0, alchemy:0, speed:0, inspiration:0, holyBanana:0,
+                farmTree:0, farmHarvest:0, farmFertilizer:0, farmGreenhouse:0, farmAuto:0
+            },
+            achievements: {}, tasks: { task1: false, task2: false, task3: false },
+            referralCode: Math.random().toString(36).substr(2, 8).toUpperCase(), referrals: [], referralBonusPercent: 0
         };
         
-        let autoClickerInterval = null;
-        let comboTimeout = null;
-        
-        // СКИНЫ
+        let autoClickerInterval = null, comboTimeout = null, farmInterval = null;
         const skins = {
             default: { name: '🐵 Обычный', price: 0, img: 'minion.clicker.jpg' },
             super: { name: '🦸 Супер миньон', price: 5000, img: 'minion_super.jpg' },
@@ -638,44 +304,75 @@
             pirate: { name: '🏴‍☠️ Пират миньон', price: 100000, img: 'minion_pirate.jpg' }
         };
         
+        const wheelRewards = [1000,2000,5000,10000,500,200,5000,1000,20000,100];
+        const achievementsList = {
+            click100: { name: "🎯 Первые 100 кликов", reward: 500, condition: () => gameData.totalClicks >= 100 },
+            click1000: { name: "🔥 1000 кликов", reward: 2000, condition: () => gameData.totalClicks >= 1000 },
+            level10: { name: "⭐ 10 уровень", reward: 2000, condition: () => gameData.level >= 10 },
+            prestige1: { name: "🔄 Первое перерождение", reward: 10000, condition: () => gameData.prestigeCount >= 1 },
+            bananas100k: { name: "💰 100,000 бананов", reward: 5000, condition: () => gameData.totalEarned >= 100000 },
+            farm10: { name: "🌱 Садовод", reward: 3000, condition: () => gameData.upgrades.farmTree >= 10 }
+        };
+        
+        function checkAchievements() {
+            for (let [id, ach] of Object.entries(achievementsList))
+                if (!gameData.achievements[id] && ach.condition()) {
+                    gameData.achievements[id] = true; gameData.bananas += ach.reward;
+                    showToast(`🏆 Достижение "${ach.name}"! +${ach.reward} 🍌`, "#FFD700"); syncToCloud();
+                }
+        }
+        function renderAchievements() {
+            const container = document.getElementById('achievementsList');
+            container.innerHTML = '';
+            for (let [id, ach] of Object.entries(achievementsList)) {
+                const unlocked = gameData.achievements[id];
+                const div = document.createElement('div'); div.className = 'achievement-item';
+                div.innerHTML = `<div><strong>${ach.name}</strong><br><small>+${ach.reward}🍌</small></div><div>${unlocked ? '✅' : '🔒'}</div>`;
+                container.appendChild(div);
+            }
+        }
+        
         function getTotalClickPower() { 
-            return 1 + gameData.clickPower1*1 + gameData.clickPower5*5 + gameData.clickPower10*10 + gameData.clickPower25*25 + gameData.clickPower50*50; 
+            let power = 1 + safeNumber(gameData.clickPower1)*1 + safeNumber(gameData.clickPower5)*5 + safeNumber(gameData.clickPower10)*10 + safeNumber(gameData.clickPower25)*25 + safeNumber(gameData.clickPower50)*50;
+            power *= (1 + safeNumber(gameData.clickMastery) * 0.02);
+            return power;
         }
         
         function getUpgradeCost(upgradeId, level) {
             const bases = {
-                click1:10, click5:200, click10:800, click25:3000, click50:10000,
-                energy:15, regen:20, bonus:25, offline:30, crit:50, auto:100, luck:80, shield:120, double:200, mega:500
+                click1:10, click5:200, click10:800, click25:3000, click50:10000, mastery:500, explosive:600,
+                energy:15, regen:20, shield:120, efficiency:150, recovery:180, vampire:250,
+                bonus:25, offline:30, crit:50, auto:100, luck:80, double:200, mega:500, bank:300, investment:400,
+                luckyClick:350, alchemy:450, speed:200, inspiration:300, holyBanana:500,
+                farmTree:100, farmHarvest:200, farmFertilizer:300, farmGreenhouse:500, farmAuto:1000
             };
-            return Math.floor((bases[upgradeId]||10) * Math.pow(1.25, level));
+            return Math.floor((bases[upgradeId]||10) * Math.pow(1.2, level));
         }
         
-        function getComboMultiplier() { return Math.min(3, 1 + Math.floor(gameData.combo / 10)); }
+        function getComboMultiplier() { return Math.min(5, 1 + Math.floor(safeNumber(gameData.combo) / 10)); }
         
         function buyUpgrade(upgradeId) {
             let level = 0;
-            if (upgradeId === 'click1') level = gameData.clickPower1;
-            else if (upgradeId === 'click5') level = gameData.clickPower5;
-            else if (upgradeId === 'click10') level = gameData.clickPower10;
-            else if (upgradeId === 'click25') level = gameData.clickPower25;
-            else if (upgradeId === 'click50') level = gameData.clickPower50;
-            else level = gameData.upgrades[upgradeId] || 0;
+            if (upgradeId === 'click1') level = safeNumber(gameData.clickPower1);
+            else if (upgradeId === 'click5') level = safeNumber(gameData.clickPower5);
+            else if (upgradeId === 'click10') level = safeNumber(gameData.clickPower10);
+            else if (upgradeId === 'click25') level = safeNumber(gameData.clickPower25);
+            else if (upgradeId === 'click50') level = safeNumber(gameData.clickPower50);
+            else if (upgradeId === 'mastery') level = safeNumber(gameData.clickMastery);
+            else if (upgradeId === 'explosive') level = safeNumber(gameData.explosive);
+            else level = safeNumber(gameData.upgrades[upgradeId]);
             if (level >= 25) { showToast("❌ Макс. уровень 25!", "#E74C3C"); return; }
-            
-            // Автокликер доступен только после 5 перерождений
-            if (upgradeId === 'auto' && gameData.prestigeCount < 5) {
-                showToast("❌ Автокликер доступен после 5 перерождений!", "#E74C3C");
-                return;
-            }
-            
+            if (upgradeId === 'auto' && safeNumber(gameData.prestigeCount) < 5) { showToast("❌ Автокликер доступен после 5 перерождений!", "#E74C3C"); return; }
             const cost = getUpgradeCost(upgradeId, level);
-            if (gameData.bananas >= cost) {
+            if (safeNumber(gameData.bananas) >= cost) {
                 gameData.bananas -= cost;
                 if (upgradeId === 'click1') gameData.clickPower1++;
                 else if (upgradeId === 'click5') gameData.clickPower5++;
                 else if (upgradeId === 'click10') gameData.clickPower10++;
                 else if (upgradeId === 'click25') gameData.clickPower25++;
                 else if (upgradeId === 'click50') gameData.clickPower50++;
+                else if (upgradeId === 'mastery') gameData.clickMastery++;
+                else if (upgradeId === 'explosive') gameData.explosive++;
                 else if (upgradeId === 'energy') { gameData.upgrades.energy++; gameData.maxEnergy += 25; gameData.energy += 25; }
                 else if (upgradeId === 'regen') gameData.upgrades.regen++;
                 else if (upgradeId === 'bonus') gameData.upgrades.bonus++;
@@ -686,6 +383,21 @@
                 else if (upgradeId === 'shield') gameData.upgrades.shield++;
                 else if (upgradeId === 'double') gameData.upgrades.double++;
                 else if (upgradeId === 'mega') gameData.upgrades.mega++;
+                else if (upgradeId === 'efficiency') gameData.upgrades.efficiency++;
+                else if (upgradeId === 'recovery') gameData.upgrades.recovery++;
+                else if (upgradeId === 'vampire') gameData.upgrades.vampire++;
+                else if (upgradeId === 'bank') gameData.upgrades.bank++;
+                else if (upgradeId === 'investment') gameData.upgrades.investment++;
+                else if (upgradeId === 'luckyClick') gameData.upgrades.luckyClick++;
+                else if (upgradeId === 'alchemy') gameData.upgrades.alchemy++;
+                else if (upgradeId === 'speed') gameData.upgrades.speed++;
+                else if (upgradeId === 'inspiration') gameData.upgrades.inspiration++;
+                else if (upgradeId === 'holyBanana') gameData.upgrades.holyBanana++;
+                else if (upgradeId === 'farmTree') { gameData.upgrades.farmTree++; updateFarmIncome(); }
+                else if (upgradeId === 'farmHarvest') { gameData.upgrades.farmHarvest++; updateFarmIncome(); }
+                else if (upgradeId === 'farmFertilizer') { gameData.upgrades.farmFertilizer++; updateFarmIncome(); }
+                else if (upgradeId === 'farmGreenhouse') { gameData.upgrades.farmGreenhouse++; updateFarmIncome(); }
+                else if (upgradeId === 'farmAuto') { gameData.upgrades.farmAuto++; updateFarmIncome(); }
                 updateUI(); syncToCloud(); showToast(`✅ ${upgradeId} улучшена!`, "#2ECC71");
                 if (!gameData.tasks.task2) { gameData.tasks.task2 = true; syncToCloud(); }
             } else showToast(`❌ Нужно ${cost.toLocaleString()} 🍌`, "#E74C3C");
@@ -695,11 +407,10 @@
             if (gameData.ownedSkins.includes(skinId)) {
                 gameData.activeSkin = skinId;
                 document.getElementById('minionImg').src = skins[skinId].img;
-                showToast(`✅ Скин ${skins[skinId].name} активирован!`, "#2ECC71");
-                syncToCloud(); return;
+                showToast(`✅ Скин ${skins[skinId].name} активирован!`, "#2ECC71"); syncToCloud(); return;
             }
             const skin = skins[skinId];
-            if (gameData.bananas >= skin.price) {
+            if (safeNumber(gameData.bananas) >= skin.price) {
                 gameData.bananas -= skin.price;
                 gameData.ownedSkins.push(skinId);
                 gameData.activeSkin = skinId;
@@ -709,249 +420,288 @@
             } else showToast(`❌ Нужно ${skin.price} 🍌`, "#E74C3C");
         }
         
+        function updateFarmIncome() {
+            let income = 0.5 * safeNumber(gameData.upgrades.farmTree);
+            income *= (1 + safeNumber(gameData.upgrades.farmHarvest) * 0.05);
+            income *= (1 + safeNumber(gameData.upgrades.farmFertilizer) * 0.03);
+            income *= (1 + safeNumber(gameData.upgrades.farmGreenhouse) * 0.02);
+            gameData.farmIncome = income;
+            if (farmInterval) clearInterval(farmInterval);
+            if (safeNumber(gameData.upgrades.farmAuto) > 0) {
+                farmInterval = setInterval(() => {
+                    let harvest = safeNumber(gameData.farmIncome);
+                    if (safeNumber(gameData.upgrades.farmAuto) > 0) harvest *= (1 + safeNumber(gameData.upgrades.farmAuto) * 0.1);
+                    gameData.bananas += Math.floor(harvest);
+                    updateUI(); syncToCloud();
+                    showToast(`🌱 Ферма принесла +${Math.floor(harvest)} 🍌!`, "#2ECC71");
+                }, 10000);
+            }
+        }
+        
         function clickMinion() {
-            if (gameData.energy <= 0) { showToast("❌ Нет энергии!", "#E74C3C"); return; }
+            if (safeNumber(gameData.energy) <= 0) { showToast("❌ Нет энергии!", "#E74C3C"); return; }
             const now = Date.now();
-            if (now - gameData.lastClickTime > 3000) { gameData.combo = 0; }
-            gameData.combo++;
-            gameData.lastClickTime = now;
+            if (now - safeNumber(gameData.lastClickTime) > 3000) gameData.combo = 0;
+            gameData.combo++; gameData.lastClickTime = now;
             if (comboTimeout) clearTimeout(comboTimeout);
             comboTimeout = setTimeout(() => { gameData.combo = 0; updateUI(); }, 3000);
             
             let comboMult = getComboMultiplier();
-            if (gameData.upgrades.double > 0) comboMult *= (1 + gameData.upgrades.double * 0.05);
-            if (gameData.upgrades.mega > 0 && Math.random() < gameData.upgrades.mega * 0.02) comboMult *= 2;
+            if (safeNumber(gameData.upgrades.double) > 0) comboMult *= (1 + safeNumber(gameData.upgrades.double) * 0.05);
+            if (safeNumber(gameData.upgrades.mega) > 0 && Math.random() < safeNumber(gameData.upgrades.mega) * 0.02) comboMult *= 2;
+            if (safeNumber(gameData.upgrades.inspiration) > 0 && Math.random() < safeNumber(gameData.upgrades.inspiration) * 0.01) comboMult *= 3;
             
-            let power = getTotalClickPower() * getPrestigeMultiplier() * comboMult;
-            let gain = Math.floor(power * (1 + gameData.upgrades.bonus*0.05 + gameData.referralBonusPercent/100));
+            let power = safeNumber(getTotalClickPower()) * safeNumber(getPrestigeMultiplier()) * comboMult;
+            let gain = Math.floor(power * (1 + safeNumber(gameData.upgrades.bonus)*0.05 + safeNumber(gameData.referralBonusPercent)/100 + safeNumber(gameData.upgrades.alchemy)*0.01));
+            gain = Math.max(1, gain);
+            
             let isCritical = false;
-            if (Math.random() < gameData.upgrades.crit * 0.05) { gain *= 2; isCritical = true; showToast("⚡ КРИТ!", "#F39C12"); }
-            if (Math.random() < gameData.upgrades.luck * 0.03) { gain = Math.floor(gain * 1.5); showToast("🍀 УДАЧА!", "#3498DB"); }
+            if (Math.random() < safeNumber(gameData.upgrades.crit) * 0.05) { gain *= 2; isCritical = true; showToast("⚡ КРИТ!", "#F39C12"); }
+            if (Math.random() < safeNumber(gameData.upgrades.luck) * 0.03) { gain = Math.floor(gain * 1.5); showToast("🍀 УДАЧА!", "#3498DB"); }
+            if (Math.random() < safeNumber(gameData.upgrades.luckyClick) * 0.02) { gain = Math.floor(gain * 3); showToast("✨ СЧАСТЛИВЫЙ КЛИК! x3", "#9B59B6"); }
+            if (safeNumber(gameData.explosive) > 0 && Math.random() < safeNumber(gameData.explosive) * 0.01) { gain *= 5; showToast("💥 ВЗРЫВНОЙ УДАР! x5", "#E74C3C"); }
             
-            let energyCost = 1 - gameData.upgrades.shield * 0.02;
-            energyCost = Math.max(0.2, energyCost);
-            gameData.energy = Math.max(0, gameData.energy - energyCost);
-            gameData.bananas += gain;
-            gameData.totalClicks++;
-            gameData.totalEarned += gain;
+            let energyCost = 1 - (safeNumber(gameData.upgrades.shield) * 0.02 + safeNumber(gameData.upgrades.efficiency) * 0.03);
+            energyCost = Math.max(0.1, energyCost);
+            if (safeNumber(gameData.upgrades.vampire) > 0 && Math.random() < safeNumber(gameData.upgrades.vampire) * 0.03) energyCost = 0;
+            gameData.energy = Math.max(0, safeNumber(gameData.energy) - energyCost);
+            gameData.bananas = safeNumber(gameData.bananas) + gain;
+            gameData.totalClicks = safeNumber(gameData.totalClicks) + 1;
+            gameData.totalEarned = safeNumber(gameData.totalEarned) + gain;
             
-            // 1 клик = 1 опыт!
-            let expGain = 1;
-            gameData.exp += expGain;
-            let expNeeded = gameData.level * 100;
-            if (gameData.exp >= expNeeded) {
+            let expGain = 1 + Math.floor(safeNumber(gameData.upgrades.speed) * 0.1);
+            gameData.exp = safeNumber(gameData.exp) + expGain;
+            let expNeeded = safeNumber(gameData.level) * 100;
+            if (safeNumber(gameData.exp) >= expNeeded) {
                 gameData.exp -= expNeeded;
-                gameData.level++;
-                gameData.bananas += 100;
+                gameData.level = safeNumber(gameData.level) + 1;
+                gameData.bananas = safeNumber(gameData.bananas) + 100;
                 showToast(`🎉 УРОВЕНЬ ${gameData.level}! +100 🍌`, "#8E44AD");
                 document.getElementById('level').classList.add('level-up');
                 setTimeout(() => document.getElementById('level').classList.remove('level-up'), 500);
             }
+            if (safeNumber(gameData.upgrades.bank) > 0) gameData.bananas += Math.floor(safeNumber(gameData.bananas) * 0.001 * safeNumber(gameData.upgrades.bank));
+            if (safeNumber(gameData.upgrades.holyBanana) > 0 && Math.random() < safeNumber(gameData.upgrades.holyBanana) * 0.01) {
+                gameData.bananas += 10000; showToast("✨ СВЯТОЙ БАНАН! +10,000 🍌", "#FFD700");
+            }
             updateUI(); syncToCloud(); showFloating(gain, isCritical);
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-            if (!gameData.tasks.task1 && gameData.bananas >= 1000) gameData.tasks.task1 = true;
-            if (!gameData.tasks.task3 && gameData.level >= 5) gameData.tasks.task3 = true;
+            if (!gameData.tasks.task1 && safeNumber(gameData.bananas) >= 1000) gameData.tasks.task1 = true;
+            if (!gameData.tasks.task3 && safeNumber(gameData.level) >= 5) gameData.tasks.task3 = true;
+            checkAchievements();
         }
         
         function restartAutoClicker() {
             if (autoClickerInterval) clearInterval(autoClickerInterval);
-            if (gameData.upgrades.auto > 0 && gameData.prestigeCount >= 5) {
-                const speed = 1 + gameData.upgrades.auto * 0.05;
-                const interval = Math.max(0.3, 1 / speed);
-                autoClickerInterval = setInterval(() => {
-                    if (gameData.energy > 0) clickMinion();
-                }, interval * 1000);
-            } else if (gameData.upgrades.auto > 0 && gameData.prestigeCount < 5) {
-                // Если автокликер куплен, но перерождений меньше 5 - не работаем
-                if (autoClickerInterval) clearInterval(autoClickerInterval);
-                autoClickerInterval = null;
+            if (safeNumber(gameData.upgrades.auto) > 0 && safeNumber(gameData.prestigeCount) >= 5) {
+                const speed = 1 + safeNumber(gameData.upgrades.auto) * 0.05 + safeNumber(gameData.upgrades.speed) * 0.02;
+                autoClickerInterval = setInterval(() => { if (safeNumber(gameData.energy) > 0) clickMinion(); }, Math.max(0.2, 1/speed)*1000);
             }
         }
         
         function doPrestige() {
-            const requiredLevel = getRequiredLevelForPrestige();
-            if (gameData.level >= requiredLevel) {
-                if (confirm(`Переродиться? Требуется уровень ${requiredLevel}. Уровень станет 1, бананы сохранятся, но прокачки сбросятся. Бонус x2 навсегда!`)) {
-                    gameData.prestigeCount++;
-                    // Уровень сбрасывается, бананы НЕ ТРАТЯТСЯ (остаются)
-                    gameData.level = 1;
-                    gameData.exp = 0;
-                    gameData.clickPower1 = 0; gameData.clickPower5 = 0; gameData.clickPower10 = 0; gameData.clickPower25 = 0; gameData.clickPower50 = 0;
-                    gameData.maxEnergy = 100; gameData.energy = 100;
-                    gameData.upgrades = { energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0, double:0, mega:0 };
-                    gameData.combo = 0;
-                    updateUI(); restartAutoClicker(); syncToCloud();
-                    showToast(`✨ ПЕРЕРОЖДЕНИЕ! x${getPrestigeMultiplier()} к силе!`, "#8E44AD");
-                }
+            const reqLevel = getRequiredLevel(), reqBananas = getRequiredBananas();
+            if (safeNumber(gameData.level) >= reqLevel && safeNumber(gameData.bananas) >= reqBananas && confirm(`Переродиться? Нужен уровень ${reqLevel} и ${reqBananas.toLocaleString()} 🍌. Бонус x2 навсегда!`)) {
+                gameData.prestigeCount++;
+                gameData.bananas = safeNumber(gameData.bananas) - reqBananas;
+                gameData.level = 1;
+                gameData.exp = 0;
+                gameData.clickPower1 = 0; gameData.clickPower5 = 0; gameData.clickPower10 = 0; gameData.clickPower25 = 0; gameData.clickPower50 = 0;
+                gameData.clickMastery = 0; gameData.explosive = 0;
+                gameData.maxEnergy = 100; gameData.energy = 100;
+                gameData.upgrades = { energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0, double:0, mega:0, efficiency:0, recovery:0, vampire:0, bank:0, investment:0, luckyClick:0, alchemy:0, speed:0, inspiration:0, holyBanana:0, farmTree:0, farmHarvest:0, farmFertilizer:0, farmGreenhouse:0, farmAuto:0 };
+                gameData.combo = 0; updateFarmIncome();
+                updateUI(); restartAutoClicker(); syncToCloud();
+                showToast(`✨ ПЕРЕРОЖДЕНИЕ! x${getPrestigeMultiplier()} к силе!`, "#8E44AD");
+                checkAchievements();
             } else {
-                showToast(`❌ Нужен ${requiredLevel} уровень (сейчас ${gameData.level})`, "#E74C3C");
+                showToast(`❌ Нужен уровень ${reqLevel} и ${reqBananas.toLocaleString()} 🍌`, "#E74C3C");
             }
         }
         
-        // ИГРА "УГАДАЙ БАНАН"
+        function initWheel() {
+            const wheel = document.getElementById('wheel'); if (!wheel) return;
+            wheel.innerHTML = '<div class="wheel-center"></div>';
+            const segmentAngle = 360 / wheelRewards.length;
+            for (let i = 0; i < wheelRewards.length; i++) {
+                const segment = document.createElement('div'); segment.className = 'wheel-segment';
+                segment.style.backgroundColor = ['#FF6B6B','#4ECDC4','#45B7D1','#96CEB4','#FFEAA7','#DDA0DD','#98D8C8','#F7DC6F','#BB8FCE','#F9E79F'][i%10];
+                segment.style.transform = `rotate(${i * segmentAngle}deg)`;
+                segment.style.width = '50%'; segment.style.height = '50%'; segment.style.left = '50%'; segment.style.top = '50%';
+                segment.style.transformOrigin = '0% 100%';
+                segment.style.display = 'flex'; segment.style.alignItems = 'center'; segment.style.justifyContent = 'center';
+                segment.style.fontSize = '14px'; segment.style.fontWeight = 'bold'; segment.style.color = '#2C3E50';
+                segment.innerText = `${wheelRewards[i]}`;
+                wheel.appendChild(segment);
+            }
+            document.getElementById('wheelRewards').innerHTML = wheelRewards.map(r => `<span style="background:#2C3E50; padding:2px 6px; border-radius:10px;">+${r}🍌</span>`).join('');
+        }
+        function spinWheel() {
+            if (safeNumber(gameData.bananas) < 5000) { showToast(`❌ Нужно 5000 🍌 для крутки!`, "#E74C3C"); return; }
+            gameData.bananas -= 5000;
+            const wheel = document.getElementById('wheel');
+            const randomIndex = Math.floor(Math.random() * wheelRewards.length);
+            const reward = wheelRewards[randomIndex];
+            const segmentAngle = 360 / wheelRewards.length;
+            wheel.style.transform = `rotate(${360*5 + (360 - (randomIndex * segmentAngle + segmentAngle/2))}deg)`;
+            setTimeout(() => {
+                gameData.bananas += reward; updateUI(); syncToCloud();
+                showToast(`🎡 Колесо принесло +${reward} 🍌!`, "#2ECC71");
+                wheel.style.transform = ''; initWheel();
+            }, 3000);
+        }
+        
         let currentGameDifficulty = 'medium';
         function startBananaGame() {
-            const modal = document.getElementById('gameModal');
-            const overlay = document.getElementById('gameOverlay');
-            modal.classList.remove('hidden');
-            overlay.classList.remove('hidden');
-            renderBananaBoxes();
-        }
-        function renderBananaBoxes() {
+            const modal = document.getElementById('gameModal'), overlay = document.getElementById('gameOverlay');
+            modal.classList.remove('hidden'); overlay.classList.remove('hidden');
             const hiddenIndex = Math.floor(Math.random() * 4);
-            const boxesDiv = document.getElementById('bananaBoxes');
-            boxesDiv.innerHTML = '';
+            const boxesDiv = document.getElementById('bananaBoxes'); boxesDiv.innerHTML = '';
             for (let i = 0; i < 4; i++) {
-                const box = document.createElement('div');
-                box.className = 'banana-box';
-                box.innerText = '📦';
+                const box = document.createElement('div'); box.className = 'banana-box'; box.innerText = '📦';
                 box.onclick = () => {
-                    let reward = 0;
-                    if (currentGameDifficulty === 'easy') reward = 100;
-                    else if (currentGameDifficulty === 'medium') reward = 250;
-                    else reward = 600;
-                    if (i === hiddenIndex) {
-                        gameData.bananas += reward;
-                        updateUI(); syncToCloud();
-                        showToast(`🎉 Ты нашёл банан! +${reward} 🍌`, "#2ECC71");
-                    } else showToast(`❌ Пусто! Попробуй ещё раз`, "#E74C3C");
-                    document.getElementById('gameModal').classList.add('hidden');
-                    document.getElementById('gameOverlay').classList.add('hidden');
+                    let reward = currentGameDifficulty === 'easy' ? 100 : currentGameDifficulty === 'medium' ? 250 : 600;
+                    if (i === hiddenIndex) { gameData.bananas += reward; updateUI(); syncToCloud(); showToast(`🎉 +${reward} 🍌!`, "#2ECC71"); }
+                    else showToast(`❌ Пусто!`, "#E74C3C");
+                    modal.classList.add('hidden'); overlay.classList.add('hidden');
                 };
                 boxesDiv.appendChild(box);
             }
         }
         
         function dailyBonus() {
-            const now = new Date();
-            const last = gameData.lastDaily ? new Date(gameData.lastDaily) : null;
-            let streak = gameData.dailyStreak;
+            const now = new Date(), last = gameData.lastDaily ? new Date(gameData.lastDaily) : null;
+            let streak = safeNumber(gameData.dailyStreak);
             if (last && (now-last) >= 48*3600000) streak=0;
             else if (last && (now-last) >= 24*3600000) streak=Math.min(streak+1,6);
             else if (!last) streak=0;
             else { showToast("❌ Бонус уже получен!", "#E74C3C"); return; }
             const rewards = [100,200,500,1000,2000,5000,10000];
             const reward = rewards[streak];
-            gameData.bananas += reward;
-            gameData.dailyStreak = streak+1;
-            gameData.lastDaily = now;
-            updateUI(); syncToCloud();
-            showToast(`🎁 +${reward} 🍌 (день ${streak+1})`, "#2ECC71");
+            gameData.bananas += reward; gameData.dailyStreak = streak+1; gameData.lastDaily = now;
+            updateUI(); syncToCloud(); showToast(`🎁 +${reward} 🍌 (день ${streak+1})`, "#2ECC71");
         }
         
         function claimOfflineManual() {
-            const now = Date.now();
-            const sec = Math.min((now - gameData.lastOnline)/1000, 8*3600);
-            const rate = 0.1 + gameData.upgrades.offline*0.05;
-            const earn = Math.floor(sec * rate);
+            const now = Date.now(), sec = Math.min((now - safeNumber(gameData.lastOnline))/1000, 8*3600);
+            let rate = 0.1 + safeNumber(gameData.upgrades.offline)*0.05 + safeNumber(gameData.upgrades.investment)*0.02 + safeNumber(gameData.farmIncome);
+            let earn = Math.floor(sec * rate);
+            if (safeNumber(gameData.upgrades.bank) > 0) earn += Math.floor(safeNumber(gameData.bananas) * 0.0005 * safeNumber(gameData.upgrades.bank));
             if (earn>0) { gameData.bananas += earn; updateUI(); syncToCloud(); showToast(`🎁 +${earn} 🍌`, "#2ECC71"); }
             else showToast("📭 Нет офлайн дохода", "#7F8C8D");
             gameData.lastOnline = now; saveToLocal();
         }
         
-        // СОХРАНЕНИЕ
         function saveToLocal() { gameData.lastOnline = Date.now(); localStorage.setItem('minionClicker_'+userId, JSON.stringify(gameData)); }
         function loadFromLocal() {
             const saved = localStorage.getItem('minionClicker_'+userId);
             if(saved) try { Object.assign(gameData, JSON.parse(saved)); } catch(e){}
-            if(!gameData.upgrades) gameData.upgrades={energy:0,regen:0,bonus:0,offline:0,crit:0,auto:0,luck:0,shield:0,double:0,mega:0};
+            if(!gameData.upgrades) gameData.upgrades={};
             if(!gameData.ownedSkins) gameData.ownedSkins=['default'];
-            if(gameData.energy>gameData.maxEnergy) gameData.energy=gameData.maxEnergy;
+            if(!gameData.achievements) gameData.achievements={};
+            if(safeNumber(gameData.energy) > safeNumber(gameData.maxEnergy)) gameData.energy = gameData.maxEnergy;
             updateUI();
         }
-        function syncToCloud() {
-            if(!tg.CloudStorage) return;
-            tg.CloudStorage.setItem('minionClickerCloud_'+userId, JSON.stringify(gameData),()=>{
-                document.getElementById('syncStatus').innerHTML="✅ Сохранено в облаке";
-                setTimeout(()=>{if(document.getElementById('syncStatus').innerHTML.includes("✅")) document.getElementById('syncStatus').innerHTML="🔄 Синхронизировано";},2000);
-            });
-        }
-        function loadFromCloud() {
-            if(!tg.CloudStorage) return;
-            tg.CloudStorage.getItem('minionClickerCloud_'+userId, (err,val)=>{
-                if(!err && val) try { Object.assign(gameData, JSON.parse(val)); updateUI(); saveToLocal(); } catch(e){}
-                restartAutoClicker();
-            });
+        function syncToCloud() { if(tg.CloudStorage) tg.CloudStorage.setItem('minionClickerCloud_'+userId, JSON.stringify(gameData),()=>{}); }
+        function loadFromCloud() { if(tg.CloudStorage) tg.CloudStorage.getItem('minionClickerCloud_'+userId, (err,val)=>{ if(!err&&val) try { Object.assign(gameData, JSON.parse(val)); updateUI(); saveToLocal(); } catch(e){} restartAutoClicker(); }); }
+        
+        function renderUpgradesList(containerId, upgradesList) {
+            const container = document.getElementById(containerId); if (!container) return;
+            container.innerHTML = '';
+            for(let u of upgradesList) {
+                const level = safeNumber(u.lvl), cost = getUpgradeCost(u.id, level);
+                const isAutoLocked = (u.id === 'auto' && safeNumber(gameData.prestigeCount) < 5);
+                const div = document.createElement('div'); div.className='item-card';
+                div.innerHTML = `<div class="item-info"><div class="item-name">${u.name}</div><div class="item-desc">${u.desc}</div><div class="item-level">Ур.${level}/25</div>${isAutoLocked ? '<div style="font-size:10px;color:#E74C3C;">🔒 Требуется 5 перерождений</div>' : ''}</div><div class="item-cost">${isAutoLocked ? '🔒 ЗАБЛОКИРОВАНО' : cost.toLocaleString()+'🍌'}</div>`;
+                div.onclick = () => { if(!isAutoLocked) buyUpgrade(u.id); else showToast("❌ Автокликер доступен после 5 перерождений!", "#E74C3C"); };
+                container.appendChild(div);
+            }
         }
         
         function updateUI() {
-            const requiredLevel = getRequiredLevelForPrestige();
-            document.getElementById('bananas').innerText = Math.floor(gameData.bananas).toLocaleString();
-            document.getElementById('level').innerText = gameData.level;
+            const reqLevel = getRequiredLevel(), reqBananas = getRequiredBananas();
+            document.getElementById('bananas').innerText = Math.floor(safeNumber(gameData.bananas)).toLocaleString();
+            document.getElementById('level').innerText = safeNumber(gameData.level);
             document.getElementById('clickPower').innerText = Math.floor(getTotalClickPower()*getPrestigeMultiplier()*getComboMultiplier());
-            document.getElementById('prestigeCount').innerText = gameData.prestigeCount;
-            document.getElementById('energy').innerText = Math.floor(gameData.energy);
-            document.getElementById('maxEnergy').innerText = gameData.maxEnergy;
-            document.getElementById('energyFill').style.width = (gameData.energy/gameData.maxEnergy*100)+'%';
-            const expNeeded = gameData.level*100;
-            document.getElementById('expFill').style.width = (gameData.exp/expNeeded*100)+'%';
-            document.getElementById('expText').innerText = `${Math.floor(gameData.exp)}/${expNeeded}`;
-            
-            // Прогресс до перерождения (по уровню)
-            const prestigePercent = Math.min(100, (gameData.level / requiredLevel) * 100);
-            document.getElementById('prestigeFill').style.width = prestigePercent+'%';
-            document.getElementById('prestigeNeededText').innerHTML = gameData.level >= requiredLevel ? "Доступно!" : `${requiredLevel - gameData.level} уровень`;
-            document.getElementById('requiredLevel').innerText = requiredLevel;
-            document.getElementById('prestigeRequiredLevel').innerText = requiredLevel;
-            
+            document.getElementById('prestigeCount').innerText = safeNumber(gameData.prestigeCount);
+            document.getElementById('energy').innerText = Math.floor(safeNumber(gameData.energy));
+            document.getElementById('maxEnergy').innerText = safeNumber(gameData.maxEnergy);
+            document.getElementById('energyFill').style.width = (safeNumber(gameData.energy)/safeNumber(gameData.maxEnergy)*100)+'%';
+            const expNeeded = safeNumber(gameData.level)*100;
+            document.getElementById('expFill').style.width = (safeNumber(gameData.exp)/expNeeded*100)+'%';
+            document.getElementById('expText').innerText = `${Math.floor(safeNumber(gameData.exp))}/${expNeeded}`;
+            const prestigePercent = Math.min(100, (safeNumber(gameData.level)/reqLevel)*100 + (safeNumber(gameData.bananas)/reqBananas)*50);
+            document.getElementById('prestigeFill').style.width = Math.min(100, prestigePercent)+'%';
+            document.getElementById('prestigeNeededText').innerHTML = (safeNumber(gameData.level)>=reqLevel && safeNumber(gameData.bananas)>=reqBananas)?"Доступно!":`${reqLevel-safeNumber(gameData.level)} ур. / ${(reqBananas-safeNumber(gameData.bananas)).toLocaleString()}🍌`;
+            document.getElementById('requiredLevel').innerText = reqLevel;
+            document.getElementById('prestigeRequiredLevel').innerText = reqLevel;
+            document.getElementById('prestigeCost').innerText = reqBananas.toLocaleString();
+            document.getElementById('requiredBananas').innerText = reqBananas.toLocaleString();
             document.getElementById('playerName').innerHTML = gameData.username;
-            document.getElementById('totalClicks').innerHTML = gameData.totalClicks.toLocaleString();
+            document.getElementById('totalClicks').innerHTML = safeNumber(gameData.totalClicks).toLocaleString();
             document.getElementById('prestigeBonus').innerHTML = `+${Math.round((getPrestigeMultiplier()-1)*100)}%`;
             document.getElementById('prestigeMult').innerHTML = getPrestigeMultiplier();
             document.getElementById('prestigeMultProfile').innerHTML = getPrestigeMultiplier();
             document.getElementById('comboMult').innerHTML = getComboMultiplier();
             document.getElementById('comboCounter').innerHTML = `🔥 x${getComboMultiplier()}`;
-            const offlineRate = 0.1+gameData.upgrades.offline*0.05;
+            const offlineRate = 0.1+safeNumber(gameData.upgrades.offline)*0.05 + safeNumber(gameData.upgrades.investment)*0.02 + safeNumber(gameData.farmIncome);
             document.getElementById('offlineRateProfile').innerHTML = offlineRate.toFixed(2);
-            const passiveIncome = gameData.upgrades.auto * offlineRate;
+            const passiveIncome = (safeNumber(gameData.upgrades.auto) * (0.1+safeNumber(gameData.upgrades.offline)*0.05)) + (safeNumber(gameData.upgrades.bank) * safeNumber(gameData.bananas) * 0.0001) + safeNumber(gameData.farmIncome);
             document.getElementById('passiveIncome').innerHTML = passiveIncome.toFixed(1);
-            document.getElementById('referralCount').innerHTML = gameData.referrals.length;
-            document.getElementById('referralLink').innerHTML = `https://t.me/minion_bot?start=${gameData.referralCode}`;
-            document.getElementById('dailyCalendar').innerHTML = [100,200,500,1000,2000,5000,10000].map((r,i)=>`<div class="day-card ${i<gameData.dailyStreak?'claimed':i===gameData.dailyStreak?'current':''}">${i+1}<br>${r}</div>`).join('');
+            document.getElementById('farmIncome').innerHTML = safeNumber(gameData.farmIncome).toFixed(1);
+            document.getElementById('dailyCalendar').innerHTML = [100,200,500,1000,2000,5000,10000].map((r,i)=>`<div class="day-card ${i<safeNumber(gameData.dailyStreak)?'claimed':i===safeNumber(gameData.dailyStreak)?'current':''}">${i+1}<br>${r}</div>`).join('');
             
-            // ПРОКАЧКИ (15 штук)
-            const upList = document.getElementById('upgradesList');
-            const ups = [
+            renderUpgradesList('upgradesCombat', [
                 {id:'click1',name:'💪 Сила I',desc:'+1🍌/клик',lvl:gameData.clickPower1},
                 {id:'click5',name:'🚀 Сила II',desc:'+5🍌/клик',lvl:gameData.clickPower5},
                 {id:'click10',name:'⚡ Сила III',desc:'+10🍌/клик',lvl:gameData.clickPower10},
                 {id:'click25',name:'⭐ Сила IV',desc:'+25🍌/клик',lvl:gameData.clickPower25},
                 {id:'click50',name:'💎 Сила V',desc:'+50🍌/клик',lvl:gameData.clickPower50},
+                {id:'crit',name:'⚡ Крит',desc:'+5% шанс x2',lvl:gameData.upgrades.crit},
+                {id:'luck',name:'🍀 Удача',desc:'+3% доп.награда',lvl:gameData.upgrades.luck},
+                {id:'mastery',name:'🎓 Мастерство',desc:'+2% ко всей силе',lvl:gameData.clickMastery},
+                {id:'mega',name:'💥 Мега-удар',desc:'+2% шанс x2 комбо',lvl:gameData.upgrades.mega},
+                {id:'explosive',name:'💣 Взрывной удар',desc:'+1% шанс x5',lvl:gameData.explosive}
+            ]);
+            renderUpgradesList('upgradesEnergy', [
                 {id:'energy',name:'⚡ Энергия',desc:'+25 макс. энергии',lvl:gameData.upgrades.energy},
                 {id:'regen',name:'🔋 Регенерация',desc:'+0.5/сек',lvl:gameData.upgrades.regen},
+                {id:'shield',name:'🛡️ Защита',desc:'-2% потери энергии',lvl:gameData.upgrades.shield},
+                {id:'efficiency',name:'⚡ Энергоэффективность',desc:'-3% затрат энергии',lvl:gameData.upgrades.efficiency},
+                {id:'recovery',name:'💪 Восстановление',desc:'+0.3/сек',lvl:gameData.upgrades.recovery},
+                {id:'vampire',name:'🧛 Энергетический вампир',desc:'+3% шанс не тратить',lvl:gameData.upgrades.vampire}
+            ]);
+            renderUpgradesList('upgradesEconomy', [
                 {id:'bonus',name:'💰 Бонус',desc:'+5% доход',lvl:gameData.upgrades.bonus},
                 {id:'offline',name:'🤖 Офлайн',desc:'+0.05/сек',lvl:gameData.upgrades.offline},
-                {id:'crit',name:'⚡ Крит',desc:'+5% шанс x2',lvl:gameData.upgrades.crit},
                 {id:'auto',name:'🎯 Автокликер',desc:'1 клик/сек (🔒 нужно 5 перерождений!)',lvl:gameData.upgrades.auto},
-                {id:'luck',name:'🍀 Удача',desc:'+3% доп.награда',lvl:gameData.upgrades.luck},
-                {id:'shield',name:'🛡️ Защита',desc:'-2% потери энергии',lvl:gameData.upgrades.shield},
                 {id:'double',name:'✨ Удвоение',desc:'+5% к комбо',lvl:gameData.upgrades.double},
-                {id:'mega',name:'💥 Мега-удар',desc:'+2% шанс x2 комбо',lvl:gameData.upgrades.mega}
-            ];
-            upList.innerHTML = '';
-            for(let u of ups){
-                const cost = getUpgradeCost(u.id, u.lvl);
-                const isAutoLocked = (u.id === 'auto' && gameData.prestigeCount < 5);
-                const div = document.createElement('div'); div.className='item-card';
-                div.innerHTML = `<div class="item-info"><div class="item-name">${u.name}</div><div class="item-desc">${u.desc}</div><div class="item-level">Ур.${u.lvl}/25</div>${isAutoLocked ? '<div style="font-size:10px;color:#E74C3C;">🔒 Требуется 5 перерождений</div>' : ''}</div><div class="item-cost">${isAutoLocked ? '🔒 ЗАБЛОКИРОВАНО' : cost.toLocaleString()+'🍌'}</div>`;
-                div.onclick = () => { if(!isAutoLocked) buyUpgrade(u.id); else showToast("❌ Автокликер доступен после 5 перерождений!", "#E74C3C"); };
-                upList.appendChild(div);
-            }
+                {id:'bank',name:'🏦 Банковский процент',desc:'+0.1% от бананов',lvl:gameData.upgrades.bank},
+                {id:'investment',name:'📈 Инвестиции',desc:'+0.02/сек офлайн',lvl:gameData.upgrades.investment}
+            ]);
+            renderUpgradesList('upgradesSpecial', [
+                {id:'luckyClick',name:'🍀 Счастливый клик',desc:'+2% шанс x3',lvl:gameData.upgrades.luckyClick},
+                {id:'alchemy',name:'🧪 Алхимия',desc:'+1% ко всем доходам',lvl:gameData.upgrades.alchemy},
+                {id:'speed',name:'⚡ Ускорение',desc:'+0.1 опыта за клик',lvl:gameData.upgrades.speed},
+                {id:'inspiration',name:'💡 Вдохновение',desc:'+1% шанс x3 комбо',lvl:gameData.upgrades.inspiration},
+                {id:'holyBanana',name:'✨ Святой банан',desc:'+1% шанс 10,000🍌',lvl:gameData.upgrades.holyBanana}
+            ]);
+            renderUpgradesList('upgradesFarm', [
+                {id:'farmTree',name:'🌳 Банановое дерево',desc:'+0.5🍌/сек',lvl:gameData.upgrades.farmTree},
+                {id:'farmHarvest',name:'🌾 Урожайность',desc:'+5% к доходу фермы',lvl:gameData.upgrades.farmHarvest},
+                {id:'farmFertilizer',name:'💊 Удобрения',desc:'+3% к доходу фермы',lvl:gameData.upgrades.farmFertilizer},
+                {id:'farmGreenhouse',name:'🏭 Теплица',desc:'+2% к доходу фермы',lvl:gameData.upgrades.farmGreenhouse},
+                {id:'farmAuto',name:'🤖 Автосбор',desc:'Каждые 10 сек бонус',lvl:gameData.upgrades.farmAuto}
+            ]);
             
-            // МАГАЗИН СКИНОВ (прозрачный фон)
-            const shopDiv = document.getElementById('shopList');
-            shopDiv.innerHTML = '<div class="item-card" style="justify-content:center;">🛒 МАГАЗИН СКИНОВ</div>';
+            const shopDiv = document.getElementById('shopList'); shopDiv.innerHTML = '<div class="item-card" style="justify-content:center;">🛒 МАГАЗИН СКИНОВ</div>';
             for(let [id,skin] of Object.entries(skins)){
-                const owned = gameData.ownedSkins.includes(id);
-                const active = gameData.activeSkin === id;
-                const div = document.createElement('div');
-                div.className = 'skin-item'+(active?' active':'');
+                const owned = gameData.ownedSkins.includes(id), active = gameData.activeSkin === id;
+                const div = document.createElement('div'); div.className = 'skin-item'+(active?' active':'');
                 div.innerHTML = `<img src="${skin.img}" class="skin-preview" onerror="this.src='minion.clicker.jpg'"><div style="font-weight:600;">${skin.name}</div><div style="font-size:12px;">${owned?(active?'✅ Активен':'🟢 Владелец'):`${skin.price.toLocaleString()}🍌`}</div>`;
-                div.onclick = ()=>buySkin(id);
-                shopDiv.appendChild(div);
+                div.onclick = ()=>buySkin(id); shopDiv.appendChild(div);
             }
             
-            // ЛИДЕРБОРД
             const leaders = [];
             for(let i=0;i<localStorage.length;i++){
                 const key = localStorage.key(i);
@@ -965,13 +715,15 @@
             else leaderDiv.innerHTML = leaders.slice(0,20).map((p,i)=>`<div class="leaderboard-item"><div class="rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div><div class="leader-name">${p.username}</div><div class="leader-stats">🍌 ${Math.floor(p.bananas).toLocaleString()} 📊 ${p.level} ур. 🔄 ${p.prestigeCount}</div></div>`).join('');
             
             const prestigeBtn = document.getElementById('prestigeBtn');
-            if(gameData.level >= requiredLevel){ prestigeBtn.classList.remove('btn-disabled'); prestigeBtn.disabled=false; }
+            if(safeNumber(gameData.level) >= reqLevel && safeNumber(gameData.bananas) >= reqBananas){ prestigeBtn.classList.remove('btn-disabled'); prestigeBtn.disabled=false; }
             else{ prestigeBtn.classList.add('btn-disabled'); prestigeBtn.disabled=true; }
+            renderAchievements();
         }
         
         function showFloating(text, isCritical){
             const div = document.createElement('div'); div.className='click-animation';
-            div.innerText = `+${text}🍌`; if(isCritical) div.innerText = `💥 ${text}🍌`;
+            div.innerText = `+${Math.floor(text).toLocaleString()} 🍌`;
+            if(isCritical) div.innerText = `💥 КРИТ! +${Math.floor(text).toLocaleString()} 🍌`;
             div.style.left = (Math.random()*(window.innerWidth-100)+50)+'px';
             div.style.top = (window.innerHeight/2)+'px';
             document.body.appendChild(div); setTimeout(()=>div.remove(),600);
@@ -981,26 +733,18 @@
             toast.innerText = msg; toast.style.background = bg;
             document.body.appendChild(toast); setTimeout(()=>toast.remove(),2000);
         }
-        function createFloatingBananas(){
-            setInterval(()=>{
-                const b=document.createElement('div'); b.className='banana-particle';
-                b.style.left=Math.random()*window.innerWidth+'px';
-                b.style.width=(20+Math.random()*30)+'px'; b.style.height=(20+Math.random()*30)+'px';
-                document.body.appendChild(b); setTimeout(()=>b.remove(),8000);
-            },10000);
-        }
+        function createFloatingBananas(){ setInterval(()=>{ const b=document.createElement('div'); b.className='banana-particle'; b.style.left=Math.random()*window.innerWidth+'px'; b.style.width=(20+Math.random()*30)+'px'; b.style.height=(20+Math.random()*30)+'px'; document.body.appendChild(b); setTimeout(()=>b.remove(),8000); },15000); }
         
         function init(){
-            loadFromLocal(); loadFromCloud(); createFloatingBananas();
+            loadFromLocal(); loadFromCloud(); createFloatingBananas(); updateFarmIncome();
             setInterval(()=>{
-                if(gameData.energy<gameData.maxEnergy){
-                    const regen = 1+gameData.upgrades.regen*0.5;
-                    gameData.energy = Math.min(gameData.maxEnergy, gameData.energy+regen);
-                    updateUI();
+                if(safeNumber(gameData.energy) < safeNumber(gameData.maxEnergy)){
+                    let regen = 1 + safeNumber(gameData.upgrades.regen)*0.5 + safeNumber(gameData.upgrades.recovery)*0.3;
+                    gameData.energy = Math.min(safeNumber(gameData.maxEnergy), safeNumber(gameData.energy)+regen); updateUI();
                 }
             },1000);
             setInterval(()=>syncToCloud(),30000);
-            restartAutoClicker();
+            restartAutoClicker(); initWheel();
         }
         
         document.getElementById('minion').addEventListener('click', clickMinion);
@@ -1008,33 +752,28 @@
         document.getElementById('claimOfflineBtn').addEventListener('click', claimOfflineManual);
         document.getElementById('dailyBonusBtn').addEventListener('click', dailyBonus);
         document.getElementById('bananaGameBtn').addEventListener('click', startBananaGame);
-        document.getElementById('closeGameBtn').addEventListener('click', ()=>{
-            document.getElementById('gameModal').classList.add('hidden');
-            document.getElementById('gameOverlay').classList.add('hidden');
-        });
-        document.querySelectorAll('.difficulty-btn').forEach(btn=>{
-            btn.addEventListener('click',()=>{
-                currentGameDifficulty = btn.dataset.diff;
-                showToast(`Сложность: ${btn.innerText}`, "#3498DB");
-            });
-        });
-        document.getElementById('copyReferralBtn').addEventListener('click',()=>{
-            navigator.clipboard.writeText(document.getElementById('referralLink').innerText);
-            showToast("📋 Ссылка скопирована!", "#3498DB");
-        });
+        document.getElementById('wheelBtn').addEventListener('click', () => { document.getElementById('wheelModal').classList.remove('hidden'); document.getElementById('wheelOverlay').classList.remove('hidden'); initWheel(); });
+        document.getElementById('spinWheelBtn').addEventListener('click', spinWheel);
+        document.getElementById('closeWheelBtn').addEventListener('click', () => { document.getElementById('wheelModal').classList.add('hidden'); document.getElementById('wheelOverlay').classList.add('hidden'); });
+        document.getElementById('closeGameBtn').addEventListener('click', ()=>{ document.getElementById('gameModal').classList.add('hidden'); document.getElementById('gameOverlay').classList.add('hidden'); });
+        document.querySelectorAll('.difficulty-btn').forEach(btn=>{ btn.addEventListener('click',()=>{ currentGameDifficulty = btn.dataset.diff; showToast(`Сложность: ${btn.innerText}`, "#3498DB"); }); });
+        document.getElementById('copyReferralBtn').addEventListener('click',()=>{ navigator.clipboard.writeText(document.getElementById('referralLink').innerText); showToast("📋 Ссылка скопирована!", "#3498DB"); });
         document.getElementById('syncCloudBtn').addEventListener('click',()=>{ syncToCloud(); showToast("☁️ Синхронизация!", "#3498DB"); });
-        document.getElementById('themeToggle').addEventListener('click',()=>{
-            document.body.classList.toggle('dark-theme');
-            document.getElementById('themeToggle').innerText = document.body.classList.contains('dark-theme')?'☀️':'🌙';
-        });
-        document.querySelectorAll('.tab').forEach(tab=>{
-            tab.addEventListener('click',()=>{
-                document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-                tab.classList.add('active');
-                document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
-            });
-        });
+        document.getElementById('themeToggle').addEventListener('click',()=>{ document.body.classList.toggle('dark-theme'); document.getElementById('themeToggle').innerText = document.body.classList.contains('dark-theme')?'☀️':'🌙'; });
+        
+        document.querySelectorAll('.upgrade-cat').forEach(cat=>{ cat.addEventListener('click',()=>{
+            document.querySelectorAll('.upgrade-cat').forEach(c=>c.classList.remove('active'));
+            document.querySelectorAll('.upgrade-category-content').forEach(c=>c.classList.remove('active'));
+            cat.classList.add('active');
+            document.getElementById(`upgradeCat${cat.dataset.cat.charAt(0).toUpperCase()+cat.dataset.cat.slice(1)}`).classList.add('active');
+        }); });
+        
+        document.querySelectorAll('.tab').forEach(tab=>{ tab.addEventListener('click',()=>{
+            document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+        }); });
         init();
     })();
 </script>
