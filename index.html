@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>🍌 Minion Clicker – Кликер миньонов</title>
+    <title>🍌 Minion Clicker | Миньон Кликер</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * {
@@ -13,13 +13,16 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
+
         body {
             background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
-            font-family: 'Segoe UI', 'Comic Neue', 'Comic Sans MS', cursive;
+            font-family: 'Comic Neue', 'Segoe UI', 'Comic Sans MS', cursive;
             min-height: 100vh;
             padding: 16px 16px 80px;
             color: #2C3E50;
         }
+
+        /* ===== ШАПКА ===== */
         .stats-row {
             display: flex;
             gap: 10px;
@@ -39,14 +42,16 @@
         }
         .stat-label { font-size: 11px; opacity: 0.8; }
         .stat-value { font-size: 20px; font-weight: bold; color: #FFD700; }
-        .energy-section {
+
+        /* ===== ЭНЕРГИЯ И ОПЫТ ===== */
+        .energy-section, .exp-section {
             background: rgba(44, 62, 80, 0.85);
             backdrop-filter: blur(8px);
             border-radius: 30px;
             padding: 12px 16px;
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
-        .energy-bar {
+        .energy-bar, .exp-bar {
             background: rgba(0,0,0,0.3);
             border-radius: 20px;
             height: 12px;
@@ -58,13 +63,21 @@
             height: 100%;
             transition: width 0.2s;
         }
-        .energy-text {
+        .exp-fill {
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+            width: 0%;
+            height: 100%;
+            transition: width 0.2s;
+        }
+        .energy-text, .exp-text {
             display: flex;
             justify-content: space-between;
             margin-top: 6px;
             font-size: 12px;
             color: white;
         }
+
+        /* ===== МИНЬОН (КЛИКАБЕЛЬНЫЙ) ===== */
         .minion-wrapper {
             display: flex;
             justify-content: center;
@@ -86,7 +99,9 @@
         }
         .minion:active { transform: scale(0.96); }
         .minion-face { font-size: 75px; }
-        .minion-glasses { font-size: 30px; margin-top: -20px; }
+        .minion-glasses { font-size: 30px; margin-top: -20px; filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.2)); }
+
+        /* ===== ТАБЫ ===== */
         .tabs {
             display: flex;
             gap: 8px;
@@ -116,6 +131,8 @@
         }
         .tab-content.active { display: block; }
         @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+        /* ===== КАРТОЧКИ ПРОКАЧЕК ===== */
         .upgrade-list {
             display: flex;
             flex-direction: column;
@@ -148,6 +165,8 @@
             font-weight: bold;
             font-size: 14px;
         }
+
+        /* ===== КНОПКИ ===== */
         .btn-prestige {
             background: #8E44AD;
             width: 100%;
@@ -161,6 +180,13 @@
             cursor: pointer;
         }
         .btn-prestige:active { transform: scale(0.97); }
+        .btn-prestige.disabled {
+            background: #95A5A6;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* ===== ОФЛАЙН И ЛИДЕРБОРД ===== */
         .offline-card {
             background: rgba(44,62,80,0.85);
             border-radius: 30px;
@@ -186,16 +212,9 @@
         }
         .rank { font-size: 24px; width: 45px; text-align: center; }
         .player-name { flex: 1; font-weight: bold; color: #2C3E50; }
-        .player-stats { color: #F39C12; font-weight: bold; }
-        .sync-status {
-            text-align: center;
-            font-size: 11px;
-            margin-top: 15px;
-            color: #2C3E50;
-            background: rgba(255,255,255,0.7);
-            padding: 6px;
-            border-radius: 40px;
-        }
+        .player-stats { color: #F39C12; font-weight: bold; font-size: 12px; text-align: right; }
+
+        /* ===== АНИМАЦИИ ===== */
         .click-animation {
             position: fixed;
             pointer-events: none;
@@ -230,12 +249,14 @@
             70% { opacity: 1; }
             100% { opacity: 0; visibility: hidden; }
         }
-        .loading {
+        .sync-status {
             text-align: center;
-            padding: 40px;
+            font-size: 11px;
+            margin-top: 15px;
             color: #2C3E50;
             background: rgba(255,255,255,0.7);
-            border-radius: 30px;
+            padding: 6px;
+            border-radius: 40px;
         }
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
@@ -244,6 +265,7 @@
 </head>
 <body>
 
+<!-- Верхняя панель статистики -->
 <div class="stats-row">
     <div class="stat-card"><div class="stat-label">🍌 БАНАНЫ</div><div class="stat-value" id="bananas">0</div></div>
     <div class="stat-card"><div class="stat-label">📊 УРОВЕНЬ</div><div class="stat-value" id="level">1</div></div>
@@ -251,11 +273,19 @@
     <div class="stat-card"><div class="stat-label">🔄 ПРЕСТИЖ</div><div class="stat-value" id="prestigeCount">0</div></div>
 </div>
 
+<!-- Энергия -->
 <div class="energy-section">
     <div class="energy-bar"><div class="energy-fill" id="energyFill" style="width: 100%"></div></div>
     <div class="energy-text"><span>⚡ Энергия</span><span><span id="energy">100</span> / <span id="maxEnergy">100</span></span></div>
 </div>
 
+<!-- Опыт -->
+<div class="exp-section">
+    <div class="exp-bar"><div class="exp-fill" id="expFill" style="width: 0%"></div></div>
+    <div class="exp-text"><span>⭐ Опыт</span><span id="expText">0 / 100</span></div>
+</div>
+
+<!-- Миленький миньон -->
 <div class="minion-wrapper">
     <div class="minion" id="minion">
         <div class="minion-face">🐵</div>
@@ -263,93 +293,92 @@
     </div>
 </div>
 
+<!-- Табы -->
 <div class="tabs">
-    <div class="tab active" data-tab="upgrades">⬆️ Прокачки</div>
+    <div class="tab active" data-tab="clicker">🍌 Кликер</div>
+    <div class="tab" data-tab="upgrades">⬆️ Прокачки</div>
     <div class="tab" data-tab="leaderboard">🏆 Топ</div>
-    <div class="tab" data-tab="offline">🤖 Офлайн</div>
     <div class="tab" data-tab="profile">👤 Профиль</div>
 </div>
 
-<div class="tab-content active" id="tab-upgrades">
+<!-- Контент: Кликер (просто информационная карточка) -->
+<div class="tab-content active" id="tab-clicker">
+    <div class="offline-card" style="background: rgba(44,62,80,0.85);">
+        <div style="font-size: 18px; margin-bottom: 8px;">🍌 Жми на миньона!</div>
+        <div style="font-size: 13px;">Каждый клик даёт бананы и опыт.</div>
+        <div style="font-size: 12px; margin-top: 12px;">Пассивный доход: <strong id="passiveIncomeText">0</strong> 🍌/сек</div>
+    </div>
+</div>
+
+<!-- Контент: Прокачки -->
+<div class="tab-content" id="tab-upgrades">
     <div class="upgrade-list" id="upgradesList"></div>
     <button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужен 10 уровень)</button>
 </div>
 
+<!-- Контент: Лидерборд (локальный) -->
 <div class="tab-content" id="tab-leaderboard">
-    <div id="leaderboardList"><div class="loading">🏆 Таблица лидеров (твои данные)</div></div>
+    <div id="leaderboardList"><div class="offline-card">🏆 Загрузка таблицы...</div></div>
 </div>
 
-<div class="tab-content" id="tab-offline">
-    <div class="offline-card">
-        <div>🤖 ОФЛАЙН ДОХОД</div>
-        <div class="offline-amount" id="offlineAmount">0</div>
-        <div>🍌 бананов получено</div>
-        <div style="font-size: 12px; margin-top: 10px;">Автокликер работает даже когда ты не в игре!</div>
-    </div>
-    <div class="upgrade-list">
-        <div class="upgrade-item" style="background: rgba(44,62,80,0.85); color:white; cursor:default;">
-            <div><div class="upgrade-name">📈 Офлайн ставка</div><div id="offlineRateText" style="font-size:12px;">0.1 банан/сек</div></div>
-            <div>+0.05 за уровень</div>
-        </div>
-    </div>
-    <button class="btn-prestige" id="claimOfflineBtn" style="background:#2ECC71;">🎁 ЗАБРАТЬ ОФЛАЙН ДОХОД</button>
-</div>
-
+<!-- Контент: Профиль -->
 <div class="tab-content" id="tab-profile">
     <div class="upgrade-list">
         <div class="upgrade-item" style="cursor:default;"><div><div class="upgrade-name">👤 Игрок</div><div id="playerName">-</div></div></div>
         <div class="upgrade-item" style="cursor:default;"><div><div class="upgrade-name">🎯 Всего кликов</div><div id="totalClicks">0</div></div></div>
         <div class="upgrade-item" style="cursor:default;"><div><div class="upgrade-name">✨ Бонус престижа</div><div id="prestigeBonus">+0%</div></div></div>
-        <div class="upgrade-item" style="cursor:default;"><div><div class="upgrade-name">⭐ Опыт до след. уровня</div><div id="expProgress">0 / 100</div></div></div>
+        <div class="upgrade-item" style="cursor:default;"><div><div class="upgrade-name">🤖 Офлайн ставка</div><div id="offlineRateProfile">0.1 🍌/сек</div></div></div>
     </div>
+    <button class="btn-prestige" id="claimOfflineBtn" style="background:#2ECC71; margin-top:0;">🎁 ЗАБРАТЬ ОФЛАЙН ДОХОД</button>
 </div>
 
-<div class="sync-status" id="syncStatus">🔄 Данные синхронизируются...</div>
+<div class="sync-status" id="syncStatus">🔄 Инициализация...</div>
 
 <script>
     (function(){
+        // ---------- Telegram WebApp ----------
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        
-        // Получаем данные пользователя
-        let userId = tg.initDataUnsafe?.user?.id || `demo_${Math.random().toString(36).substr(2, 8)}`;
-        let userName = tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || "Миньон";
-        
-        // Игровые данные
+
+        // ---------- Данные пользователя ----------
+        const userId = tg.initDataUnsafe?.user?.id || `demo_${Math.random().toString(36).substr(2, 8)}`;
+        const userName = tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username || "Миньон";
+
+        // Начальное состояние
         let gameData = {
             userId: userId,
             username: userName,
             bananas: 100,
-            energy: 100,
-            maxEnergy: 100,
             level: 1,
             exp: 0,
             totalClicks: 0,
             clickPower: 1,
             prestigeCount: 0,
             prestigeBonus: 1.0,
+            maxEnergy: 100,
+            energy: 100,
             lastOnline: Date.now(),
             upgrades: {
-                click: 0,
-                energy: 0,
-                regen: 0,
-                bonus: 0,
-                offline: 0,
-                crit: 0,
-                auto: 0
+                click: 0,    // +1 банан за клик
+                energy: 0,   // +25 макс. энергии
+                regen: 0,    // +0.5 реген/сек
+                bonus: 0,    // +5% к доходу
+                offline: 0,  // +0.05 банан/сек офлайн
+                crit: 0,     // +5% шанс x2
+                auto: 0      // 1 клик/сек
             }
         };
-        
+
         let autoClickerInterval = null;
         let syncTimeout = null;
-        
-        // ========== СОХРАНЕНИЕ И ЗАГРУЗКА ==========
+
+        // ---------- Сохранение / загрузка (localStorage + CloudStorage) ----------
         function saveToLocal() {
             gameData.lastOnline = Date.now();
             localStorage.setItem('minionClicker', JSON.stringify(gameData));
         }
-        
+
         function loadFromLocal() {
             const saved = localStorage.getItem('minionClicker');
             if (saved) {
@@ -360,25 +389,28 @@
                     }
                 } catch(e) {}
             }
+            if (!gameData.upgrades) {
+                gameData.upgrades = { click:0, energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0 };
+            }
             if (gameData.energy > gameData.maxEnergy) gameData.energy = gameData.maxEnergy;
             updateUI();
         }
-        
+
         function syncToCloud() {
             if (!tg.CloudStorage) {
-                document.getElementById('syncStatus').innerHTML = "⚠️ Облако не поддерживается, данные только локально";
+                document.getElementById('syncStatus').innerHTML = "⚠️ Облако не поддерживается, данные локально";
                 return;
             }
             const cloudData = {
                 bananas: gameData.bananas,
                 level: gameData.level,
                 exp: gameData.exp,
-                energy: gameData.energy,
-                maxEnergy: gameData.maxEnergy,
-                clickPower: gameData.clickPower,
                 totalClicks: gameData.totalClicks,
+                clickPower: gameData.clickPower,
                 prestigeCount: gameData.prestigeCount,
                 prestigeBonus: gameData.prestigeBonus,
+                maxEnergy: gameData.maxEnergy,
+                energy: gameData.energy,
                 upgrades: gameData.upgrades,
                 userId: gameData.userId,
                 username: gameData.username,
@@ -394,7 +426,7 @@
                 }
             });
         }
-        
+
         function loadFromCloud() {
             if (!tg.CloudStorage) return;
             tg.CloudStorage.getItem('minionClickerCloud', (err, value) => {
@@ -417,6 +449,8 @@
                                     if(document.getElementById('syncStatus').innerHTML.includes("☁️"))
                                         document.getElementById('syncStatus').innerHTML = "🔄 Данные синхронизированы";
                                 }, 2000);
+                            } else {
+                                document.getElementById('syncStatus').innerHTML = "✅ Данные синхронизированы";
                             }
                         }
                     } catch(e) {}
@@ -424,20 +458,20 @@
                 startAutoClicker();
             });
         }
-        
+
         function autoSync() {
             saveToLocal();
             if (syncTimeout) clearTimeout(syncTimeout);
             syncTimeout = setTimeout(() => syncToCloud(), 800);
         }
-        
-        // ========== ИГРОВАЯ ЛОГИКА ==========
+
+        // ---------- Игровая логика ----------
         function getUpgradeCost(upgrade) {
             const level = gameData.upgrades[upgrade];
             const base = { click:10, energy:15, regen:20, bonus:25, offline:30, crit:50, auto:100 }[upgrade];
             return Math.floor(base * Math.pow(1.5, level));
         }
-        
+
         function buyUpgrade(upgrade) {
             const cost = getUpgradeCost(upgrade);
             if (gameData.bananas >= cost) {
@@ -450,12 +484,25 @@
                 
                 updateUI();
                 autoSync();
-                showToast(`✅ Улучшение куплено!`, "#2ECC71");
+                showToast(`✅ ${getUpgradeName(upgrade)} улучшена!`, "#2ECC71");
             } else {
                 showToast(`❌ Нужно ${cost} 🍌`, "#E74C3C");
             }
         }
-        
+
+        function getUpgradeName(upgrade) {
+            const names = {
+                click: '💪 Сила клика',
+                energy: '⚡ Макс. энергия',
+                regen: '🔋 Регенерация',
+                bonus: '💰 Бонус бананов',
+                offline: '🤖 Офлайн кликер',
+                crit: '⚡ Критический удар',
+                auto: '🎯 Автокликер'
+            };
+            return names[upgrade] || upgrade;
+        }
+
         function showToast(msg, bg = "#2C3E50") {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -464,7 +511,7 @@
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 1800);
         }
-        
+
         function showFloating(text, isCritical = false) {
             const div = document.createElement('div');
             div.className = 'click-animation';
@@ -474,7 +521,7 @@
             document.body.appendChild(div);
             setTimeout(() => div.remove(), 600);
         }
-        
+
         function clickMinion() {
             if (gameData.energy <= 0) {
                 showToast("❌ Нет энергии!", "#E74C3C");
@@ -493,13 +540,16 @@
             gameData.bananas += gain;
             gameData.totalClicks++;
             
+            // Опыт и уровни
             let expNeeded = gameData.level * 100;
             gameData.exp += gain;
+            let leveledUp = false;
             if (gameData.exp >= expNeeded) {
                 gameData.exp -= expNeeded;
                 gameData.level++;
                 gameData.bananas += 100;
                 showToast(`🎉 УРОВЕНЬ ${gameData.level}! +100 🍌`, "#8E44AD");
+                leveledUp = true;
                 const minionDiv = document.getElementById('minion');
                 minionDiv.style.transform = "scale(1.1)";
                 setTimeout(() => minionDiv.style.transform = "", 200);
@@ -509,22 +559,21 @@
             autoSync();
             showFloating(gain, isCritical);
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            if (leveledUp) updateUI();
         }
-        
+
         function doPrestige() {
             if (gameData.level >= 10) {
                 if (confirm("Переродиться? Уровень станет 1, прокачки сбросятся, но бонус +10% останется навсегда!")) {
                     gameData.prestigeCount++;
-                    gameData.prestigeBonus += 0.1;
+                    gameData.prestigeBonus = 1 + (gameData.prestigeCount * 0.1);
                     gameData.bananas = 100;
                     gameData.level = 1;
                     gameData.exp = 0;
                     gameData.clickPower = 1;
                     gameData.maxEnergy = 100;
                     gameData.energy = 100;
-                    gameData.upgrades = {
-                        click:0, energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0
-                    };
+                    gameData.upgrades = { click:0, energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0 };
                     updateUI();
                     restartAutoClicker();
                     autoSync();
@@ -534,7 +583,7 @@
                 showToast(`❌ Нужен 10 уровень (сейчас ${gameData.level})`, "#E74C3C");
             }
         }
-        
+
         function claimOffline() {
             const now = Date.now();
             const secondsOffline = Math.min((now - gameData.lastOnline) / 1000, 8 * 3600);
@@ -551,7 +600,7 @@
             gameData.lastOnline = now;
             saveToLocal();
         }
-        
+
         function restartAutoClicker() {
             if (autoClickerInterval) clearInterval(autoClickerInterval);
             if (gameData.upgrades.auto > 0) {
@@ -561,31 +610,62 @@
                 }, interval * 1000);
             }
         }
-        
-        function updateEnergy() {
+
+        function updateEnergyAndExp() {
+            // Регенерация энергии
             const regenRate = 1 + (gameData.upgrades.regen * 0.5);
-            gameData.energy = Math.min(gameData.energy + regenRate, gameData.maxEnergy);
-            updateUI();
+            gameData.energy = Math.min(gameData.maxEnergy, gameData.energy + regenRate);
+            // Обновляем UI энергию
+            document.getElementById('energyFill').style.width = (gameData.energy / gameData.maxEnergy * 100) + '%';
+            document.getElementById('energy').innerText = Math.floor(gameData.energy);
+            // Опыт UI тоже обновим
+            const expNeeded = gameData.level * 100;
+            const expPercent = (gameData.exp / expNeeded) * 100;
+            document.getElementById('expFill').style.width = `${expPercent}%`;
+            document.getElementById('expText').innerText = `${Math.floor(gameData.exp)} / ${expNeeded}`;
         }
-        
-        // ========== UI ОБНОВЛЕНИЕ ==========
+
+        // ---------- Обновление всего интерфейса ----------
         function updateUI() {
+            // Баланс и уровень
             document.getElementById('bananas').innerText = Math.floor(gameData.bananas).toLocaleString();
             document.getElementById('level').innerText = gameData.level;
             document.getElementById('clickPower').innerText = Math.floor(gameData.clickPower * gameData.prestigeBonus);
             document.getElementById('prestigeCount').innerText = gameData.prestigeCount;
+            
+            // Энергия
             document.getElementById('energy').innerText = Math.floor(gameData.energy);
             document.getElementById('maxEnergy').innerText = gameData.maxEnergy;
             document.getElementById('energyFill').style.width = (gameData.energy / gameData.maxEnergy * 100) + '%';
-            document.getElementById('prestigeBonus').innerHTML = `+${Math.round((gameData.prestigeBonus-1)*100)}%`;
-            document.getElementById('totalClicks').innerHTML = gameData.totalClicks.toLocaleString();
-            document.getElementById('expProgress').innerHTML = `${Math.floor(gameData.exp)} / ${gameData.level * 100}`;
+            
+            // Опыт
+            const expNeeded = gameData.level * 100;
+            const expPercent = (gameData.exp / expNeeded) * 100;
+            document.getElementById('expFill').style.width = `${expPercent}%`;
+            document.getElementById('expText').innerText = `${Math.floor(gameData.exp)} / ${expNeeded}`;
+            
+            // Профиль
             document.getElementById('playerName').innerHTML = gameData.username;
-            
+            document.getElementById('totalClicks').innerHTML = gameData.totalClicks.toLocaleString();
+            document.getElementById('prestigeBonus').innerHTML = `+${Math.round((gameData.prestigeBonus-1)*100)}%`;
             const offlineRate = 0.1 + (gameData.upgrades.offline * 0.05);
-            document.getElementById('offlineRateText').innerHTML = `${offlineRate.toFixed(2)} банан/сек`;
+            document.getElementById('offlineRateProfile').innerHTML = `${offlineRate.toFixed(2)} 🍌/сек`;
             
-            // Рендер прокачек
+            // Пассивный доход в кликере
+            const passiveIncome = (gameData.upgrades.auto * 0.5) + (gameData.upgrades.offline * 0.05);
+            document.getElementById('passiveIncomeText').innerHTML = passiveIncome.toFixed(1);
+            
+            // Кнопка перерождения
+            const prestigeBtn = document.getElementById('prestigeBtn');
+            if (gameData.level >= 10) {
+                prestigeBtn.classList.remove('disabled');
+                prestigeBtn.disabled = false;
+            } else {
+                prestigeBtn.classList.add('disabled');
+                prestigeBtn.disabled = true;
+            }
+            
+            // Рендер списка прокачек
             const upgradesList = document.getElementById('upgradesList');
             const upgradesConfig = [
                 { id:'click', name:'💪 Сила клика', desc:'+1 банан за клик', base:10 },
@@ -614,44 +694,80 @@
                 upgradesList.appendChild(div);
             }
             
-            // Лидерборд (демо)
-            const leaderDiv = document.getElementById('leaderboardList');
-            leaderDiv.innerHTML = `
-                <div class="leaderboard-item"><div class="rank">🥇</div><div class="player-name">${gameData.username}</div><div class="player-stats">🍌 ${Math.floor(gameData.bananas).toLocaleString()}</div></div>
-                <div style="text-align:center; margin-top:20px; font-size:12px;">🏆 Полноценный рейтинг — через бэкенд</div>
-            `;
-            
-            // Офлайн доход
-            const secondsOffline = Math.min((Date.now() - gameData.lastOnline) / 1000, 28800);
-            const offlineIncome = 0.1 + (gameData.upgrades.offline * 0.05);
-            const pending = Math.floor(secondsOffline * offlineIncome);
-            document.getElementById('offlineAmount').innerText = pending;
+            // Локальная таблица лидеров (из localStorage, только этот пользователь + демо)
+            try {
+                let allPlayers = [];
+                for(let i=0; i<localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if(key && key.includes('minionClicker')) {
+                        try {
+                            const data = JSON.parse(localStorage.getItem(key));
+                            if(data && data.username) {
+                                allPlayers.push({
+                                    username: data.username,
+                                    bananas: data.bananas || 0,
+                                    level: data.level || 1,
+                                    prestigeCount: data.prestigeCount || 0
+                                });
+                            }
+                        } catch(e) {}
+                    }
+                }
+                // Добавляем текущего игрока, если его нет
+                if(!allPlayers.find(p => p.username === gameData.username)) {
+                    allPlayers.push({
+                        username: gameData.username,
+                        bananas: gameData.bananas,
+                        level: gameData.level,
+                        prestigeCount: gameData.prestigeCount
+                    });
+                }
+                allPlayers.sort((a,b) => b.bananas - a.bananas);
+                const top10 = allPlayers.slice(0,10);
+                const leaderDiv = document.getElementById('leaderboardList');
+                if(top10.length === 0) {
+                    leaderDiv.innerHTML = '<div class="offline-card">🏆 Пока нет данных</div>';
+                } else {
+                    leaderDiv.innerHTML = top10.map((p, idx) => `
+                        <div class="leaderboard-item">
+                            <div class="rank">${idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx+1}`}</div>
+                            <div class="player-name">${p.username}</div>
+                            <div class="player-stats">🍌 ${Math.floor(p.bananas).toLocaleString()}<br>📊 ${p.level} ур. | 🔄 ${p.prestigeCount}</div>
+                        </div>
+                    `).join('');
+                }
+            } catch(e) {
+                document.getElementById('leaderboardList').innerHTML = '<div class="offline-card">🏆 Ошибка загрузки</div>';
+            }
         }
-        
-        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+
+        // ---------- Инициализация ----------
         function initGame() {
             loadFromLocal();
             loadFromCloud();
             
-            setInterval(() => autoSync(), 30000);
-            setInterval(updateEnergy, 3000);
+            // Периодические задачи
+            setInterval(() => {
+                updateEnergyAndExp();
+                autoSync();
+            }, 3000);
+            setInterval(() => {
+                updateUI();
+            }, 5000);
             
+            // Обработчики
             document.getElementById('minion').addEventListener('click', clickMinion);
             document.getElementById('prestigeBtn').addEventListener('click', doPrestige);
             document.getElementById('claimOfflineBtn').addEventListener('click', claimOffline);
             
+            // Табы
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                     tab.classList.add('active');
                     document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
-                    if (tab.dataset.tab === 'offline') {
-                        const secondsOffline = Math.min((Date.now() - gameData.lastOnline) / 1000, 28800);
-                        const offlineIncome = 0.1 + (gameData.upgrades.offline * 0.05);
-                        const pending = Math.floor(secondsOffline * offlineIncome);
-                        document.getElementById('offlineAmount').innerText = pending;
-                    }
+                    if(tab.dataset.tab === 'leaderboard') updateUI();
                 });
             });
             
