@@ -13,42 +13,32 @@
             user-select: none;
             -webkit-tap-highlight-color: transparent;
         }
-
         body {
             background: linear-gradient(135deg, #FFD700 0%, #FFC107 100%);
-            font-family: 'Comic Neue', 'Segoe UI', 'Comic Sans MS', cursive;
+            font-family: 'Segoe UI', 'Comic Neue', 'Comic Sans MS', cursive;
             min-height: 100vh;
             padding: 16px 16px 80px;
             color: #2C3E50;
         }
-
-        /* Шапка */
         .stats-row {
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         .stat-card {
             flex: 1;
             background: rgba(44, 62, 80, 0.85);
             backdrop-filter: blur(8px);
             border-radius: 28px;
-            padding: 10px 8px;
+            padding: 8px 6px;
             text-align: center;
             color: white;
             border: 1px solid #FFD700;
+            min-width: 70px;
         }
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.8;
-        }
-        .stat-value {
-            font-size: 22px;
-            font-weight: bold;
-            color: #FFD700;
-        }
-
-        /* Энергия */
+        .stat-label { font-size: 11px; opacity: 0.8; }
+        .stat-value { font-size: 20px; font-weight: bold; color: #FFD700; }
         .energy-section {
             background: rgba(44, 62, 80, 0.85);
             backdrop-filter: blur(8px);
@@ -75,8 +65,6 @@
             font-size: 12px;
             color: white;
         }
-
-        /* Миньон */
         .minion-wrapper {
             display: flex;
             justify-content: center;
@@ -99,8 +87,6 @@
         .minion:active { transform: scale(0.96); }
         .minion-face { font-size: 75px; }
         .minion-glasses { font-size: 30px; margin-top: -20px; }
-
-        /* Табы */
         .tabs {
             display: flex;
             gap: 8px;
@@ -130,8 +116,6 @@
         }
         .tab-content.active { display: block; }
         @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Карточки улучшений */
         .upgrade-list {
             display: flex;
             flex-direction: column;
@@ -151,7 +135,7 @@
             cursor: pointer;
             transition: 0.05s linear;
         }
-        .upgrade-item:active { transform: scale(0.98); background: rgba(255,255,255,1); }
+        .upgrade-item:active { transform: scale(0.98); background: white; }
         .upgrade-info { flex: 1; }
         .upgrade-name { font-weight: bold; font-size: 16px; color: #2C3E50; }
         .upgrade-desc { font-size: 11px; color: #7F8C8D; margin: 4px 0; }
@@ -164,7 +148,6 @@
             font-weight: bold;
             font-size: 14px;
         }
-
         .btn-prestige {
             background: #8E44AD;
             width: 100%;
@@ -178,7 +161,6 @@
             cursor: pointer;
         }
         .btn-prestige:active { transform: scale(0.97); }
-        
         .offline-card {
             background: rgba(44,62,80,0.85);
             border-radius: 30px;
@@ -241,6 +223,7 @@
             font-weight: bold;
             z-index: 1100;
             animation: fadeToast 2s forwards;
+            white-space: nowrap;
         }
         @keyframes fadeToast {
             0% { opacity: 1; }
@@ -304,7 +287,7 @@
         <div style="font-size: 12px; margin-top: 10px;">Автокликер работает даже когда ты не в игре!</div>
     </div>
     <div class="upgrade-list">
-        <div class="upgrade-item" style="background: rgba(44,62,80,0.85); color:white;">
+        <div class="upgrade-item" style="background: rgba(44,62,80,0.85); color:white; cursor:default;">
             <div><div class="upgrade-name">📈 Офлайн ставка</div><div id="offlineRateText" style="font-size:12px;">0.1 банан/сек</div></div>
             <div>+0.05 за уровень</div>
         </div>
@@ -314,14 +297,14 @@
 
 <div class="tab-content" id="tab-profile">
     <div class="upgrade-list">
-        <div class="upgrade-item"><div><div class="upgrade-name">👤 Игрок</div><div id="playerName">-</div></div></div>
-        <div class="upgrade-item"><div><div class="upgrade-name">🎯 Всего кликов</div><div id="totalClicks">0</div></div></div>
-        <div class="upgrade-item"><div><div class="upgrade-name">✨ Бонус престижа</div><div id="prestigeBonus">+0%</div></div></div>
-        <div class="upgrade-item"><div><div class="upgrade-name">⭐ Опыт до след. уровня</div><div id="expProgress">0 / 100</div></div></div>
+        <div class="upgrade-item" style="cursor:default;"><div><div class="upgrade-name">👤 Игрок</div><div id="playerName">-</div></div></div>
+        <div class="upgrade-item" style="cursor:default;"><div><div class="upgrade-name">🎯 Всего кликов</div><div id="totalClicks">0</div></div></div>
+        <div class="upgrade-item" style="cursor:default;"><div><div class="upgrade-name">✨ Бонус престижа</div><div id="prestigeBonus">+0%</div></div></div>
+        <div class="upgrade-item" style="cursor:default;"><div><div class="upgrade-name">⭐ Опыт до след. уровня</div><div id="expProgress">0 / 100</div></div></div>
     </div>
 </div>
 
-<div class="sync-status" id="syncStatus">🔄 Синхронизация с облаком Telegram...</div>
+<div class="sync-status" id="syncStatus">🔄 Данные синхронизируются...</div>
 
 <script>
     (function(){
@@ -329,11 +312,11 @@
         tg.ready();
         tg.expand();
         
-        // ---------- Инициализация данных ----------
+        // Получаем данные пользователя
         let userId = tg.initDataUnsafe?.user?.id || `demo_${Math.random().toString(36).substr(2, 8)}`;
         let userName = tg.initDataUnsafe?.user?.username || tg.initDataUnsafe?.user?.first_name || "Миньон";
         
-        // Базовые параметры
+        // Игровые данные
         let gameData = {
             userId: userId,
             username: userName,
@@ -348,20 +331,20 @@
             prestigeBonus: 1.0,
             lastOnline: Date.now(),
             upgrades: {
-                click: 0,    // +1 банан за клик
-                energy: 0,   // +25 макс. энергии
-                regen: 0,    // +0.5 реген/сек
-                bonus: 0,    // +5% к доходу
-                offline: 0,  // +0.05 банан/сек офлайн
-                crit: 0,     // +5% шанс x2
-                auto: 0      // 1 клик/сек
+                click: 0,
+                energy: 0,
+                regen: 0,
+                bonus: 0,
+                offline: 0,
+                crit: 0,
+                auto: 0
             }
         };
         
         let autoClickerInterval = null;
         let syncTimeout = null;
         
-        // ---------- Функции сохранения / загрузки ----------
+        // ========== СОХРАНЕНИЕ И ЗАГРУЗКА ==========
         function saveToLocal() {
             gameData.lastOnline = Date.now();
             localStorage.setItem('minionClicker', JSON.stringify(gameData));
@@ -372,18 +355,15 @@
             if (saved) {
                 try {
                     const parsed = JSON.parse(saved);
-                    // Сохраняем структуру, но обновляем userId/username если сменился аккаунт
                     if (parsed.userId === gameData.userId) {
                         Object.assign(gameData, parsed);
                     }
                 } catch(e) {}
             }
-            // Убедимся что энергия не выше макс
             if (gameData.energy > gameData.maxEnergy) gameData.energy = gameData.maxEnergy;
             updateUI();
         }
         
-        // Сохранение в облако Telegram
         function syncToCloud() {
             if (!tg.CloudStorage) {
                 document.getElementById('syncStatus').innerHTML = "⚠️ Облако не поддерживается, данные только локально";
@@ -405,16 +385,16 @@
                 lastOnline: gameData.lastOnline
             };
             tg.CloudStorage.setItem('minionClickerCloud', JSON.stringify(cloudData), (err) => {
-                if (err) console.warn("Cloud save error", err);
-                else document.getElementById('syncStatus').innerHTML = "✅ Сохранено в облаке";
-                setTimeout(() => {
-                    if(document.getElementById('syncStatus').innerHTML.includes("✅")) 
-                        document.getElementById('syncStatus').innerHTML = "🔄 Данные синхронизированы";
-                }, 2000);
+                if (!err) {
+                    document.getElementById('syncStatus').innerHTML = "✅ Сохранено в облаке";
+                    setTimeout(() => {
+                        if(document.getElementById('syncStatus').innerHTML.includes("✅"))
+                            document.getElementById('syncStatus').innerHTML = "🔄 Данные синхронизированы";
+                    }, 2000);
+                }
             });
         }
         
-        // Загрузка из облака Telegram
         function loadFromCloud() {
             if (!tg.CloudStorage) return;
             tg.CloudStorage.getItem('minionClickerCloud', (err, value) => {
@@ -442,20 +422,16 @@
                     } catch(e) {}
                 }
                 startAutoClicker();
-                startOfflineChecker();
             });
         }
         
-        // Автосинхронизация при изменении
         function autoSync() {
             saveToLocal();
             if (syncTimeout) clearTimeout(syncTimeout);
-            syncTimeout = setTimeout(() => {
-                syncToCloud();
-            }, 800);
+            syncTimeout = setTimeout(() => syncToCloud(), 800);
         }
         
-        // ---------- Игровая механика ----------
+        // ========== ИГРОВАЯ ЛОГИКА ==========
         function getUpgradeCost(upgrade) {
             const level = gameData.upgrades[upgrade];
             const base = { click:10, energy:15, regen:20, bonus:25, offline:30, crit:50, auto:100 }[upgrade];
@@ -474,7 +450,7 @@
                 
                 updateUI();
                 autoSync();
-                showToast(`✅ ${upgrade} улучшена!`, "#2ECC71");
+                showToast(`✅ Улучшение куплено!`, "#2ECC71");
             } else {
                 showToast(`❌ Нужно ${cost} 🍌`, "#E74C3C");
             }
@@ -517,7 +493,6 @@
             gameData.bananas += gain;
             gameData.totalClicks++;
             
-            // Опыт и уровни
             let expNeeded = gameData.level * 100;
             gameData.exp += gain;
             if (gameData.exp >= expNeeded) {
@@ -525,7 +500,6 @@
                 gameData.level++;
                 gameData.bananas += 100;
                 showToast(`🎉 УРОВЕНЬ ${gameData.level}! +100 🍌`, "#8E44AD");
-                // Анимация уровня
                 const minionDiv = document.getElementById('minion');
                 minionDiv.style.transform = "scale(1.1)";
                 setTimeout(() => minionDiv.style.transform = "", 200);
@@ -588,28 +562,13 @@
             }
         }
         
-        function startOfflineChecker() {
-            setInterval(() => {
-                const now = Date.now();
-                const secondsOffline = (now - gameData.lastOnline) / 1000;
-                if (secondsOffline > 60 && gameData.upgrades.offline > 0) {
-                    const offlineIncome = 0.1 + (gameData.upgrades.offline * 0.05);
-                    const earned = Math.floor(Math.min(secondsOffline, 28800) * offlineIncome);
-                    if (earned > 0) {
-                        document.getElementById('offlineAmount').innerText = earned;
-                    }
-                }
-            }, 30000);
-        }
-        
         function updateEnergy() {
-            if (!gameData) return;
             const regenRate = 1 + (gameData.upgrades.regen * 0.5);
             gameData.energy = Math.min(gameData.energy + regenRate, gameData.maxEnergy);
             updateUI();
         }
         
-        // ---------- UI рендер ----------
+        // ========== UI ОБНОВЛЕНИЕ ==========
         function updateUI() {
             document.getElementById('bananas').innerText = Math.floor(gameData.bananas).toLocaleString();
             document.getElementById('level').innerText = gameData.level;
@@ -626,7 +585,7 @@
             const offlineRate = 0.1 + (gameData.upgrades.offline * 0.05);
             document.getElementById('offlineRateText').innerHTML = `${offlineRate.toFixed(2)} банан/сек`;
             
-            // Рендер списка прокачек
+            // Рендер прокачек
             const upgradesList = document.getElementById('upgradesList');
             const upgradesConfig = [
                 { id:'click', name:'💪 Сила клика', desc:'+1 банан за клик', base:10 },
@@ -655,37 +614,32 @@
                 upgradesList.appendChild(div);
             }
             
-            // Таблица лидеров (демо, из локального хранилища – для реального нужен бэкенд)
+            // Лидерборд (демо)
             const leaderDiv = document.getElementById('leaderboardList');
             leaderDiv.innerHTML = `
                 <div class="leaderboard-item"><div class="rank">🥇</div><div class="player-name">${gameData.username}</div><div class="player-stats">🍌 ${Math.floor(gameData.bananas).toLocaleString()}</div></div>
-                <div style="text-align:center; margin-top:20px; font-size:12px;">🏆 Топ формируется из твоих данных. Полноценный рейтинг — через бэкенд.</div>
+                <div style="text-align:center; margin-top:20px; font-size:12px;">🏆 Полноценный рейтинг — через бэкенд</div>
             `;
             
-            // Офлайн уведомление
+            // Офлайн доход
             const secondsOffline = Math.min((Date.now() - gameData.lastOnline) / 1000, 28800);
             const offlineIncome = 0.1 + (gameData.upgrades.offline * 0.05);
             const pending = Math.floor(secondsOffline * offlineIncome);
             document.getElementById('offlineAmount').innerText = pending;
         }
         
-        // ---------- Инициализация игры ----------
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
         function initGame() {
             loadFromLocal();
-            loadFromCloud();  // асинхронно подтянет облако
+            loadFromCloud();
             
-            // Периодическое сохранение
-            setInterval(() => {
-                autoSync();
-            }, 30000);
+            setInterval(() => autoSync(), 30000);
             setInterval(updateEnergy, 3000);
             
-            // События
             document.getElementById('minion').addEventListener('click', clickMinion);
             document.getElementById('prestigeBtn').addEventListener('click', doPrestige);
             document.getElementById('claimOfflineBtn').addEventListener('click', claimOffline);
             
-            // Табы
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -702,8 +656,6 @@
             });
             
             updateUI();
-            startAutoClicker();
-            startOfflineChecker();
         }
         
         initGame();
