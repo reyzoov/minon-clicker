@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>🍌 Minion Clicker | Миньон Кликер + Летающий Миньон</title>
+    <title>🍌 Minion Clicker | Миньон Кликер</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Красивые шрифты -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,27 +17,34 @@
         }
 
         body {
-            background: url('bg.jpg') no-repeat center center fixed;
-            background-size: cover;
-            font-family: 'Comic Neue', 'Segoe UI', 'Comic Sans MS', cursive;
+            background: linear-gradient(135deg, #FFD700 0%, #FFC107 50%, #FFB300 100%);
+            font-family: 'Poppins', 'Comic Neue', 'Segoe UI', sans-serif;
             min-height: 100vh;
             padding: 16px 16px 80px;
             color: #2C3E50;
             position: relative;
         }
         
-        body.dark-theme { filter: brightness(0.85); }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: -1;
+        body.dark-theme {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
         }
-
+        
+        body.dark-theme .stat-card,
+        body.dark-theme .energy-box,
+        body.dark-theme .exp-box,
+        body.dark-theme .prestige-progress-box,
+        body.dark-theme .offline-card,
+        body.dark-theme .tabs {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
+        body.dark-theme .item-card {
+            background: rgba(30, 30, 50, 0.95);
+            color: #FFD700;
+        }
+        
+        body.dark-theme .item-name { color: #FFD700; }
+        
         /* Плавающие бананы */
         @keyframes floatBanana {
             0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
@@ -63,14 +72,14 @@
             background: rgba(44, 62, 80, 0.85);
             backdrop-filter: blur(8px);
             border-radius: 28px;
-            padding: 8px 6px;
+            padding: 10px 6px;
             text-align: center;
             color: white;
             border: 1px solid #FFD700;
             min-width: 70px;
         }
-        .stat-label { font-size: 11px; opacity: 0.8; }
-        .stat-value { font-size: 20px; font-weight: bold; color: #FFD700; }
+        .stat-label { font-size: 11px; opacity: 0.8; letter-spacing: 0.5px; }
+        .stat-value { font-size: 22px; font-weight: 800; color: #FFD700; }
 
         .energy-box, .exp-box, .prestige-progress-box {
             background: rgba(44, 62, 80, 0.85);
@@ -88,7 +97,7 @@
         .energy-fill { background: linear-gradient(90deg, #4cd964, #34c759); width: 100%; height: 100%; transition: width 0.2s; }
         .exp-fill { background: linear-gradient(90deg, #FFD700, #FFA500); width: 0%; height: 100%; transition: width 0.2s; }
         .prestige-fill { background: linear-gradient(90deg, #8E44AD, #9B59B6); width: 0%; height: 100%; transition: width 0.2s; }
-        .bar-text { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: white; }
+        .bar-text { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: white; font-weight: 500; }
 
         .minion-wrap {
             display: flex;
@@ -112,7 +121,6 @@
             pointer-events: none;
         }
         
-        /* Комбо счётчик */
         .combo-counter {
             position: absolute;
             bottom: -30px;
@@ -122,7 +130,7 @@
             color: #2C3E50;
             padding: 6px 16px;
             border-radius: 40px;
-            font-weight: bold;
+            font-weight: 800;
             font-size: 14px;
             white-space: nowrap;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
@@ -140,6 +148,7 @@
             font-size: 24px;
             cursor: pointer;
             z-index: 100;
+            backdrop-filter: blur(5px);
         }
 
         .tabs {
@@ -155,10 +164,10 @@
         .tab {
             flex: 1;
             text-align: center;
-            padding: 6px 4px;
+            padding: 8px 4px;
             border-radius: 30px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 700;
             font-size: 11px;
             color: rgba(255,255,255,0.7);
             transition: 0.2s;
@@ -180,6 +189,7 @@
             gap: 10px;
             max-height: 450px;
             overflow-y: auto;
+            padding-right: 4px;
         }
         .item-card {
             background: rgba(255,255,255,0.95);
@@ -195,16 +205,16 @@
         }
         .item-card:active { transform: scale(0.98); background: white; }
         .item-info { flex: 1; }
-        .item-name { font-weight: bold; font-size: 14px; color: #2C3E50; }
+        .item-name { font-weight: 800; font-size: 14px; color: #2C3E50; }
         .item-desc { font-size: 10px; color: #7F8C8D; margin: 4px 0; }
-        .item-level { font-size: 12px; color: #F39C12; font-weight: bold; }
+        .item-level { font-size: 11px; color: #F39C12; font-weight: 700; }
         .item-cost {
             background: #3498DB;
             color: white;
             padding: 6px 14px;
             border-radius: 40px;
-            font-weight: bold;
-            font-size: 14px;
+            font-weight: 700;
+            font-size: 13px;
         }
 
         .btn-prestige, .task-claim, .game-btn {
@@ -213,10 +223,11 @@
             border: none;
             border-radius: 40px;
             color: white;
-            font-weight: bold;
+            font-weight: 800;
             font-size: 16px;
             margin-top: 15px;
             cursor: pointer;
+            transition: transform 0.05s;
         }
         .btn-prestige { background: #8E44AD; }
         .task-claim { background: #2ECC71; }
@@ -226,6 +237,7 @@
 
         .offline-card {
             background: rgba(44,62,80,0.85);
+            backdrop-filter: blur(8px);
             border-radius: 30px;
             padding: 20px;
             text-align: center;
@@ -243,7 +255,7 @@
             padding: 10px 20px;
             border-radius: 40px;
             font-size: 14px;
-            font-weight: bold;
+            font-weight: 600;
             z-index: 1100;
             animation: fadeToast 2s forwards;
             white-space: nowrap;
@@ -262,13 +274,14 @@
             background: rgba(0,0,0,0.5);
             padding: 6px;
             border-radius: 40px;
+            font-weight: 500;
         }
         
         .click-animation {
             position: fixed;
             pointer-events: none;
             font-size: 28px;
-            font-weight: bold;
+            font-weight: 800;
             color: #FFD700;
             text-shadow: 2px 2px 0 #2C3E50;
             animation: floatUp 0.6s ease-out forwards;
@@ -309,6 +322,7 @@
             padding: 10px;
             text-align: center;
             min-width: 60px;
+            font-weight: 600;
         }
         .day-card.claimed { background: #1A252F; opacity: 0.5; }
         .day-card.current { border: 2px solid #FFD700; transform: scale(1.02); }
@@ -319,6 +333,7 @@
             border-radius: 30px;
             word-break: break-all;
             margin: 12px 0;
+            font-size: 12px;
         }
         
         .leaderboard-item {
@@ -331,8 +346,8 @@
             margin-bottom: 8px;
         }
         .rank { font-size: 24px; width: 45px; text-align: center; }
-        .leader-name { flex: 1; font-weight: bold; color: #2C3E50; }
-        .leader-stats { color: #F39C12; font-weight: bold; font-size: 12px; text-align: right; }
+        .leader-name { flex: 1; font-weight: 700; color: #2C3E50; }
+        .leader-stats { color: #F39C12; font-weight: 700; font-size: 12px; text-align: right; }
         
         .banana-icon {
             width: 24px;
@@ -350,12 +365,14 @@
             border-radius: 20px;
             padding: 10px;
             cursor: pointer;
+            transition: 0.1s;
         }
+        .skin-item:active { transform: scale(0.97); }
         .skin-item.active { border: 2px solid #FFD700; background: #FFD70020; }
         .skin-preview { width: 60px; height: 60px; object-fit: contain; border-radius: 15px; }
         
         /* Модальные окна */
-        .game-modal, .shooter-modal {
+        .game-modal {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -369,8 +386,8 @@
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-        .game-modal.hidden, .shooter-modal.hidden { display: none; }
-        .game-overlay, .shooter-overlay {
+        .game-modal.hidden { display: none; }
+        .game-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -379,7 +396,7 @@
             background: rgba(0,0,0,0.7);
             z-index: 1999;
         }
-        .game-overlay.hidden, .shooter-overlay.hidden { display: none; }
+        .game-overlay.hidden { display: none; }
         .banana-box {
             display: inline-block;
             width: 70px;
@@ -389,7 +406,9 @@
             border-radius: 15px;
             cursor: pointer;
             font-size: 30px;
+            transition: 0.05s;
         }
+        .banana-box:active { transform: scale(0.95); }
         .difficulty-btn {
             background: #3498DB;
             color: white;
@@ -398,23 +417,12 @@
             border: none;
             border-radius: 20px;
             cursor: pointer;
+            font-weight: 600;
         }
         
-        /* Игра-стрелялка */
-        #shooterCanvas {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border-radius: 20px;
-            display: block;
-            margin: 0 auto;
-            cursor: crosshair;
-        }
-        .shooter-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            color: #FFD700;
-            font-weight: bold;
-        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -422,7 +430,7 @@
 <button class="theme-toggle" id="themeToggle">🌙</button>
 
 <div class="stats-grid">
-    <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="banana-icon"> БАНАНЫ</div><div class="stat-value" id="bananas">0</div></div>
+    <div class="stat-card"><div class="stat-label">🍌 БАНАНЫ</div><div class="stat-value" id="bananas">0</div></div>
     <div class="stat-card"><div class="stat-label">📊 УРОВЕНЬ</div><div class="stat-value" id="level">1</div></div>
     <div class="stat-card"><div class="stat-label">💪 СИЛА</div><div class="stat-value" id="clickPower">1</div></div>
     <div class="stat-card"><div class="stat-label">🔄 ПРЕСТИЖ</div><div class="stat-value" id="prestigeCount">0</div></div>
@@ -445,7 +453,7 @@
 
 <div class="minion-wrap">
     <div class="minion" id="minion">
-        <img src="minion.clicker.jpg" alt="Миньон" class="minion-img" id="minionImg">
+        <img src="minion.clicker.jpg" alt="Миньон" class="minion-img" id="minionImg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ccircle cx=%2750%27 cy=%2750%27 r=%2745%27 fill=%27%23FFD700%27/%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E🐵%3C/text%3E%3C/svg%3E'">
     </div>
     <div class="combo-counter" id="comboCounter">🔥 x1</div>
 </div>
@@ -453,7 +461,7 @@
 <div class="tabs">
     <div class="tab active" data-tab="clicker">🍌 Кликер</div>
     <div class="tab" data-tab="upgrades">⬆️ Прокачки</div>
-    <div class="tab" data-tab="shop">🛒 Магазин</div>
+    <div class="tab" data-tab="shop">🛒 Скины</div>
     <div class="tab" data-tab="games">🎮 Игры</div>
     <div class="tab" data-tab="leaderboard">📊 Топ</div>
     <div class="tab" data-tab="profile">👤 Профиль</div>
@@ -463,11 +471,10 @@
     <div class="offline-card">
         🍌 Жми на миньона!<div style="margin-top:8px;">Пассивный доход: <strong id="passiveIncome">0</strong> 🍌/сек</div>
         <div style="margin-top:8px;">🤖 Автокликер не тратит энергию!</div>
-        <div style="margin-top:8px;">✨ Бонус перерождения: x<span id="prestigeMult">1</span></div>
+        <div style="margin-top:8px;">✨ Бонус престижа: x<span id="prestigeMult">1</span></div>
         <div style="margin-top:8px;">🔥 Комбо множитель: x<span id="comboMult">1</span></div>
     </div>
     <button class="task-claim" id="dailyBonusBtn">🎁 Ежедневный бонус</button>
-    <button class="game-btn" id="treasureBtn">🎁 Сундук сокровищ (каждый час)</button>
 </div>
 
 <div class="tab-content" id="tab-upgrades">
@@ -480,11 +487,8 @@
 </div>
 
 <div class="tab-content" id="tab-games">
-    <div class="offline-card">
-        🎮 ВЕСЁЛЫЕ ИГРЫ 🎮
-    </div>
-    <button class="game-btn" id="bananaGameBtn">🍌 УГАДАЙ БАНАН (сложность)</button>
-    <button class="game-btn" id="shooterGameBtn" style="background:#9B59B6; margin-top:10px;">✈️ ЛЕТАЮЩИЙ МИНЬОН (Shooter)</button>
+    <div class="offline-card">🎮 ВЕСЁЛЫЕ ИГРЫ 🎮</div>
+    <button class="game-btn" id="bananaGameBtn">🍌 УГАДАЙ БАНАН (выбор сложности)</button>
 </div>
 
 <div class="tab-content" id="tab-leaderboard">
@@ -516,29 +520,14 @@
 <div class="game-overlay hidden" id="gameOverlay"></div>
 <div class="game-modal hidden" id="gameModal">
     <h3>🍌 Угадай банан!</h3>
-    <p>В каком ящике банан?</p>
+    <p>В каком ящике спрятан банан?</p>
     <div id="bananaBoxes" style="display:flex; justify-content:center; flex-wrap:wrap;"></div>
     <div style="margin-top:10px;">
         <button class="difficulty-btn" data-diff="easy">😊 Лёгкий</button>
         <button class="difficulty-btn" data-diff="medium">😐 Средний</button>
         <button class="difficulty-btn" data-diff="hard">😤 Сложный</button>
     </div>
-    <button id="closeGameBtn" style="margin-top:15px; background:#E74C3C; padding:8px 20px; border:none; border-radius:20px; color:white;">Закрыть</button>
-</div>
-
-<!-- Модалка Shooter (Летающий миньон) -->
-<div class="shooter-overlay hidden" id="shooterOverlay"></div>
-<div class="shooter-modal hidden" id="shooterModal">
-    <h3>✈️ ЛЕТАЮЩИЙ МИНЬОН</h3>
-    <div class="shooter-stats">
-        <span>🎯 Очки: <span id="shooterScore">0</span></span>
-        <span>⏱️ Время: <span id="shooterTimer">30</span>с</span>
-        <span>🎁 Бонус: <span id="shooterBonus">0</span>🍌</span>
-    </div>
-    <canvas id="shooterCanvas" width="300" height="400"></canvas>
-    <div style="margin-top:10px; font-size:12px;">💡 Кликай по врагам (бананы и метеориты)</div>
-    <button id="startShooterBtn" class="game-btn" style="margin-top:10px;">🚀 СТАРТ ИГРЫ</button>
-    <button id="closeShooterBtn" style="margin-top:8px; background:#E74C3C; padding:8px 20px; border:none; border-radius:20px; color:white;">Закрыть</button>
+    <button id="closeGameBtn" style="margin-top:15px; background:#E74C3C; padding:8px 20px; border:none; border-radius:20px; color:white; font-weight:600;">Закрыть</button>
 </div>
 
 <script>
@@ -557,13 +546,12 @@
         let gameData = {
             userId, username: userName,
             bananas: 100, level: 1, exp: 0, totalClicks: 0,
-            clickPower1: 0, clickPower5: 0, clickPower25: 0,
+            clickPower1: 0, clickPower5: 0, clickPower10: 0, clickPower25: 0, clickPower50: 0,
             prestigeCount: 0, maxEnergy: 100, energy: 100,
             lastOnline: Date.now(), lastDaily: null, dailyStreak: 0,
-            lastTreasure: 0,
             combo: 0, lastClickTime: 0,
             activeSkin: 'default', ownedSkins: ['default'],
-            upgrades: { energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0 },
+            upgrades: { energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0, double:0, mega:0 },
             tasks: { task1: false, task2: false, task3: false },
             referralCode: Math.random().toString(36).substr(2, 8).toUpperCase(),
             referrals: [], referralBonusPercent: 0, totalEarned: 0
@@ -572,17 +560,25 @@
         let autoClickerInterval = null;
         let comboTimeout = null;
         
-        // Скины
+        // Скины (5 штук)
         const skins = {
             default: { name: '🐵 Обычный', price: 0, img: 'minion.clicker.jpg' },
             super: { name: '🦸 Супер миньон', price: 5000, img: 'minion_super.jpg' },
-            king: { name: '👑 Король миньон', price: 20000, img: 'minion_king.jpg' }
+            king: { name: '👑 Король миньон', price: 20000, img: 'minion_king.jpg' },
+            robot: { name: '🤖 Робо-миньон', price: 50000, img: 'minion_robot.jpg' },
+            pirate: { name: '🏴‍☠️ Пират миньон', price: 100000, img: 'minion_pirate.jpg' }
         };
         
-        function getTotalClickPower() { return 1 + gameData.clickPower1*1 + gameData.clickPower5*5 + gameData.clickPower25*25; }
+        function getTotalClickPower() { 
+            return 1 + gameData.clickPower1*1 + gameData.clickPower5*5 + gameData.clickPower10*10 + gameData.clickPower25*25 + gameData.clickPower50*50; 
+        }
+        
         function getUpgradeCost(upgradeId, level) {
-            const bases = { click1:10, click5:200, click25:1000, energy:15, regen:20, bonus:25, offline:30, crit:50, auto:100, luck:80, shield:120 };
-            return Math.floor((bases[upgradeId]||10) * Math.pow(1.3, level));
+            const bases = {
+                click1:10, click5:200, click10:800, click25:3000, click50:10000,
+                energy:15, regen:20, bonus:25, offline:30, crit:50, auto:100, luck:80, shield:120, double:200, mega:500
+            };
+            return Math.floor((bases[upgradeId]||10) * Math.pow(1.25, level));
         }
         
         function getComboMultiplier() { return Math.min(3, 1 + Math.floor(gameData.combo / 10)); }
@@ -591,7 +587,9 @@
             let level = 0;
             if (upgradeId === 'click1') level = gameData.clickPower1;
             else if (upgradeId === 'click5') level = gameData.clickPower5;
+            else if (upgradeId === 'click10') level = gameData.clickPower10;
             else if (upgradeId === 'click25') level = gameData.clickPower25;
+            else if (upgradeId === 'click50') level = gameData.clickPower50;
             else level = gameData.upgrades[upgradeId] || 0;
             if (level >= 25) { showToast("❌ Макс. уровень 25!", "#E74C3C"); return; }
             const cost = getUpgradeCost(upgradeId, level);
@@ -599,7 +597,9 @@
                 gameData.bananas -= cost;
                 if (upgradeId === 'click1') gameData.clickPower1++;
                 else if (upgradeId === 'click5') gameData.clickPower5++;
+                else if (upgradeId === 'click10') gameData.clickPower10++;
                 else if (upgradeId === 'click25') gameData.clickPower25++;
+                else if (upgradeId === 'click50') gameData.clickPower50++;
                 else if (upgradeId === 'energy') { gameData.upgrades.energy++; gameData.maxEnergy += 25; gameData.energy += 25; }
                 else if (upgradeId === 'regen') gameData.upgrades.regen++;
                 else if (upgradeId === 'bonus') gameData.upgrades.bonus++;
@@ -608,6 +608,8 @@
                 else if (upgradeId === 'auto') { gameData.upgrades.auto++; restartAutoClicker(); }
                 else if (upgradeId === 'luck') gameData.upgrades.luck++;
                 else if (upgradeId === 'shield') gameData.upgrades.shield++;
+                else if (upgradeId === 'double') gameData.upgrades.double++;
+                else if (upgradeId === 'mega') gameData.upgrades.mega++;
                 updateUI(); syncToCloud(); showToast(`✅ ${upgradeId} улучшена!`, "#2ECC71");
                 if (!gameData.tasks.task2) { gameData.tasks.task2 = true; syncToCloud(); }
             } else showToast(`❌ Нужно ${cost.toLocaleString()} 🍌`, "#E74C3C");
@@ -640,8 +642,11 @@
             if (comboTimeout) clearTimeout(comboTimeout);
             comboTimeout = setTimeout(() => { gameData.combo = 0; updateUI(); }, 3000);
             
-            const comboMult = getComboMultiplier();
-            const power = getTotalClickPower() * getPrestigeMultiplier() * comboMult;
+            let comboMult = getComboMultiplier();
+            if (gameData.upgrades.double > 0) comboMult *= (1 + gameData.upgrades.double * 0.05);
+            if (gameData.upgrades.mega > 0 && Math.random() < gameData.upgrades.mega * 0.02) comboMult *= 2;
+            
+            let power = getTotalClickPower() * getPrestigeMultiplier() * comboMult;
             let gain = Math.floor(power * (1 + gameData.upgrades.bonus*0.05 + gameData.referralBonusPercent/100));
             let isCritical = false;
             if (Math.random() < gameData.upgrades.crit * 0.05) { gain *= 2; isCritical = true; showToast("⚡ КРИТ!", "#F39C12"); }
@@ -680,37 +685,15 @@
             }
         }
         
-        // ========== СУНДУК СОКРОВИЩ ==========
-        function openTreasure() {
-            const now = Date.now();
-            const last = gameData.lastTreasure || 0;
-            if (now - last < 3600000) {
-                const minutes = Math.ceil((3600000 - (now - last)) / 60000);
-                showToast(`⏳ Следующий сундук через ${minutes} мин`, "#E74C3C");
-                return;
-            }
-            const rewards = [500, 1000, 2000, 5000, 10000, 0];
-            const extra = [0, 10, 20, 50, 100];
-            const reward = rewards[Math.floor(Math.random() * rewards.length)];
-            gameData.bananas += reward;
-            if (Math.random() < 0.3) {
-                const expBonus = extra[Math.floor(Math.random() * extra.length)];
-                gameData.exp += expBonus;
-                showToast(`🎁 СУНДУК: +${reward}🍌 +${expBonus}⭐!`, "#FFD700");
-            } else showToast(`🎁 СУНДУК: +${reward}🍌!`, "#FFD700");
-            gameData.lastTreasure = now;
-            updateUI(); syncToCloud();
-        }
-        
         function doPrestige() {
             if (gameData.level >= 10 && confirm("Переродиться? Бонус x2 навсегда (суммируется)!")) {
                 gameData.prestigeCount++;
                 gameData.bananas = 100;
                 gameData.level = 1;
                 gameData.exp = 0;
-                gameData.clickPower1 = 0; gameData.clickPower5 = 0; gameData.clickPower25 = 0;
+                gameData.clickPower1 = 0; gameData.clickPower5 = 0; gameData.clickPower10 = 0; gameData.clickPower25 = 0; gameData.clickPower50 = 0;
                 gameData.maxEnergy = 100; gameData.energy = 100;
-                gameData.upgrades = { energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0 };
+                gameData.upgrades = { energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0, double:0, mega:0 };
                 gameData.combo = 0;
                 updateUI(); restartAutoClicker(); syncToCloud();
                 showToast(`✨ ПЕРЕРОЖДЕНИЕ! x${getPrestigeMultiplier()} к силе!`, "#8E44AD");
@@ -737,8 +720,8 @@
                 box.onclick = () => {
                     let reward = 0;
                     if (currentGameDifficulty === 'easy') reward = 100;
-                    else if (currentGameDifficulty === 'medium') reward = 200;
-                    else reward = 500;
+                    else if (currentGameDifficulty === 'medium') reward = 250;
+                    else reward = 600;
                     if (i === hiddenIndex) {
                         gameData.bananas += reward;
                         updateUI(); syncToCloud();
@@ -749,159 +732,6 @@
                 };
                 boxesDiv.appendChild(box);
             }
-        }
-        
-        // ========== ИГРА "ЛЕТАЮЩИЙ МИНЬОН" (SHOOTER) ==========
-        let shooterActive = false;
-        let shooterAnimationId = null;
-        let shooterScore = 0;
-        let shooterTime = 30;
-        let shooterEnemies = [];
-        let shooterBullets = [];
-        let lastShootTime = 0;
-        const SHOOT_DELAY = 200;
-        
-        function startShooterGame() {
-            const modal = document.getElementById('shooterModal');
-            const overlay = document.getElementById('shooterOverlay');
-            modal.classList.remove('hidden');
-            overlay.classList.remove('hidden');
-            initShooterCanvas();
-        }
-        
-        function initShooterCanvas() {
-            const canvas = document.getElementById('shooterCanvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = 300;
-            canvas.height = 400;
-            
-            shooterActive = false;
-            shooterScore = 0;
-            shooterTime = 30;
-            shooterEnemies = [];
-            shooterBullets = [];
-            document.getElementById('shooterScore').innerText = '0';
-            document.getElementById('shooterTimer').innerText = '30';
-            document.getElementById('shooterBonus').innerText = '0';
-            
-            const startBtn = document.getElementById('startShooterBtn');
-            startBtn.onclick = () => {
-                if (shooterActive) return;
-                shooterActive = true;
-                shooterScore = 0;
-                shooterTime = 30;
-                shooterEnemies = [];
-                shooterBullets = [];
-                lastShootTime = 0;
-                updateShooterUI();
-                gameLoop();
-                const timerInterval = setInterval(() => {
-                    if (!shooterActive) { clearInterval(timerInterval); return; }
-                    shooterTime--;
-                    updateShooterUI();
-                    if (shooterTime <= 0) {
-                        shooterActive = false;
-                        clearInterval(timerInterval);
-                        const bonus = Math.floor(shooterScore * 10);
-                        gameData.bananas += bonus;
-                        updateUI(); syncToCloud();
-                        showToast(`✈️ Игра окончена! +${bonus} 🍌 за ${shooterScore} очков!`, "#FFD700");
-                        document.getElementById('shooterBonus').innerText = bonus;
-                        if (shooterAnimationId) cancelAnimationFrame(shooterAnimationId);
-                        drawGameOver(ctx, canvas.width, canvas.height);
-                    }
-                }, 1000);
-            };
-            
-            canvas.onclick = (e) => {
-                if (!shooterActive) return;
-                const now = Date.now();
-                if (now - lastShootTime < SHOOT_DELAY) return;
-                lastShootTime = now;
-                const rect = canvas.getBoundingClientRect();
-                const scaleX = canvas.width / rect.width;
-                const scaleY = canvas.height / rect.height;
-                let clickX = (e.clientX - rect.left) * scaleX;
-                let clickY = (e.clientY - rect.top) * scaleY;
-                clickX = Math.min(canvas.width, Math.max(0, clickX));
-                clickY = Math.min(canvas.height, Math.max(0, clickY));
-                shooterBullets.push({ x: clickX, y: clickY, radius: 5, life: 1 });
-                // Проверка попаданий
-                for (let i = 0; i < shooterEnemies.length; i++) {
-                    const e = shooterEnemies[i];
-                    const dx = clickX - e.x, dy = clickY - e.y;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    if (dist < e.radius) {
-                        shooterScore += e.type === 'banana' ? 10 : -5;
-                        shooterEnemies.splice(i,1);
-                        i--;
-                        updateShooterUI();
-                    }
-                }
-            };
-        }
-        
-        function updateShooterUI() {
-            document.getElementById('shooterScore').innerText = shooterScore;
-            document.getElementById('shooterTimer').innerText = shooterTime;
-        }
-        
-        function gameLoop() {
-            if (!shooterActive) return;
-            const canvas = document.getElementById('shooterCanvas');
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            // Спавн врагов
-            if (Math.random() < 0.03 && shooterEnemies.length < 10) {
-                const type = Math.random() < 0.7 ? 'banana' : 'meteor';
-                shooterEnemies.push({
-                    x: Math.random() * canvas.width,
-                    y: 20,
-                    radius: type === 'banana' ? 12 : 15,
-                    type: type,
-                    speedY: 1 + Math.random() * 2
-                });
-            }
-            // Движение врагов
-            for (let i = 0; i < shooterEnemies.length; i++) {
-                shooterEnemies[i].y += shooterEnemies[i].speedY;
-                if (shooterEnemies[i].y > canvas.height + 50) shooterEnemies.splice(i,1);
-            }
-            // Рисуем миньона-лётчика
-            ctx.save();
-            ctx.shadowBlur = 0;
-            ctx.font = "40px sans-serif";
-            ctx.fillText("🐵", canvas.width/2 - 25, canvas.height - 40);
-            // Враги
-            for (let e of shooterEnemies) {
-                if (e.type === 'banana') {
-                    ctx.fillStyle = "#FFD700";
-                    ctx.font = `${e.radius*2}px sans-serif`;
-                    ctx.fillText("🍌", e.x - e.radius, e.y - e.radius);
-                } else {
-                    ctx.fillStyle = "#8B4513";
-                    ctx.font = `${e.radius*2}px sans-serif`;
-                    ctx.fillText("🌑", e.x - e.radius, e.y - e.radius);
-                }
-            }
-            // Пули
-            for (let b of shooterBullets) {
-                ctx.fillStyle = "#FF4444";
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, 4, 0, Math.PI*2);
-                ctx.fill();
-            }
-            shooterBullets = [];
-            ctx.restore();
-            shooterAnimationId = requestAnimationFrame(gameLoop);
-        }
-        
-        function drawGameOver(ctx, w, h) {
-            ctx.fillStyle = "rgba(0,0,0,0.7)";
-            ctx.fillRect(0, 0, w, h);
-            ctx.fillStyle = "#FFD700";
-            ctx.font = "bold 20px sans-serif";
-            ctx.fillText("ИГРА ОКОНЧЕНА", w/2-70, h/2);
         }
         
         // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
@@ -937,7 +767,7 @@
         function loadFromLocal() {
             const saved = localStorage.getItem('minionClicker_'+userId);
             if(saved) try { Object.assign(gameData, JSON.parse(saved)); } catch(e){}
-            if(!gameData.upgrades) gameData.upgrades={energy:0,regen:0,bonus:0,offline:0,crit:0,auto:0,luck:0,shield:0};
+            if(!gameData.upgrades) gameData.upgrades={energy:0,regen:0,bonus:0,offline:0,crit:0,auto:0,luck:0,shield:0,double:0,mega:0};
             if(!gameData.ownedSkins) gameData.ownedSkins=['default'];
             if(gameData.energy>gameData.maxEnergy) gameData.energy=gameData.maxEnergy;
             updateUI();
@@ -985,12 +815,14 @@
             document.getElementById('referralLink').innerHTML = `https://t.me/minion_bot?start=${gameData.referralCode}`;
             document.getElementById('dailyCalendar').innerHTML = [100,200,500,1000,2000,5000,10000].map((r,i)=>`<div class="day-card ${i<gameData.dailyStreak?'claimed':i===gameData.dailyStreak?'current':''}">${i+1}<br>${r}</div>`).join('');
             
-            // Прокачки
+            // 15 ПРОКАЧЕК
             const upList = document.getElementById('upgradesList');
             const ups = [
                 {id:'click1',name:'💪 Сила I',desc:'+1🍌/клик',lvl:gameData.clickPower1},
                 {id:'click5',name:'🚀 Сила II',desc:'+5🍌/клик',lvl:gameData.clickPower5},
-                {id:'click25',name:'⭐ Сила III',desc:'+25🍌/клик',lvl:gameData.clickPower25},
+                {id:'click10',name:'⚡ Сила III',desc:'+10🍌/клик',lvl:gameData.clickPower10},
+                {id:'click25',name:'⭐ Сила IV',desc:'+25🍌/клик',lvl:gameData.clickPower25},
+                {id:'click50',name:'💎 Сила V',desc:'+50🍌/клик',lvl:gameData.clickPower50},
                 {id:'energy',name:'⚡ Энергия',desc:'+25 макс. энергии',lvl:gameData.upgrades.energy},
                 {id:'regen',name:'🔋 Регенерация',desc:'+0.5/сек',lvl:gameData.upgrades.regen},
                 {id:'bonus',name:'💰 Бонус',desc:'+5% доход',lvl:gameData.upgrades.bonus},
@@ -998,7 +830,9 @@
                 {id:'crit',name:'⚡ Крит',desc:'+5% шанс x2',lvl:gameData.upgrades.crit},
                 {id:'auto',name:'🎯 Автокликер',desc:'1 клик/сек (без энергии)',lvl:gameData.upgrades.auto},
                 {id:'luck',name:'🍀 Удача',desc:'+3% доп.награда',lvl:gameData.upgrades.luck},
-                {id:'shield',name:'🛡️ Защита',desc:'-2% потери энергии',lvl:gameData.upgrades.shield}
+                {id:'shield',name:'🛡️ Защита',desc:'-2% потери энергии',lvl:gameData.upgrades.shield},
+                {id:'double',name:'✨ Удвоение',desc:'+5% к комбо',lvl:gameData.upgrades.double},
+                {id:'mega',name:'💥 Мега-удар',desc:'+2% шанс x2 комбо',lvl:gameData.upgrades.mega}
             ];
             upList.innerHTML = '';
             for(let u of ups){
@@ -1008,6 +842,7 @@
                 div.onclick = ()=>buyUpgrade(u.id);
                 upList.appendChild(div);
             }
+            
             // Магазин скинов
             const shopDiv = document.getElementById('shopList');
             shopDiv.innerHTML = '<div class="item-card" style="justify-content:center;">🛒 МАГАЗИН СКИНОВ</div>';
@@ -1016,10 +851,11 @@
                 const active = gameData.activeSkin === id;
                 const div = document.createElement('div');
                 div.className = 'skin-item'+(active?' active':'');
-                div.innerHTML = `<img src="${skin.img}" class="skin-preview" onerror="this.src='minion.clicker.jpg'"><div>${skin.name}</div><div>${owned?(active?'✅ Активен':'Владелец'):`${skin.price}🍌`}</div>`;
+                div.innerHTML = `<img src="${skin.img}" class="skin-preview" onerror="this.src='minion.clicker.jpg'"><div style="font-weight:600;">${skin.name}</div><div style="font-size:12px;">${owned?(active?'✅ Активен':'🟢 Владелец'):`${skin.price.toLocaleString()}🍌`}</div>`;
                 div.onclick = ()=>buySkin(id);
                 shopDiv.appendChild(div);
             }
+            
             // Лидерборд
             const leaders = [];
             for(let i=0;i<localStorage.length;i++){
@@ -1059,7 +895,6 @@
             },10000);
         }
         
-        // Инициализация
         function init(){
             loadFromLocal(); loadFromCloud(); createFloatingBananas();
             setInterval(()=>{
@@ -1077,18 +912,10 @@
         document.getElementById('prestigeBtn').addEventListener('click', doPrestige);
         document.getElementById('claimOfflineBtn').addEventListener('click', claimOfflineManual);
         document.getElementById('dailyBonusBtn').addEventListener('click', dailyBonus);
-        document.getElementById('treasureBtn').addEventListener('click', openTreasure);
         document.getElementById('bananaGameBtn').addEventListener('click', startBananaGame);
-        document.getElementById('shooterGameBtn').addEventListener('click', startShooterGame);
         document.getElementById('closeGameBtn').addEventListener('click', ()=>{
             document.getElementById('gameModal').classList.add('hidden');
             document.getElementById('gameOverlay').classList.add('hidden');
-        });
-        document.getElementById('closeShooterBtn').addEventListener('click', ()=>{
-            shooterActive = false;
-            if(shooterAnimationId) cancelAnimationFrame(shooterAnimationId);
-            document.getElementById('shooterModal').classList.add('hidden');
-            document.getElementById('shooterOverlay').classList.add('hidden');
         });
         document.querySelectorAll('.difficulty-btn').forEach(btn=>{
             btn.addEventListener('click',()=>{
@@ -1102,8 +929,8 @@
         });
         document.getElementById('syncCloudBtn').addEventListener('click',()=>{ syncToCloud(); showToast("☁️ Синхронизация!", "#3498DB"); });
         document.getElementById('themeToggle').addEventListener('click',()=>{
-            document.body.classList.toggle('dark-theme');
-            document.getElementById('themeToggle').innerText = document.body.classList.contains('dark-theme')?'☀️':'🌙';
+            document.body.classList.toggle('dark-tabs');
+            document.getElementById('themeToggle').innerText = document.body.classList.contains('dark-tabs')?'☀️':'🌙';
         });
         document.querySelectorAll('.tab').forEach(tab=>{
             tab.addEventListener('click',()=>{
