@@ -5,8 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>🍌 Minion Clicker | Миньон Кликер</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <!-- Красивые шрифты -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Шрифт Marua -->
+    <style>
+        @font-face {
+            font-family: 'Marua';
+            src: url('https://fonts-online.ru/fonts/marua/marua-light.woff2') format('woff2');
+            font-weight: 300;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Marua';
+            src: url('https://fonts-online.ru/fonts/marua/marua-regular.woff2') format('woff2');
+            font-weight: 400;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Marua';
+            src: url('https://fonts-online.ru/fonts/marua/marua-bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+    </style>
     <style>
         * {
             margin: 0;
@@ -17,16 +36,35 @@
         }
 
         body {
-            background: linear-gradient(135deg, #FFD700 0%, #FFC107 50%, #FFB300 100%);
-            font-family: 'Poppins', 'Comic Neue', 'Segoe UI', sans-serif;
+            font-family: 'Marua', 'Segoe UI', sans-serif;
             min-height: 100vh;
             padding: 16px 16px 80px;
-            color: #2C3E50;
+            color: #fff;
             position: relative;
+            transition: all 0.3s ease;
+            font-weight: 400;
+        }
+
+        /* ФОН С КАРТИНКОЙ bg.jpg */
+        body {
+            background: url('bg.jpg') no-repeat center center fixed;
+            background-size: cover;
         }
         
-        body.dark-theme {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+        
+        /* ТЁМНАЯ ТЕМА */
+        body.dark-theme::before {
+            background: rgba(0, 0, 0, 0.8);
         }
         
         body.dark-theme .stat-card,
@@ -44,7 +82,7 @@
         }
         
         body.dark-theme .item-name { color: #FFD700; }
-        
+
         /* Плавающие бананы */
         @keyframes floatBanana {
             0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
@@ -61,6 +99,7 @@
             animation: floatBanana 8s linear infinite;
         }
 
+        /* КАРТОЧКИ СТАТИСТИКИ С КАРТИНКОЙ banana.jpg */
         .stats-grid {
             display: flex;
             gap: 10px;
@@ -78,9 +117,24 @@
             border: 1px solid #FFD700;
             min-width: 70px;
         }
-        .stat-label { font-size: 11px; opacity: 0.8; letter-spacing: 0.5px; }
-        .stat-value { font-size: 22px; font-weight: 800; color: #FFD700; }
+        .stat-label {
+            font-size: 11px;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+        .stat-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+        }
+        .stat-value { font-size: 22px; font-weight: 700; color: #FFD700; }
 
+        /* ПОЛОСКИ */
         .energy-box, .exp-box, .prestige-progress-box {
             background: rgba(44, 62, 80, 0.85);
             backdrop-filter: blur(8px);
@@ -97,8 +151,23 @@
         .energy-fill { background: linear-gradient(90deg, #4cd964, #34c759); width: 100%; height: 100%; transition: width 0.2s; }
         .exp-fill { background: linear-gradient(90deg, #FFD700, #FFA500); width: 0%; height: 100%; transition: width 0.2s; }
         .prestige-fill { background: linear-gradient(90deg, #8E44AD, #9B59B6); width: 0%; height: 100%; transition: width 0.2s; }
-        .bar-text { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: white; font-weight: 500; }
+        .bar-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            font-size: 12px;
+            color: white;
+            font-weight: 500;
+            align-items: center;
+        }
+        .bar-icon {
+            width: 18px;
+            height: 18px;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
 
+        /* МИНЬОН */
         .minion-wrap {
             display: flex;
             justify-content: center;
@@ -130,12 +199,13 @@
             color: #2C3E50;
             padding: 6px 16px;
             border-radius: 40px;
-            font-weight: 800;
+            font-weight: 700;
             font-size: 14px;
             white-space: nowrap;
             box-shadow: 0 2px 10px rgba(0,0,0,0.2);
         }
 
+        /* КНОПКА ТЕМЫ */
         .theme-toggle {
             position: fixed;
             top: 10px;
@@ -151,6 +221,7 @@
             backdrop-filter: blur(5px);
         }
 
+        /* ТАБЫ */
         .tabs {
             display: flex;
             gap: 6px;
@@ -183,6 +254,7 @@
         .tab-content.active { display: block; }
         @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
+        /* ПРОКАЧКИ */
         .upgrade-list, .shop-list {
             display: flex;
             flex-direction: column;
@@ -205,7 +277,7 @@
         }
         .item-card:active { transform: scale(0.98); background: white; }
         .item-info { flex: 1; }
-        .item-name { font-weight: 800; font-size: 14px; color: #2C3E50; }
+        .item-name { font-weight: 700; font-size: 14px; color: #2C3E50; }
         .item-desc { font-size: 10px; color: #7F8C8D; margin: 4px 0; }
         .item-level { font-size: 11px; color: #F39C12; font-weight: 700; }
         .item-cost {
@@ -217,13 +289,14 @@
             font-size: 13px;
         }
 
+        /* КНОПКИ */
         .btn-prestige, .task-claim, .game-btn {
             width: 100%;
             padding: 14px;
             border: none;
             border-radius: 40px;
             color: white;
-            font-weight: 800;
+            font-weight: 700;
             font-size: 16px;
             margin-top: 15px;
             cursor: pointer;
@@ -235,6 +308,7 @@
         .btn-prestige:active, .task-claim:active, .game-btn:active { transform: scale(0.97); }
         .btn-disabled { background: #95A5A6; opacity: 0.6; pointer-events: none; }
 
+        /* КАРТОЧКИ */
         .offline-card {
             background: rgba(44,62,80,0.85);
             backdrop-filter: blur(8px);
@@ -281,7 +355,7 @@
             position: fixed;
             pointer-events: none;
             font-size: 28px;
-            font-weight: 800;
+            font-weight: 700;
             color: #FFD700;
             text-shadow: 2px 2px 0 #2C3E50;
             animation: floatUp 0.6s ease-out forwards;
@@ -349,13 +423,6 @@
         .leader-name { flex: 1; font-weight: 700; color: #2C3E50; }
         .leader-stats { color: #F39C12; font-weight: 700; font-size: 12px; text-align: right; }
         
-        .banana-icon {
-            width: 24px;
-            height: 24px;
-            vertical-align: middle;
-            margin-right: 4px;
-        }
-        
         .skin-item {
             display: inline-block;
             width: calc(33% - 10px);
@@ -371,7 +438,7 @@
         .skin-item.active { border: 2px solid #FFD700; background: #FFD70020; }
         .skin-preview { width: 60px; height: 60px; object-fit: contain; border-radius: 15px; }
         
-        /* Модальные окна */
+        /* МОДАЛКИ */
         .game-modal {
             position: fixed;
             top: 50%;
@@ -420,6 +487,14 @@
             font-weight: 600;
         }
         
+        .developer {
+            text-align: center;
+            font-size: 10px;
+            margin-top: 20px;
+            opacity: 0.7;
+            color: white;
+        }
+        
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 4px; }
@@ -430,10 +505,10 @@
 <button class="theme-toggle" id="themeToggle">🌙</button>
 
 <div class="stats-grid">
-    <div class="stat-card"><div class="stat-label">🍌 БАНАНЫ</div><div class="stat-value" id="bananas">0</div></div>
-    <div class="stat-card"><div class="stat-label">📊 УРОВЕНЬ</div><div class="stat-value" id="level">1</div></div>
-    <div class="stat-card"><div class="stat-label">💪 СИЛА</div><div class="stat-value" id="clickPower">1</div></div>
-    <div class="stat-card"><div class="stat-label">🔄 ПРЕСТИЖ</div><div class="stat-value" id="prestigeCount">0</div></div>
+    <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="stat-icon" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E🍌%3C/text%3E%3C/svg%3E'"> БАНАНЫ</div><div class="stat-value" id="bananas">0</div></div>
+    <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="stat-icon" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E⭐%3C/text%3E%3C/svg%3E'"> УРОВЕНЬ</div><div class="stat-value" id="level">1</div></div>
+    <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="stat-icon" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E💪%3C/text%3E%3C/svg%3E'"> СИЛА</div><div class="stat-value" id="clickPower">1</div></div>
+    <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="stat-icon" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext x=%2750%27 y=%2770%27 text-anchor=%27middle%27 font-size=%2740%27%3E🔄%3C/text%3E%3C/svg%3E'"> ПРЕСТИЖ</div><div class="stat-value" id="prestigeCount">0</div></div>
 </div>
 
 <div class="energy-box">
@@ -448,7 +523,7 @@
 
 <div class="prestige-progress-box">
     <div class="bar-bg"><div class="prestige-fill" id="prestigeFill" style="width: 0%"></div></div>
-    <div class="bar-text"><span>🔄 До перерождения</span><span id="prestigeNeededText">10 уровень</span></div>
+    <div class="bar-text"><span>🔄 До перерождения</span><span id="prestigeNeededText">100,000 🍌</span></div>
 </div>
 
 <div class="minion-wrap">
@@ -479,7 +554,7 @@
 
 <div class="tab-content" id="tab-upgrades">
     <div class="upgrade-list" id="upgradesList"></div>
-    <button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужен 10 уровень)</button>
+    <button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужно 100,000 🍌)</button>
 </div>
 
 <div class="tab-content" id="tab-shop">
@@ -515,6 +590,7 @@
 </div>
 
 <div class="sync-status" id="syncStatus">🔄 Инициализация...</div>
+<div class="developer">Разработчик @reeizoov</div>
 
 <!-- Модалка Угадай банан -->
 <div class="game-overlay hidden" id="gameOverlay"></div>
@@ -536,13 +612,11 @@
         tg.ready();
         tg.expand();
 
-        // ========== ПОЛЬЗОВАТЕЛЬ ==========
         const userId = tg.initDataUnsafe?.user?.id || `demo_${Math.random().toString(36).substr(2, 8)}`;
         const userName = tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username || "Миньон";
         
         function getPrestigeMultiplier() { return Math.pow(2, gameData.prestigeCount); }
 
-        // ========== ДАННЫЕ ==========
         let gameData = {
             userId, username: userName,
             bananas: 100, level: 1, exp: 0, totalClicks: 0,
@@ -560,7 +634,7 @@
         let autoClickerInterval = null;
         let comboTimeout = null;
         
-        // Скины (5 штук)
+        // СКИНЫ
         const skins = {
             default: { name: '🐵 Обычный', price: 0, img: 'minion.clicker.jpg' },
             super: { name: '🦸 Супер миньон', price: 5000, img: 'minion_super.jpg' },
@@ -605,7 +679,11 @@
                 else if (upgradeId === 'bonus') gameData.upgrades.bonus++;
                 else if (upgradeId === 'offline') gameData.upgrades.offline++;
                 else if (upgradeId === 'crit') gameData.upgrades.crit++;
-                else if (upgradeId === 'auto') { gameData.upgrades.auto++; restartAutoClicker(); }
+                else if (upgradeId === 'auto') { 
+                    if (gameData.prestigeCount < 5) { showToast("❌ Автокликер доступен после 5 перерождений!", "#E74C3C"); gameData.bananas += cost; return; }
+                    gameData.upgrades.auto++; 
+                    restartAutoClicker(); 
+                }
                 else if (upgradeId === 'luck') gameData.upgrades.luck++;
                 else if (upgradeId === 'shield') gameData.upgrades.shield++;
                 else if (upgradeId === 'double') gameData.upgrades.double++;
@@ -677,30 +755,36 @@
         
         function restartAutoClicker() {
             if (autoClickerInterval) clearInterval(autoClickerInterval);
-            if (gameData.upgrades.auto > 0) {
-                const interval = Math.max(0.5, 2 - gameData.upgrades.auto*0.06);
+            if (gameData.upgrades.auto > 0 && gameData.prestigeCount >= 5) {
+                const speed = 1 + gameData.upgrades.auto * 0.05;
+                const interval = Math.max(0.3, 1 / speed);
                 autoClickerInterval = setInterval(() => {
                     if (gameData.energy > 0) clickMinion();
-                }, interval*1000);
+                }, interval * 1000);
             }
         }
         
         function doPrestige() {
-            if (gameData.level >= 10 && confirm("Переродиться? Бонус x2 навсегда (суммируется)!")) {
-                gameData.prestigeCount++;
-                gameData.bananas = 100;
-                gameData.level = 1;
-                gameData.exp = 0;
-                gameData.clickPower1 = 0; gameData.clickPower5 = 0; gameData.clickPower10 = 0; gameData.clickPower25 = 0; gameData.clickPower50 = 0;
-                gameData.maxEnergy = 100; gameData.energy = 100;
-                gameData.upgrades = { energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0, double:0, mega:0 };
-                gameData.combo = 0;
-                updateUI(); restartAutoClicker(); syncToCloud();
-                showToast(`✨ ПЕРЕРОЖДЕНИЕ! x${getPrestigeMultiplier()} к силе!`, "#8E44AD");
-            } else if (gameData.level < 10) showToast(`❌ Нужен 10 уровень`, "#E74C3C");
+            const needed = 100000;
+            if (gameData.bananas >= needed) {
+                if (confirm(`Переродиться за ${needed.toLocaleString()} 🍌? Бонус x2 навсегда!`)) {
+                    gameData.prestigeCount++;
+                    gameData.bananas -= needed;
+                    gameData.level = 1;
+                    gameData.exp = 0;
+                    gameData.clickPower1 = 0; gameData.clickPower5 = 0; gameData.clickPower10 = 0; gameData.clickPower25 = 0; gameData.clickPower50 = 0;
+                    gameData.maxEnergy = 100; gameData.energy = 100;
+                    gameData.upgrades = { energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0, double:0, mega:0 };
+                    gameData.combo = 0;
+                    updateUI(); restartAutoClicker(); syncToCloud();
+                    showToast(`✨ ПЕРЕРОЖДЕНИЕ! x${getPrestigeMultiplier()} к силе!`, "#8E44AD");
+                }
+            } else {
+                showToast(`❌ Нужно ${needed.toLocaleString()} 🍌`, "#E74C3C");
+            }
         }
         
-        // ========== ИГРА "УГАДАЙ БАНАН" ==========
+        // ИГРА "УГАДАЙ БАНАН"
         let currentGameDifficulty = 'medium';
         function startBananaGame() {
             const modal = document.getElementById('gameModal');
@@ -734,7 +818,6 @@
             }
         }
         
-        // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
         function dailyBonus() {
             const now = new Date();
             const last = gameData.lastDaily ? new Date(gameData.lastDaily) : null;
@@ -762,7 +845,7 @@
             gameData.lastOnline = now; saveToLocal();
         }
         
-        // ========== СОХРАНЕНИЕ ==========
+        // СОХРАНЕНИЕ
         function saveToLocal() { gameData.lastOnline = Date.now(); localStorage.setItem('minionClicker_'+userId, JSON.stringify(gameData)); }
         function loadFromLocal() {
             const saved = localStorage.getItem('minionClicker_'+userId);
@@ -798,8 +881,9 @@
             const expNeeded = gameData.level*100;
             document.getElementById('expFill').style.width = (gameData.exp/expNeeded*100)+'%';
             document.getElementById('expText').innerText = `${Math.floor(gameData.exp)}/${expNeeded}`;
-            document.getElementById('prestigeFill').style.width = Math.min(100, (gameData.level/10)*100)+'%';
-            document.getElementById('prestigeNeededText').innerHTML = gameData.level>=10?"Доступно!":`${10-gameData.level} уровень`;
+            const prestigePercent = Math.min(100, (gameData.bananas/100000)*100);
+            document.getElementById('prestigeFill').style.width = prestigePercent+'%';
+            document.getElementById('prestigeNeededText').innerHTML = gameData.bananas>=100000?"Доступно!":`${(100000-gameData.bananas).toLocaleString()} 🍌`;
             document.getElementById('playerName').innerHTML = gameData.username;
             document.getElementById('totalClicks').innerHTML = gameData.totalClicks.toLocaleString();
             document.getElementById('prestigeBonus').innerHTML = `+${Math.round((getPrestigeMultiplier()-1)*100)}%`;
@@ -815,7 +899,7 @@
             document.getElementById('referralLink').innerHTML = `https://t.me/minion_bot?start=${gameData.referralCode}`;
             document.getElementById('dailyCalendar').innerHTML = [100,200,500,1000,2000,5000,10000].map((r,i)=>`<div class="day-card ${i<gameData.dailyStreak?'claimed':i===gameData.dailyStreak?'current':''}">${i+1}<br>${r}</div>`).join('');
             
-            // 15 ПРОКАЧЕК
+            // ПРОКАЧКИ (15 штук)
             const upList = document.getElementById('upgradesList');
             const ups = [
                 {id:'click1',name:'💪 Сила I',desc:'+1🍌/клик',lvl:gameData.clickPower1},
@@ -828,7 +912,7 @@
                 {id:'bonus',name:'💰 Бонус',desc:'+5% доход',lvl:gameData.upgrades.bonus},
                 {id:'offline',name:'🤖 Офлайн',desc:'+0.05/сек',lvl:gameData.upgrades.offline},
                 {id:'crit',name:'⚡ Крит',desc:'+5% шанс x2',lvl:gameData.upgrades.crit},
-                {id:'auto',name:'🎯 Автокликер',desc:'1 клик/сек (без энергии)',lvl:gameData.upgrades.auto},
+                {id:'auto',name:'🎯 Автокликер',desc:'1 клик/сек (нужно 5 перерождений!)',lvl:gameData.upgrades.auto},
                 {id:'luck',name:'🍀 Удача',desc:'+3% доп.награда',lvl:gameData.upgrades.luck},
                 {id:'shield',name:'🛡️ Защита',desc:'-2% потери энергии',lvl:gameData.upgrades.shield},
                 {id:'double',name:'✨ Удвоение',desc:'+5% к комбо',lvl:gameData.upgrades.double},
@@ -837,13 +921,14 @@
             upList.innerHTML = '';
             for(let u of ups){
                 const cost = getUpgradeCost(u.id, u.lvl);
+                const autoLock = (u.id === 'auto' && gameData.prestigeCount < 5);
                 const div = document.createElement('div'); div.className='item-card';
-                div.innerHTML = `<div class="item-info"><div class="item-name">${u.name}</div><div class="item-desc">${u.desc}</div><div class="item-level">Ур.${u.lvl}/25</div></div><div class="item-cost">${cost.toLocaleString()}🍌</div>`;
-                div.onclick = ()=>buyUpgrade(u.id);
+                div.innerHTML = `<div class="item-info"><div class="item-name">${u.name}</div><div class="item-desc">${u.desc}</div><div class="item-level">Ур.${u.lvl}/25</div>${autoLock ? '<div style="font-size:10px;color:#E74C3C;">🔒 Требуется 5 перерождений</div>' : ''}</div><div class="item-cost">${autoLock ? '🔒 ЗАБЛОКИРОВАНО' : cost.toLocaleString()+'🍌'}</div>`;
+                div.onclick = () => { if(!autoLock) buyUpgrade(u.id); else showToast("❌ Нужно 5 перерождений!", "#E74C3C"); };
                 upList.appendChild(div);
             }
             
-            // Магазин скинов
+            // МАГАЗИН СКИНОВ
             const shopDiv = document.getElementById('shopList');
             shopDiv.innerHTML = '<div class="item-card" style="justify-content:center;">🛒 МАГАЗИН СКИНОВ</div>';
             for(let [id,skin] of Object.entries(skins)){
@@ -856,7 +941,7 @@
                 shopDiv.appendChild(div);
             }
             
-            // Лидерборд
+            // ЛИДЕРБОРД
             const leaders = [];
             for(let i=0;i<localStorage.length;i++){
                 const key = localStorage.key(i);
@@ -870,7 +955,7 @@
             else leaderDiv.innerHTML = leaders.slice(0,20).map((p,i)=>`<div class="leaderboard-item"><div class="rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div><div class="leader-name">${p.username}</div><div class="leader-stats">🍌 ${Math.floor(p.bananas).toLocaleString()} 📊 ${p.level} ур. 🔄 ${p.prestigeCount}</div></div>`).join('');
             
             const prestigeBtn = document.getElementById('prestigeBtn');
-            if(gameData.level>=10){ prestigeBtn.classList.remove('btn-disabled'); prestigeBtn.disabled=false; }
+            if(gameData.bananas>=100000){ prestigeBtn.classList.remove('btn-disabled'); prestigeBtn.disabled=false; }
             else{ prestigeBtn.classList.add('btn-disabled'); prestigeBtn.disabled=true; }
         }
         
@@ -929,8 +1014,8 @@
         });
         document.getElementById('syncCloudBtn').addEventListener('click',()=>{ syncToCloud(); showToast("☁️ Синхронизация!", "#3498DB"); });
         document.getElementById('themeToggle').addEventListener('click',()=>{
-            document.body.classList.toggle('dark-tabs');
-            document.getElementById('themeToggle').innerText = document.body.classList.contains('dark-tabs')?'☀️':'🌙';
+            document.body.classList.toggle('dark-theme');
+            document.getElementById('themeToggle').innerText = document.body.classList.contains('dark-theme')?'☀️':'🌙';
         });
         document.querySelectorAll('.tab').forEach(tab=>{
             tab.addEventListener('click',()=>{
