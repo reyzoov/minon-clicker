@@ -43,10 +43,6 @@
             position: relative;
             transition: all 0.3s ease;
             font-weight: 400;
-        }
-
-        /* ФОН С КАРТИНКОЙ bg.jpg */
-        body {
             background: url('bg.jpg') no-repeat center center fixed;
             background-size: cover;
         }
@@ -160,12 +156,6 @@
             font-weight: 500;
             align-items: center;
         }
-        .bar-icon {
-            width: 18px;
-            height: 18px;
-            vertical-align: middle;
-            margin-right: 4px;
-        }
 
         /* МИНЬОН */
         .minion-wrap {
@@ -264,7 +254,7 @@
             padding-right: 4px;
         }
         .item-card {
-            background: rgba(255,255,255,0.95);
+            background: rgba(255,255,255,0.9);
             border-radius: 24px;
             padding: 12px;
             display: flex;
@@ -275,7 +265,7 @@
             cursor: pointer;
             transition: 0.05s linear;
         }
-        .item-card:active { transform: scale(0.98); background: white; }
+        .item-card:active { transform: scale(0.98); background: rgba(255,255,255,1); }
         .item-info { flex: 1; }
         .item-name { font-weight: 700; font-size: 14px; color: #2C3E50; }
         .item-desc { font-size: 10px; color: #7F8C8D; margin: 4px 0; }
@@ -428,15 +418,16 @@
             width: calc(33% - 10px);
             margin: 5px;
             text-align: center;
-            background: rgba(255,255,255,0.95);
+            background: transparent;
             border-radius: 20px;
             padding: 10px;
             cursor: pointer;
             transition: 0.1s;
+            color: white;
         }
         .skin-item:active { transform: scale(0.97); }
-        .skin-item.active { border: 2px solid #FFD700; background: #FFD70020; }
-        .skin-preview { width: 60px; height: 60px; object-fit: contain; border-radius: 15px; }
+        .skin-item.active { border: 2px solid #FFD700; background: rgba(0,0,0,0.3); border-radius: 20px; }
+        .skin-preview { width: 60px; height: 60px; object-fit: contain; border-radius: 15px; background: transparent; }
         
         /* МОДАЛКИ */
         .game-modal {
@@ -554,7 +545,7 @@
 
 <div class="tab-content" id="tab-upgrades">
     <div class="upgrade-list" id="upgradesList"></div>
-    <button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужно 100,000 🍌)</button>
+    <button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужно <span id="prestigeCost">100,000</span> 🍌)</button>
 </div>
 
 <div class="tab-content" id="tab-shop">
@@ -616,6 +607,7 @@
         const userName = tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username || "Миньон";
         
         function getPrestigeMultiplier() { return Math.pow(2, gameData.prestigeCount); }
+        function getPrestigeCost() { return 100000 * Math.pow(2, gameData.prestigeCount); }
 
         let gameData = {
             userId, username: userName,
@@ -679,11 +671,7 @@
                 else if (upgradeId === 'bonus') gameData.upgrades.bonus++;
                 else if (upgradeId === 'offline') gameData.upgrades.offline++;
                 else if (upgradeId === 'crit') gameData.upgrades.crit++;
-                else if (upgradeId === 'auto') { 
-                    if (gameData.prestigeCount < 5) { showToast("❌ Автокликер доступен после 5 перерождений!", "#E74C3C"); gameData.bananas += cost; return; }
-                    gameData.upgrades.auto++; 
-                    restartAutoClicker(); 
-                }
+                else if (upgradeId === 'auto') { gameData.upgrades.auto++; restartAutoClicker(); }
                 else if (upgradeId === 'luck') gameData.upgrades.luck++;
                 else if (upgradeId === 'shield') gameData.upgrades.shield++;
                 else if (upgradeId === 'double') gameData.upgrades.double++;
@@ -737,8 +725,10 @@
             gameData.totalClicks++;
             gameData.totalEarned += gain;
             
+            // 1 клик = 1 опыт!
+            let expGain = 1;
+            gameData.exp += expGain;
             let expNeeded = gameData.level * 100;
-            gameData.exp += gain;
             if (gameData.exp >= expNeeded) {
                 gameData.exp -= expNeeded;
                 gameData.level++;
@@ -755,7 +745,7 @@
         
         function restartAutoClicker() {
             if (autoClickerInterval) clearInterval(autoClickerInterval);
-            if (gameData.upgrades.auto > 0 && gameData.prestigeCount >= 5) {
+            if (gameData.upgrades.auto > 0) {
                 const speed = 1 + gameData.upgrades.auto * 0.05;
                 const interval = Math.max(0.3, 1 / speed);
                 autoClickerInterval = setInterval(() => {
@@ -765,7 +755,7 @@
         }
         
         function doPrestige() {
-            const needed = 100000;
+            const needed = getPrestigeCost();
             if (gameData.bananas >= needed) {
                 if (confirm(`Переродиться за ${needed.toLocaleString()} 🍌? Бонус x2 навсегда!`)) {
                     gameData.prestigeCount++;
@@ -871,6 +861,7 @@
         }
         
         function updateUI() {
+            const needed = getPrestigeCost();
             document.getElementById('bananas').innerText = Math.floor(gameData.bananas).toLocaleString();
             document.getElementById('level').innerText = gameData.level;
             document.getElementById('clickPower').innerText = Math.floor(getTotalClickPower()*getPrestigeMultiplier()*getComboMultiplier());
@@ -881,9 +872,10 @@
             const expNeeded = gameData.level*100;
             document.getElementById('expFill').style.width = (gameData.exp/expNeeded*100)+'%';
             document.getElementById('expText').innerText = `${Math.floor(gameData.exp)}/${expNeeded}`;
-            const prestigePercent = Math.min(100, (gameData.bananas/100000)*100);
+            const prestigePercent = Math.min(100, (gameData.bananas/needed)*100);
             document.getElementById('prestigeFill').style.width = prestigePercent+'%';
-            document.getElementById('prestigeNeededText').innerHTML = gameData.bananas>=100000?"Доступно!":`${(100000-gameData.bananas).toLocaleString()} 🍌`;
+            document.getElementById('prestigeNeededText').innerHTML = gameData.bananas>=needed?"Доступно!":`${(needed-gameData.bananas).toLocaleString()} 🍌`;
+            document.getElementById('prestigeCost').innerText = needed.toLocaleString();
             document.getElementById('playerName').innerHTML = gameData.username;
             document.getElementById('totalClicks').innerHTML = gameData.totalClicks.toLocaleString();
             document.getElementById('prestigeBonus').innerHTML = `+${Math.round((getPrestigeMultiplier()-1)*100)}%`;
@@ -912,7 +904,7 @@
                 {id:'bonus',name:'💰 Бонус',desc:'+5% доход',lvl:gameData.upgrades.bonus},
                 {id:'offline',name:'🤖 Офлайн',desc:'+0.05/сек',lvl:gameData.upgrades.offline},
                 {id:'crit',name:'⚡ Крит',desc:'+5% шанс x2',lvl:gameData.upgrades.crit},
-                {id:'auto',name:'🎯 Автокликер',desc:'1 клик/сек (нужно 5 перерождений!)',lvl:gameData.upgrades.auto},
+                {id:'auto',name:'🎯 Автокликер',desc:'1 клик/сек (не тратит энергию!)',lvl:gameData.upgrades.auto},
                 {id:'luck',name:'🍀 Удача',desc:'+3% доп.награда',lvl:gameData.upgrades.luck},
                 {id:'shield',name:'🛡️ Защита',desc:'-2% потери энергии',lvl:gameData.upgrades.shield},
                 {id:'double',name:'✨ Удвоение',desc:'+5% к комбо',lvl:gameData.upgrades.double},
@@ -921,14 +913,13 @@
             upList.innerHTML = '';
             for(let u of ups){
                 const cost = getUpgradeCost(u.id, u.lvl);
-                const autoLock = (u.id === 'auto' && gameData.prestigeCount < 5);
                 const div = document.createElement('div'); div.className='item-card';
-                div.innerHTML = `<div class="item-info"><div class="item-name">${u.name}</div><div class="item-desc">${u.desc}</div><div class="item-level">Ур.${u.lvl}/25</div>${autoLock ? '<div style="font-size:10px;color:#E74C3C;">🔒 Требуется 5 перерождений</div>' : ''}</div><div class="item-cost">${autoLock ? '🔒 ЗАБЛОКИРОВАНО' : cost.toLocaleString()+'🍌'}</div>`;
-                div.onclick = () => { if(!autoLock) buyUpgrade(u.id); else showToast("❌ Нужно 5 перерождений!", "#E74C3C"); };
+                div.innerHTML = `<div class="item-info"><div class="item-name">${u.name}</div><div class="item-desc">${u.desc}</div><div class="item-level">Ур.${u.lvl}/25</div></div><div class="item-cost">${cost.toLocaleString()}🍌</div>`;
+                div.onclick = () => buyUpgrade(u.id);
                 upList.appendChild(div);
             }
             
-            // МАГАЗИН СКИНОВ
+            // МАГАЗИН СКИНОВ (прозрачный фон)
             const shopDiv = document.getElementById('shopList');
             shopDiv.innerHTML = '<div class="item-card" style="justify-content:center;">🛒 МАГАЗИН СКИНОВ</div>';
             for(let [id,skin] of Object.entries(skins)){
@@ -955,7 +946,7 @@
             else leaderDiv.innerHTML = leaders.slice(0,20).map((p,i)=>`<div class="leaderboard-item"><div class="rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div><div class="leader-name">${p.username}</div><div class="leader-stats">🍌 ${Math.floor(p.bananas).toLocaleString()} 📊 ${p.level} ур. 🔄 ${p.prestigeCount}</div></div>`).join('');
             
             const prestigeBtn = document.getElementById('prestigeBtn');
-            if(gameData.bananas>=100000){ prestigeBtn.classList.remove('btn-disabled'); prestigeBtn.disabled=false; }
+            if(gameData.bananas>=needed){ prestigeBtn.classList.remove('btn-disabled'); prestigeBtn.disabled=false; }
             else{ prestigeBtn.classList.add('btn-disabled'); prestigeBtn.disabled=true; }
         }
         
