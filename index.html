@@ -14,6 +14,7 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* ========== ОСНОВНЫЕ СТИЛИ ========== */
         body {
             background: url('bg.jpg') no-repeat center center fixed;
             background-size: cover;
@@ -22,9 +23,17 @@
             padding: 16px 16px 80px;
             color: #2C3E50;
             position: relative;
+            transition: background 0.3s ease;
         }
         
-        /* Затемнение фона для читаемости текста */
+        body.dark-theme {
+            filter: brightness(0.85);
+        }
+        
+        body.dark-theme::before {
+            background: rgba(0, 0, 0, 0.7);
+        }
+        
         body::before {
             content: '';
             position: fixed;
@@ -34,9 +43,26 @@
             height: 100%;
             background: rgba(0, 0, 0, 0.4);
             z-index: -1;
+            transition: background 0.3s ease;
         }
 
-        /* Шапка */
+        /* ========== АНИМАЦИЯ ПАРЯЩИХ БАНАНОВ ========== */
+        @keyframes floatBanana {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 1; }
+        }
+        .banana-particle {
+            position: fixed;
+            width: 30px;
+            height: 30px;
+            background: url('banana.jpg') no-repeat center;
+            background-size: contain;
+            pointer-events: none;
+            z-index: 999;
+            animation: floatBanana 8s linear infinite;
+        }
+        
+        /* ========== ШАПКА ========== */
         .stats-grid {
             display: flex;
             gap: 10px;
@@ -57,8 +83,8 @@
         .stat-label { font-size: 11px; opacity: 0.8; }
         .stat-value { font-size: 20px; font-weight: bold; color: #FFD700; }
 
-        /* Энергия и опыт */
-        .energy-box, .exp-box {
+        /* ========== ПОЛОСКИ ========== */
+        .energy-box, .exp-box, .prestige-progress-box {
             background: rgba(44, 62, 80, 0.85);
             backdrop-filter: blur(8px);
             border-radius: 30px;
@@ -83,6 +109,12 @@
             height: 100%;
             transition: width 0.2s;
         }
+        .prestige-fill {
+            background: linear-gradient(90deg, #8E44AD, #9B59B6);
+            width: 0%;
+            height: 100%;
+            transition: width 0.2s;
+        }
         .bar-text {
             display: flex;
             justify-content: space-between;
@@ -90,12 +122,22 @@
             font-size: 12px;
             color: white;
         }
+        .exp-percent {
+            font-size: 11px;
+            color: #FFD700;
+            margin-left: 8px;
+        }
+        .prestige-text {
+            font-size: 11px;
+            color: #FFD700;
+        }
 
-        /* Миньон с картинкой */
+        /* ========== МИНЬОН ========== */
         .minion-wrap {
             display: flex;
             justify-content: center;
             margin: 20px 0;
+            position: relative;
         }
         .minion {
             width: 220px;
@@ -115,7 +157,23 @@
             pointer-events: none;
         }
 
-        /* Табы */
+        /* ========== КНОПКА ТЕМЫ ========== */
+        .theme-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(44,62,80,0.8);
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            font-size: 24px;
+            cursor: pointer;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        /* ========== ТАБЫ ========== */
         .tabs {
             display: flex;
             gap: 8px;
@@ -146,8 +204,8 @@
         .tab-content.active { display: block; }
         @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Карточки */
-        .upgrade-list, .tasks-list {
+        /* ========== КАРТОЧКИ ========== */
+        .upgrade-list, .tasks-list, .shop-list, .records-list, .achievements-list {
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -165,6 +223,7 @@
             border-left: 6px solid #FFD700;
             cursor: pointer;
             transition: 0.05s linear;
+            position: relative;
         }
         .item-card:active { transform: scale(0.98); background: white; }
         .item-info { flex: 1; }
@@ -179,8 +238,28 @@
             font-weight: bold;
             font-size: 14px;
         }
+        
+        /* Всплывающая подсказка */
+        .upgrade-tooltip {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2C3E50;
+            color: #FFD700;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        .item-card:hover .upgrade-tooltip {
+            display: block;
+        }
 
-        .btn-prestige, .task-claim {
+        /* ========== КНОПКИ ========== */
+        .btn-prestige, .task-claim, .shop-btn, .game-btn {
             width: 100%;
             padding: 14px;
             border: none;
@@ -193,9 +272,25 @@
         }
         .btn-prestige { background: #8E44AD; }
         .task-claim { background: #2ECC71; margin-top: 10px; }
-        .btn-prestige:active, .task-claim:active { transform: scale(0.97); }
+        .shop-btn { background: #F39C12; }
+        .game-btn { background: #E74C3C; }
+        .dificulty-btn { background: #3498DB; margin-right: 10px; }
+        
+        .btn-prestige:active, .task-claim:active, .shop-btn:active, .game-btn:active {
+            transform: scale(0.97);
+        }
         .btn-disabled { background: #95A5A6; opacity: 0.6; pointer-events: none; }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); background: #f39c12; }
+            100% { transform: scale(1); }
+        }
+        #dailyBonusBtn {
+            animation: pulse 2s infinite;
+        }
 
+        /* ========== ОФЛАЙН И ЛИДЕРБОРД ========== */
         .offline-card {
             background: rgba(44,62,80,0.85);
             border-radius: 30px;
@@ -204,7 +299,24 @@
             color: white;
             margin-bottom: 15px;
         }
-        .offline-amount { font-size: 36px; font-weight: bold; color: #FFD700; margin: 10px 0; }
+        .offline-notification {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2ECC71;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            z-index: 2000;
+            animation: slideDown 0.5s ease;
+        }
+        @keyframes slideDown {
+            from { top: -50px; opacity: 0; }
+            to { top: 20%; opacity: 1; }
+        }
+        
         .leaderboard-item {
             background: rgba(255,255,255,0.9);
             border-radius: 20px;
@@ -218,7 +330,7 @@
         .leader-name { flex: 1; font-weight: bold; color: #2C3E50; }
         .leader-stats { color: #F39C12; font-weight: bold; font-size: 12px; text-align: right; }
 
-        /* Банан в балансе */
+        /* ========== АНИМАЦИИ ========== */
         .banana-icon {
             width: 24px;
             height: 24px;
@@ -240,6 +352,29 @@
             0% { opacity: 1; transform: translateY(0) scale(0.8); }
             100% { opacity: 0; transform: translateY(-80px) scale(1.5); }
         }
+        
+        .level-up {
+            animation: levelGlow 0.5s ease;
+        }
+        @keyframes levelGlow {
+            0% { text-shadow: 0 0 0 #FFD700; }
+            100% { text-shadow: 0 0 20px #FFD700; }
+        }
+        
+        .particle {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: #FFD700;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFly 0.5s ease-out forwards;
+            z-index: 1001;
+        }
+        @keyframes particleFly {
+            to { transform: translate(var(--x, 0), var(--y, -50px)); opacity: 0; }
+        }
+
         .toast {
             position: fixed;
             bottom: 100px;
@@ -260,6 +395,7 @@
             70% { opacity: 1; }
             100% { opacity: 0; visibility: hidden; }
         }
+        
         .sync-status {
             text-align: center;
             font-size: 11px;
@@ -269,6 +405,7 @@
             padding: 6px;
             border-radius: 40px;
         }
+        
         .daily-calendar { display: flex; gap: 8px; overflow-x: auto; padding: 8px 0; }
         .day-card {
             background: #2C3E50;
@@ -280,6 +417,7 @@
         }
         .day-card.claimed { background: #1A252F; opacity: 0.5; }
         .day-card.current { border: 2px solid #FFD700; transform: scale(1.02); }
+        
         .referral-link {
             background: white;
             padding: 12px;
@@ -287,9 +425,83 @@
             word-break: break-all;
             margin: 12px 0;
         }
+        
+        .records-list .item-card {
+            cursor: default;
+        }
+        .records-list .item-card:active {
+            transform: none;
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .skin-item {
+            display: inline-block;
+            width: calc(33% - 10px);
+            margin: 5px;
+            text-align: center;
+            background: rgba(255,255,255,0.95);
+            border-radius: 20px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .skin-item.active {
+            border: 2px solid #FFD700;
+            background: #FFD70020;
+        }
+        .skin-preview {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        
+        .game-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 30px;
+            padding: 20px;
+            z-index: 2000;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .game-modal.hidden {
+            display: none;
+        }
+        .game-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1999;
+        }
+        .game-overlay.hidden {
+            display: none;
+        }
+        .banana-box {
+            display: inline-block;
+            width: 80px;
+            padding: 15px;
+            margin: 10px;
+            background: #FFD700;
+            border-radius: 15px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
+
+<button class="theme-toggle" id="themeToggle">🌙</button>
 
 <div class="stats-grid">
     <div class="stat-card"><div class="stat-label"><img src="banana.jpg" class="banana-icon" alt="🍌"> БАНАНЫ</div><div class="stat-value" id="bananas">0</div></div>
@@ -302,9 +514,21 @@
     <div class="bar-bg"><div class="energy-fill" id="energyFill" style="width: 100%"></div></div>
     <div class="bar-text"><span>⚡ Энергия</span><span id="energy">100</span> / <span id="maxEnergy">100</span></div>
 </div>
+
 <div class="exp-box">
     <div class="bar-bg"><div class="exp-fill" id="expFill" style="width: 0%"></div></div>
-    <div class="bar-text"><span>⭐ Опыт</span><span id="expText">0 / 100</span></div>
+    <div class="bar-text">
+        <span>⭐ Опыт</span>
+        <span><span id="expText">0 / 100</span> <span class="exp-percent" id="expPercent">0%</span></span>
+    </div>
+</div>
+
+<div class="prestige-progress-box">
+    <div class="bar-bg"><div class="prestige-fill" id="prestigeFill" style="width: 0%"></div></div>
+    <div class="bar-text">
+        <span>🔄 До перерождения</span>
+        <span class="prestige-text" id="prestigeNeededText">10 уровень</span>
+    </div>
 </div>
 
 <div class="minion-wrap">
@@ -316,18 +540,49 @@
 <div class="tabs">
     <div class="tab active" data-tab="clicker">🍌 Кликер</div>
     <div class="tab" data-tab="upgrades">⬆️ Прокачки</div>
-    <div class="tab" data-tab="tasks">📋 Задания</div>
-    <div class="tab" data-tab="leaderboard">🏆 Топ</div>
+    <div class="tab" data-tab="shop">🛒 Магазин</div>
+    <div class="tab" data-tab="quests">📋 Квесты</div>
+    <div class="tab" data-tab="records">🏆 Рекорды</div>
+    <div class="tab" data-tab="leaderboard">📊 Топ</div>
     <div class="tab" data-tab="profile">👤 Профиль</div>
 </div>
 
 <div class="tab-content active" id="tab-clicker">
-    <div class="offline-card">🍌 Жми на миньона!<div style="margin-top:8px;">Пассивный доход: <strong id="passiveIncome">0</strong> 🍌/сек</div></div>
+    <div class="offline-card">
+        🍌 Жми на миньона!<div style="margin-top:8px;">Пассивный доход: <strong id="passiveIncome">0</strong> 🍌/сек</div>
+        <div style="margin-top:8px;">⭐ Ночной бонус: <span id="nightBonus">x1</span></div>
+        <div style="margin-top:8px; font-size:12px;">🎯 Рекорд за клик: <span id="recordClick">0</span> 🍌</div>
+    </div>
+    <button class="task-claim" id="dailyBonusBtn">🎁 Ежедневный бонус</button>
+    <button class="game-btn" id="bananaGameBtn">🎲 Угадай банан! (Игра)</button>
+    <div class="difficulty-selector" style="margin-top:15px;">
+        <button class="dificulty-btn" data-diff="easy">😊 Лёгкий</button>
+        <button class="dificulty-btn" data-diff="normal">😐 Обычный</button>
+        <button class="dificulty-btn" data-diff="hard">😤 Сложный</button>
+    </div>
 </div>
 
-<div class="tab-content" id="tab-upgrades"><div class="upgrade-list" id="upgradesList"></div><button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужен 10 уровень)</button></div>
-<div class="tab-content" id="tab-tasks"><div class="tasks-list" id="tasksList"></div></div>
-<div class="tab-content" id="tab-leaderboard"><div id="leaderboardList"><div class="offline-card">🏆 Загрузка...</div></div></div>
+<div class="tab-content" id="tab-upgrades">
+    <div class="upgrade-list" id="upgradesList"></div>
+    <button class="btn-prestige" id="prestigeBtn">🔄 ПЕРЕРОДИТЬСЯ (нужен 10 уровень)</button>
+</div>
+
+<div class="tab-content" id="tab-shop">
+    <div class="shop-list" id="shopList"></div>
+</div>
+
+<div class="tab-content" id="tab-quests">
+    <div class="tasks-list" id="dailyQuestsList"></div>
+    <button class="task-claim" id="refreshQuestsBtn">🔄 Обновить квесты</button>
+</div>
+
+<div class="tab-content" id="tab-records">
+    <div class="records-list" id="recordsList"></div>
+</div>
+
+<div class="tab-content" id="tab-leaderboard">
+    <div id="leaderboardList"><div class="offline-card">🏆 Загрузка...</div></div>
+</div>
 
 <div class="tab-content" id="tab-profile">
     <div class="offline-card">
@@ -337,9 +592,11 @@
         <div>🤖 Офлайн ставка: <span id="offlineRateProfile">0.1</span> 🍌/сек</div>
         <button class="task-claim" id="claimOfflineBtn">🎁 ЗАБРАТЬ ОФЛАЙН</button>
         <hr style="margin:12px 0; border-color:#FFD700;">
+        <div>🏆 Достижения</div>
+        <div id="achievementsList" class="achievements-list"></div>
+        <hr style="margin:12px 0; border-color:#FFD700;">
         <div>📅 Ежедневный бонус</div>
         <div id="dailyCalendar" class="daily-calendar"></div>
-        <button class="task-claim" id="dailyBonusBtn">🎁 ЗАБРАТЬ БОНУС</button>
         <hr style="margin:12px 0; border-color:#FFD700;">
         <div>👥 Реферальная ссылка</div>
         <div class="referral-link" id="referralLink"></div>
@@ -351,15 +608,26 @@
 
 <div class="sync-status" id="syncStatus">🔄 Инициализация...</div>
 
+<!-- Модальное окно для мини-игры -->
+<div class="game-overlay hidden" id="gameOverlay"></div>
+<div class="game-modal hidden" id="gameModal">
+    <h3>🍌 Угадай банан!</h3>
+    <p>В каком ящике банан?</p>
+    <div id="bananaBoxes"></div>
+    <button id="closeGameBtn">Закрыть</button>
+</div>
+
 <script>
     (function() {
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
 
+        // ========== ПОЛЬЗОВАТЕЛЬ ==========
         const userId = tg.initDataUnsafe?.user?.id || `demo_${Math.random().toString(36).substr(2, 8)}`;
         const userName = tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username || "Миньон";
 
+        // ========== ДАННЫЕ ==========
         let gameData = {
             userId: userId,
             username: userName,
@@ -375,15 +643,41 @@
             lastOnline: Date.now(),
             lastDaily: null,
             dailyStreak: 0,
+            difficulty: 'normal',
+            activeSkin: 'default',
+            ownedSkins: ['default'],
+            records: { maxClick: 0, maxClicksPerMin: 0, fastestLevelUp: 0 },
+            achievements: {},
+            dailyQuests: [],
+            lastQuestRefresh: null,
             upgrades: { click:0, energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0 },
             tasks: { task1: false, task2: false, task3: false },
             referralCode: Math.random().toString(36).substr(2, 8).toUpperCase(),
             referrals: [],
             referralBonusPercent: 0
         };
-
+        
+        // Скины
+        const skins = {
+            default: { name: '🐵 Обычный', price: 0, img: 'minion.clicker.jpg' },
+            super: { name: '🦸 Супер миньон', price: 5000, img: 'minion_super.jpg' },
+            king: { name: '👑 Король миньон', price: 20000, img: 'minion_king.jpg' }
+        };
+        
+        // Достижения
+        const achievementsList = {
+            '100_clicks': { name: '🎯 Первые 100 кликов', reward: 500, condition: () => gameData.totalClicks >= 100 },
+            '1000_clicks': { name: '🔥 1000 кликов', reward: 2000, condition: () => gameData.totalClicks >= 1000 },
+            '10_level': { name: '⭐ Мастер миньонов', reward: 5000, condition: () => gameData.level >= 10 },
+            'prestige_1': { name: '🔄 Первое перерождение', reward: 10000, condition: () => gameData.prestigeCount >= 1 },
+            'million_bananas': { name: '💰 Миллионер', reward: 50000, condition: () => gameData.totalEarned >= 1000000 }
+        };
+        
+        if (!gameData.totalEarned) gameData.totalEarned = 0;
+        
         let autoClickerInterval = null;
 
+        // ========== СОХРАНЕНИЕ ==========
         function saveToLocal() {
             gameData.lastOnline = Date.now();
             localStorage.setItem('minionClicker_' + userId, JSON.stringify(gameData));
@@ -399,6 +693,9 @@
             }
             if (!gameData.upgrades) gameData.upgrades = { click:0, energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0 };
             if (!gameData.tasks) gameData.tasks = { task1: false, task2: false, task3: false };
+            if (!gameData.ownedSkins) gameData.ownedSkins = ['default'];
+            if (!gameData.records) gameData.records = { maxClick: 0, maxClicksPerMin: 0, fastestLevelUp: 0 };
+            if (!gameData.dailyQuests) initDailyQuests();
             if (gameData.energy > gameData.maxEnergy) gameData.energy = gameData.maxEnergy;
             updateUI();
         }
@@ -424,10 +721,41 @@
 
         function autoSync() { saveToLocal(); syncToCloud(); }
 
+        // ========== ЕЖЕДНЕВНЫЕ КВЕСТЫ ==========
+        function initDailyQuests() {
+            const today = new Date().toDateString();
+            if (gameData.lastQuestRefresh !== today) {
+                gameData.dailyQuests = [
+                    { id: 0, name: 'Сделать 50 кликов', progress: 0, target: 50, reward: 500, completed: false },
+                    { id: 1, name: 'Заработать 2000 бананов', progress: 0, target: 2000, reward: 1000, completed: false },
+                    { id: 2, name: 'Купить улучшение', progress: 0, target: 1, reward: 750, completed: false }
+                ];
+                gameData.lastQuestRefresh = today;
+                autoSync();
+            }
+        }
+
+        // ========== НОЧНОЙ БОНУС ==========
+        function getNightBonus() {
+            const hour = new Date().getHours();
+            return (hour >= 23 || hour <= 6) ? 2 : 1;
+        }
+
+        // ========== СЛОЖНОСТЬ ==========
+        function getDifficultyMultiplier() {
+            const diff = gameData.difficulty;
+            if (diff === 'easy') return { click: 2, upgradeCost: 0.8, income: 1.5 };
+            if (diff === 'hard') return { click: 0.5, upgradeCost: 1.5, income: 0.7 };
+            return { click: 1, upgradeCost: 1, income: 1 };
+        }
+
+        // ========== ПРОКАЧКИ ==========
         function getUpgradeCost(upgradeId) {
             const level = gameData.upgrades[upgradeId];
             const base = { click:10, energy:15, regen:20, bonus:25, offline:30, crit:50, auto:100 }[upgradeId];
-            return Math.floor(base * Math.pow(1.5, level));
+            let cost = Math.floor(base * Math.pow(1.5, level));
+            const diffMultiplier = getDifficultyMultiplier().upgradeCost;
+            return Math.floor(cost * diffMultiplier);
         }
 
         function buyUpgrade(upgradeId) {
@@ -438,6 +766,18 @@
                 if (upgradeId === 'click') gameData.clickPower++;
                 if (upgradeId === 'energy') { gameData.maxEnergy += 25; gameData.energy += 25; }
                 if (upgradeId === 'auto') restartAutoClicker();
+                
+                // Обновляем квест "Купить улучшение"
+                const clickQuest = gameData.dailyQuests.find(q => q.id === 2);
+                if (clickQuest && !clickQuest.completed) {
+                    clickQuest.progress++;
+                    if (clickQuest.progress >= clickQuest.target) {
+                        clickQuest.completed = true;
+                        showToast(`✅ Квест "${clickQuest.name}" выполнен! +${clickQuest.reward} 🍌`, "#2ECC71");
+                        gameData.bananas += clickQuest.reward;
+                    }
+                }
+                
                 updateUI();
                 autoSync();
                 showToast(`✅ ${upgradeId} улучшена!`, "#2ECC71");
@@ -451,19 +791,102 @@
             }
         }
 
+        // ========== ПОКУПКА СКИНА ==========
+        function buySkin(skinId) {
+            if (gameData.ownedSkins.includes(skinId)) {
+                gameData.activeSkin = skinId;
+                document.getElementById('minionImg').src = skins[skinId].img;
+                showToast(`✅ Скин ${skins[skinId].name} активирован!`, "#2ECC71");
+                autoSync();
+                return;
+            }
+            const skin = skins[skinId];
+            if (gameData.bananas >= skin.price) {
+                gameData.bananas -= skin.price;
+                gameData.ownedSkins.push(skinId);
+                gameData.activeSkin = skinId;
+                document.getElementById('minionImg').src = skin.img;
+                updateUI();
+                autoSync();
+                showToast(`✅ Скин ${skin.name} куплен!`, "#2ECC71");
+            } else {
+                showToast(`❌ Нужно ${skin.price} 🍌`, "#E74C3C");
+            }
+        }
+
+        // ========== ОФЛАЙН ==========
+        function checkOfflineIncome() {
+            const now = Date.now();
+            const secondsOffline = Math.min((now - gameData.lastOnline) / 1000, 8 * 3600);
+            const offlineRate = 0.1 + (gameData.upgrades.offline * 0.05);
+            const earned = Math.floor(secondsOffline * offlineRate);
+            if (earned > 0) {
+                gameData.bananas += earned;
+                showOfflineNotification(`🎁 +${earned} 🍌 офлайн дохода!`);
+                autoSync();
+            }
+            gameData.lastOnline = now;
+            updateUI();
+        }
+        
+        function showOfflineNotification(msg) {
+            const notification = document.createElement('div');
+            notification.className = 'offline-notification';
+            notification.innerText = msg;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 4000);
+        }
+
+        // ========== МИНИ-ИГРА "УГАДАЙ БАНАН" ==========
+        let currentGameCallback = null;
+        function startBananaGame() {
+            const hiddenIndex = Math.floor(Math.random() * 4);
+            const modal = document.getElementById('gameModal');
+            const overlay = document.getElementById('gameOverlay');
+            const boxesDiv = document.getElementById('bananaBoxes');
+            boxesDiv.innerHTML = '';
+            for (let i = 0; i < 4; i++) {
+                const box = document.createElement('div');
+                box.className = 'banana-box';
+                box.innerText = '📦';
+                box.onclick = () => {
+                    if (i === hiddenIndex) {
+                        const reward = [100, 200, 500, 1000][Math.floor(Math.random() * 4)];
+                        gameData.bananas += reward;
+                        updateUI();
+                        autoSync();
+                        showToast(`🎉 Ты нашёл банан! +${reward} 🍌`, "#2ECC71");
+                    } else {
+                        showToast("❌ Пусто! Попробуй ещё раз", "#E74C3C");
+                    }
+                    modal.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                };
+                boxesDiv.appendChild(box);
+            }
+            modal.classList.remove('hidden');
+            overlay.classList.remove('hidden');
+        }
+
+        // ========== КЛИК ==========
         function clickMinion() {
             if (gameData.energy <= 0) {
                 showToast("❌ Нет энергии!", "#E74C3C");
                 return;
             }
             
-            // Анимация картинки миньона при клике
+            // Анимация картинки
             const minionImg = document.getElementById('minionImg');
             minionImg.style.transform = 'scale(0.95)';
             setTimeout(() => { minionImg.style.transform = 'scale(1)'; }, 150);
             
-            let gain = Math.floor(gameData.clickPower * gameData.prestigeBonus);
+            // Создаём партиклы
+            createParticles();
+            
+            let gain = Math.floor(gameData.clickPower * gameData.prestigeBonus * getDifficultyMultiplier().click);
             gain = Math.floor(gain * (1 + gameData.upgrades.bonus * 0.05 + gameData.referralBonusPercent / 100));
+            gain = Math.floor(gain * getNightBonus());
+            
             let isCritical = false;
             if (Math.random() < gameData.upgrades.crit * 0.05) {
                 gain *= 2;
@@ -471,31 +894,95 @@
                 showToast("⚡ КРИТИЧЕСКИЙ УДАР x2!", "#F39C12");
             }
             
+            // Рекорд клика
+            if (gain > gameData.records.maxClick) {
+                gameData.records.maxClick = gain;
+                showToast(`🏆 Новый рекорд! +${gain} 🍌`, "#FFD700");
+            }
+            
             gameData.energy -= 1;
             gameData.bananas += gain;
             gameData.totalClicks++;
+            gameData.totalEarned = (gameData.totalEarned || 0) + gain;
             
+            // Обновляем квест "Сделать клики"
+            const clickQuest = gameData.dailyQuests?.find(q => q.id === 0);
+            if (clickQuest && !clickQuest.completed) {
+                clickQuest.progress++;
+                if (clickQuest.progress >= clickQuest.target) {
+                    clickQuest.completed = true;
+                    showToast(`✅ Квест "${clickQuest.name}" выполнен! +${clickQuest.reward} 🍌`, "#2ECC71");
+                    gameData.bananas += clickQuest.reward;
+                }
+            }
+            
+            // Опыт и уровень
             let expNeeded = gameData.level * 100;
             gameData.exp += gain;
+            let leveledUp = false;
             if (gameData.exp >= expNeeded) {
                 gameData.exp -= expNeeded;
                 gameData.level++;
                 gameData.bananas += 100;
+                leveledUp = true;
                 showToast(`🎉 УРОВЕНЬ ${gameData.level}! +100 🍌`, "#8E44AD");
+                document.getElementById('level').classList.add('level-up');
+                setTimeout(() => document.getElementById('level').classList.remove('level-up'), 500);
             }
             
             updateUI();
             autoSync();
             showFloating(gain, isCritical);
+            playClickSound();
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             
             if (!gameData.tasks.task1 && gameData.bananas >= 1000) { gameData.tasks.task1 = true; autoSync(); }
             if (!gameData.tasks.task3 && gameData.level >= 5) { gameData.tasks.task3 = true; autoSync(); }
+            
+            checkAchievements();
+        }
+        
+        // Звук
+        function playClickSound() {
+            try {
+                const audio = new Audio();
+                audio.volume = 0.2;
+            } catch(e) {}
+        }
+        
+        // Партиклы
+        function createParticles() {
+            const rect = document.getElementById('minion').getBoundingClientRect();
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = (rect.left + rect.width/2 + (Math.random() - 0.5) * 50) + 'px';
+                particle.style.top = (rect.top + rect.height/2 + (Math.random() - 0.5) * 50) + 'px';
+                particle.style.setProperty('--x', (Math.random() - 0.5) * 100 + 'px');
+                particle.style.setProperty('--y', Math.random() * -100 + 'px');
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 500);
+            }
+        }
+        
+        // Анимация бананов на фоне
+        function createFloatingBananas() {
+            setInterval(() => {
+                const banana = document.createElement('div');
+                banana.className = 'banana-particle';
+                banana.style.left = Math.random() * window.innerWidth + 'px';
+                banana.style.width = (20 + Math.random() * 30) + 'px';
+                banana.style.height = (20 + Math.random() * 30) + 'px';
+                document.body.appendChild(banana);
+                setTimeout(() => banana.remove(), 8000);
+            }, 10000);
         }
 
+        // ========== ПЕРЕРОЖДЕНИЕ ==========
         function doPrestige() {
             if (gameData.level >= 10) {
                 if (confirm("Переродиться? Уровень станет 1, прокачки сбросятся, но бонус +10% останется навсегда!")) {
+                    const oldLevel = gameData.level;
                     gameData.prestigeCount++;
                     gameData.prestigeBonus = 1 + (gameData.prestigeCount * 0.1);
                     gameData.bananas = 100;
@@ -509,38 +996,27 @@
                     restartAutoClicker();
                     autoSync();
                     showToast(`✨ ПЕРЕРОЖДЕНИЕ! +${Math.round((gameData.prestigeBonus-1)*100)}% к силе!`, "#8E44AD");
+                    checkAchievements();
                 }
             } else {
                 showToast(`❌ Нужен 10 уровень (сейчас ${gameData.level})`, "#E74C3C");
             }
         }
 
-        function restartAutoClicker() {
-            if (autoClickerInterval) clearInterval(autoClickerInterval);
-            if (gameData.upgrades.auto > 0) {
-                autoClickerInterval = setInterval(() => {
-                    if (gameData.energy > 0) clickMinion();
-                }, 1000);
+        // ========== ДОСТИЖЕНИЯ ==========
+        function checkAchievements() {
+            for (const [id, ach] of Object.entries(achievementsList)) {
+                if (!gameData.achievements[id] && ach.condition()) {
+                    gameData.achievements[id] = true;
+                    gameData.bananas += ach.reward;
+                    showToast(`🏆 Достижение "${ach.name}"! +${ach.reward} 🍌`, "#FFD700");
+                    autoSync();
+                }
             }
+            updateUI();
         }
 
-        function claimOfflineManual() {
-            const now = Date.now();
-            const secondsOffline = Math.min((now - gameData.lastOnline) / 1000, 8 * 3600);
-            const offlineRate = 0.1 + (gameData.upgrades.offline * 0.05);
-            const earned = Math.floor(secondsOffline * offlineRate);
-            if (earned > 0) {
-                gameData.bananas += earned;
-                updateUI();
-                autoSync();
-                showToast(`🎁 +${earned} 🍌 офлайн дохода!`, "#2ECC71");
-            } else {
-                showToast("📭 Нет офлайн дохода", "#7F8C8D");
-            }
-            gameData.lastOnline = now;
-            saveToLocal();
-        }
-
+        // ========== ЕЖЕДНЕВНЫЙ БОНУС ==========
         function dailyBonus() {
             const now = new Date();
             const last = gameData.lastDaily ? new Date(gameData.lastDaily) : null;
@@ -561,26 +1037,7 @@
             showToast(`🎁 Ежедневный бонус: +${reward} 🍌 (день ${streak + 1})`, "#2ECC71");
         }
 
-        function claimTask(taskId) {
-            const rewards = { task1: 500, task2: 1000, task3: 2000 };
-            if (gameData.tasks[taskId]) { showToast("❌ Задание уже выполнено!", "#E74C3C"); return; }
-            
-            let canClaim = false;
-            if (taskId === 'task1' && gameData.bananas >= 1000) canClaim = true;
-            if (taskId === 'task2' && Object.values(gameData.upgrades).some(l => l > 0)) canClaim = true;
-            if (taskId === 'task3' && gameData.level >= 5) canClaim = true;
-            
-            if (canClaim) {
-                gameData.tasks[taskId] = true;
-                gameData.bananas += rewards[taskId];
-                updateUI();
-                autoSync();
-                showToast(`✅ +${rewards[taskId]} 🍌`, "#2ECC71");
-            } else {
-                showToast("❌ Условие не выполнено!", "#E74C3C");
-            }
-        }
-
+        // ========== ОБНОВЛЕНИЕ UI ==========
         function updateUI() {
             document.getElementById('bananas').innerText = Math.floor(gameData.bananas).toLocaleString();
             document.getElementById('level').innerText = gameData.level;
@@ -591,16 +1048,29 @@
             document.getElementById('energyFill').style.width = (gameData.energy / gameData.maxEnergy * 100) + '%';
             
             const expNeeded = gameData.level * 100;
-            document.getElementById('expFill').style.width = (gameData.exp / expNeeded * 100) + '%';
+            const expPercent = (gameData.exp / expNeeded) * 100;
+            document.getElementById('expFill').style.width = expPercent + '%';
             document.getElementById('expText').innerText = `${Math.floor(gameData.exp)} / ${expNeeded}`;
+            document.getElementById('expPercent').innerText = Math.floor(expPercent) + '%';
+            
+            const prestigeNeeded = Math.max(0, 10 - gameData.level);
+            const prestigePercent = (gameData.level / 10) * 100;
+            document.getElementById('prestigeFill').style.width = prestigePercent + '%';
+            document.getElementById('prestigeNeededText').innerText = prestigeNeeded === 0 ? "Доступно!" : `${prestigeNeeded} уровень`;
             
             document.getElementById('playerName').innerHTML = gameData.username;
             document.getElementById('totalClicks').innerHTML = gameData.totalClicks.toLocaleString();
             document.getElementById('prestigeBonus').innerHTML = `+${Math.round((gameData.prestigeBonus-1)*100)}%`;
-            document.getElementById('passiveIncome').innerHTML = ((gameData.upgrades.auto * 0.5) + (0.1 + gameData.upgrades.offline * 0.05)).toFixed(1);
+            const offlineRate = 0.1 + (gameData.upgrades.offline * 0.05);
+            document.getElementById('offlineRateProfile').innerHTML = offlineRate.toFixed(2);
+            const passiveIncome = ((gameData.upgrades.auto * 0.5) + offlineRate) * getNightBonus();
+            document.getElementById('passiveIncome').innerHTML = passiveIncome.toFixed(1);
+            document.getElementById('nightBonus').innerHTML = `x${getNightBonus()}`;
+            document.getElementById('recordClick').innerHTML = gameData.records.maxClick;
             document.getElementById('referralCount').innerHTML = gameData.referrals.length;
             document.getElementById('referralLink').innerHTML = `https://t.me/minion_bot?start=${gameData.referralCode}`;
             
+            // Кнопка перерождения
             const prestigeBtn = document.getElementById('prestigeBtn');
             if (gameData.level >= 10) {
                 prestigeBtn.classList.remove('btn-disabled');
@@ -610,8 +1080,17 @@
                 prestigeBtn.disabled = true;
             }
             
-            // Прокачки
-            const updates = [
+            renderUpgrades();
+            renderShop();
+            renderDailyQuests();
+            renderRecords();
+            renderAchievements();
+            renderLeaderboard();
+            renderDailyCalendar();
+        }
+        
+        function renderUpgrades() {
+            const upgrades = [
                 { id: 'click', name: '💪 Сила клика', desc: '+1 банан/клик' },
                 { id: 'energy', name: '⚡ Макс. энергия', desc: '+25 к макс. энергии' },
                 { id: 'regen', name: '🔋 Регенерация', desc: '+0.5 энергии/сек' },
@@ -622,33 +1101,99 @@
             ];
             const container = document.getElementById('upgradesList');
             container.innerHTML = '';
-            for (let up of updates) {
+            for (let up of upgrades) {
                 const level = gameData.upgrades[up.id];
                 const cost = getUpgradeCost(up.id);
                 const div = document.createElement('div');
                 div.className = 'item-card';
-                div.innerHTML = `<div class="item-info"><div class="item-name">${up.name}</div><div class="item-desc">${up.desc}</div><div class="item-level">Ур. ${level}/10</div></div><div class="item-cost">${cost} 🍌</div>`;
+                div.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${up.name}</div>
+                        <div class="item-desc">${up.desc}</div>
+                        <div class="item-level">Ур. ${level}/10</div>
+                        <div class="upgrade-tooltip">💰 Следующий уровень: ${Math.floor(cost * 1.5).toLocaleString()} 🍌</div>
+                    </div>
+                    <div class="item-cost">${cost.toLocaleString()} 🍌</div>
+                `;
                 div.addEventListener('click', () => buyUpgrade(up.id));
                 container.appendChild(div);
             }
-            
-            // Задания
-            const tasksDiv = document.getElementById('tasksList');
-            tasksDiv.innerHTML = `
-                <div class="item-card"><div><div class="item-name">📋 Накопи 1000 бананов</div><div class="item-desc">Награда: 500 🍌</div></div>${!gameData.tasks.task1 ? '<button class="task-claim task-btn" data-task="task1">ЗАБРАТЬ</button>' : '<div>✅ Выполнено</div>'}</div>
-                <div class="item-card"><div><div class="item-name">📋 Купи улучшение</div><div class="item-desc">Награда: 1000 🍌</div></div>${!gameData.tasks.task2 ? '<button class="task-claim task-btn" data-task="task2">ЗАБРАТЬ</button>' : '<div>✅ Выполнено</div>'}</div>
-                <div class="item-card"><div><div class="item-name">📋 Достигни 5 уровня</div><div class="item-desc">Награда: 2000 🍌</div></div>${!gameData.tasks.task3 ? '<button class="task-claim task-btn" data-task="task3">ЗАБРАТЬ</button>' : '<div>✅ Выполнено</div>'}</div>
+        }
+        
+        function renderShop() {
+            const container = document.getElementById('shopList');
+            container.innerHTML = '<div class="item-card" style="justify-content:center;">🛒 Магазин скинов</div>';
+            for (const [skinId, skin] of Object.entries(skins)) {
+                const owned = gameData.ownedSkins.includes(skinId);
+                const active = gameData.activeSkin === skinId;
+                const div = document.createElement('div');
+                div.className = 'skin-item' + (active ? ' active' : '');
+                div.innerHTML = `
+                    <img src="${skin.img}" class="skin-preview" onerror="this.src='minion.clicker.jpg'">
+                    <div>${skin.name}</div>
+                    <div>${owned ? (active ? '✅ Активен' : 'Владелец') : `${skin.price} 🍌`}</div>
+                `;
+                div.onclick = () => buySkin(skinId);
+                container.appendChild(div);
+            }
+        }
+        
+        function renderDailyQuests() {
+            const container = document.getElementById('dailyQuestsList');
+            if (!gameData.dailyQuests || gameData.dailyQuests.length === 0) {
+                container.innerHTML = '<div class="item-card">🎯 Квесты появятся завтра</div>';
+                return;
+            }
+            container.innerHTML = '';
+            for (let q of gameData.dailyQuests) {
+                const percent = (q.progress / q.target) * 100;
+                const div = document.createElement('div');
+                div.className = 'item-card';
+                div.style.cursor = 'default';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">📋 ${q.name}</div>
+                        <div class="item-desc">Прогресс: ${q.progress} / ${q.target}</div>
+                        <div class="bar-bg" style="margin-top:5px;"><div class="exp-fill" style="width:${percent}%;"></div></div>
+                        <div class="item-level">Награда: ${q.reward} 🍌</div>
+                    </div>
+                    ${q.completed ? '<div>✅ Выполнено</div>' : ''}
+                `;
+                container.appendChild(div);
+            }
+        }
+        
+        function renderRecords() {
+            const container = document.getElementById('recordsList');
+            container.innerHTML = `
+                <div class="item-card"><div class="item-info"><div class="item-name">💥 Максимальный клик</div></div><div>${gameData.records.maxClick} 🍌</div></div>
+                <div class="item-card"><div class="item-info"><div class="item-name">🎯 Всего кликов</div></div><div>${gameData.totalClicks.toLocaleString()}</div></div>
+                <div class="item-card"><div class="item-info"><div class="item-name">🍌 Всего заработано</div></div><div>${Math.floor(gameData.totalEarned || 0).toLocaleString()}</div></div>
+                <div class="item-card"><div class="item-info"><div class="item-name">🔄 Перерождений</div></div><div>${gameData.prestigeCount}</div></div>
             `;
-            document.querySelectorAll('.task-btn').forEach(btn => {
-                btn.addEventListener('click', () => claimTask(btn.dataset.task));
-            });
-            
-            // Календарь
-            const rewards = [100, 200, 500, 1000, 2000, 5000, 10000];
-            const streak = gameData.dailyStreak;
-            document.getElementById('dailyCalendar').innerHTML = rewards.map((r, i) => `<div class="day-card ${i < streak ? 'claimed' : i === streak ? 'current' : ''}">${i+1}<br>${r}</div>`).join('');
-            
-            // Лидерборд
+        }
+        
+        function renderAchievements() {
+            const container = document.getElementById('achievementsList');
+            container.innerHTML = '';
+            for (const [id, ach] of Object.entries(achievementsList)) {
+                const unlocked = gameData.achievements[id];
+                const div = document.createElement('div');
+                div.className = 'item-card';
+                div.style.cursor = 'default';
+                div.style.opacity = unlocked ? '1' : '0.6';
+                div.innerHTML = `
+                    <div class="item-info">
+                        <div class="item-name">${ach.name}</div>
+                        <div class="item-desc">Награда: ${ach.reward} 🍌</div>
+                    </div>
+                    ${unlocked ? '✅' : '🔒'}
+                `;
+                container.appendChild(div);
+            }
+        }
+        
+        function renderLeaderboard() {
             const leaders = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -663,6 +1208,38 @@
             const leaderDiv = document.getElementById('leaderboardList');
             if (leaders.length === 0) leaderDiv.innerHTML = '<div class="offline-card">🏆 Пока никого</div>';
             else leaderDiv.innerHTML = leaders.slice(0,20).map((p, i) => `<div class="leaderboard-item"><div class="rank">${i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}</div><div class="leader-name">${p.username}</div><div class="leader-stats">🍌 ${Math.floor(p.bananas).toLocaleString()} 📊 ${p.level} ур. 🔄 ${p.prestigeCount}</div></div>`).join('');
+        }
+        
+        function renderDailyCalendar() {
+            const rewards = [100, 200, 500, 1000, 2000, 5000, 10000];
+            const streak = gameData.dailyStreak;
+            document.getElementById('dailyCalendar').innerHTML = rewards.map((r, i) => `<div class="day-card ${i < streak ? 'claimed' : i === streak ? 'current' : ''}">${i+1}<br>${r}</div>`).join('');
+        }
+
+        function claimOfflineManual() {
+            const now = Date.now();
+            const secondsOffline = Math.min((now - gameData.lastOnline) / 1000, 8 * 3600);
+            const offlineRate = 0.1 + (gameData.upgrades.offline * 0.05);
+            const earned = Math.floor(secondsOffline * offlineRate);
+            if (earned > 0) {
+                gameData.bananas += earned;
+                updateUI();
+                autoSync();
+                showToast(`🎁 +${earned} 🍌 офлайн дохода!`, "#2ECC71");
+            } else {
+                showToast("📭 Нет офлайн дохода", "#7F8C8D");
+            }
+            gameData.lastOnline = now;
+            saveToLocal();
+        }
+
+        function restartAutoClicker() {
+            if (autoClickerInterval) clearInterval(autoClickerInterval);
+            if (gameData.upgrades.auto > 0) {
+                autoClickerInterval = setInterval(() => {
+                    if (gameData.energy > 0) clickMinion();
+                }, 1000);
+            }
         }
 
         function showFloating(text, isCritical) {
@@ -684,28 +1261,58 @@
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
         }
-
+        
+        // ========== ОБРАБОТЧИКИ ==========
         document.getElementById('minion').addEventListener('click', clickMinion);
         document.getElementById('prestigeBtn').addEventListener('click', doPrestige);
         document.getElementById('claimOfflineBtn').addEventListener('click', claimOfflineManual);
         document.getElementById('dailyBonusBtn').addEventListener('click', dailyBonus);
+        document.getElementById('bananaGameBtn').addEventListener('click', startBananaGame);
+        document.getElementById('closeGameBtn')?.addEventListener('click', () => {
+            document.getElementById('gameModal').classList.add('hidden');
+            document.getElementById('gameOverlay').classList.add('hidden');
+        });
         document.getElementById('copyReferralBtn').addEventListener('click', () => {
             navigator.clipboard.writeText(document.getElementById('referralLink').innerText);
             showToast("📋 Ссылка скопирована!", "#3498DB");
         });
         document.getElementById('syncCloudBtn').addEventListener('click', () => { syncToCloud(); showToast("☁️ Синхронизация выполнена!", "#3498DB"); });
-
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+            document.getElementById('themeToggle').innerText = document.body.classList.contains('dark-theme') ? '☀️' : '🌙';
+        });
+        document.getElementById('refreshQuestsBtn').addEventListener('click', () => {
+            initDailyQuests();
+            renderDailyQuests();
+            showToast("🔄 Квесты обновлены!", "#3498DB");
+        });
+        
+        document.querySelectorAll('.dificulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                gameData.difficulty = btn.dataset.diff;
+                showToast(`Сложность изменена на ${btn.innerText}`, "#3498DB");
+                autoSync();
+            });
+        });
+        
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 tab.classList.add('active');
                 document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+                if (tab.dataset.tab === 'leaderboard') renderLeaderboard();
+                if (tab.dataset.tab === 'profile') renderAchievements();
+                if (tab.dataset.tab === 'records') renderRecords();
             });
         });
 
+        // ========== ЗАПУСК ==========
         loadFromLocal();
         loadFromCloud();
+        checkOfflineIncome();
+        initDailyQuests();
+        createFloatingBananas();
         
         setInterval(() => {
             if (gameData.energy < gameData.maxEnergy) {
@@ -717,6 +1324,7 @@
         
         restartAutoClicker();
         updateUI();
+        checkAchievements();
     })();
 </script>
 </body>
