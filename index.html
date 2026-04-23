@@ -270,7 +270,6 @@
         const userId = tg.initDataUnsafe?.user?.id || `demo_${Math.random().toString(36).substr(2, 8)}`;
         const userName = tg.initDataUnsafe?.user?.first_name || tg.initDataUnsafe?.user?.username || "Миньон";
         
-        // Функции для безопасной работы с числами
         function safeNumber(value, defaultValue = 0) {
             const num = Number(value);
             return isNaN(num) ? defaultValue : num;
@@ -296,6 +295,9 @@
         };
         
         let autoClickerInterval = null, comboTimeout = null, farmInterval = null;
+        let isSyncing = false;
+        let pendingSync = false;
+        
         const skins = {
             default: { name: '🐵 Обычный', price: 0, img: 'minion.clicker.jpg' },
             super: { name: '🦸 Супер миньон', price: 5000, img: 'minion_super.jpg' },
@@ -306,21 +308,110 @@
         
         const wheelRewards = [1000,2000,5000,10000,500,200,5000,1000,20000,100];
         const achievementsList = {
-            click100: { name: "🎯 Первые 100 кликов", reward: 500, condition: () => gameData.totalClicks >= 100 },
-            click1000: { name: "🔥 1000 кликов", reward: 2000, condition: () => gameData.totalClicks >= 1000 },
-            level10: { name: "⭐ 10 уровень", reward: 2000, condition: () => gameData.level >= 10 },
-            prestige1: { name: "🔄 Первое перерождение", reward: 10000, condition: () => gameData.prestigeCount >= 1 },
-            bananas100k: { name: "💰 100,000 бананов", reward: 5000, condition: () => gameData.totalEarned >= 100000 },
-            farm10: { name: "🌱 Садовод", reward: 3000, condition: () => gameData.upgrades.farmTree >= 10 }
+            click100: { name: "🎯 Первые 100 кликов", reward: 500, condition: () => safeNumber(gameData.totalClicks) >= 100 },
+            click1000: { name: "🔥 1000 кликов", reward: 2000, condition: () => safeNumber(gameData.totalClicks) >= 1000 },
+            level10: { name: "⭐ 10 уровень", reward: 2000, condition: () => safeNumber(gameData.level) >= 10 },
+            prestige1: { name: "🔄 Первое перерождение", reward: 10000, condition: () => safeNumber(gameData.prestigeCount) >= 1 },
+            bananas100k: { name: "💰 100,000 бананов", reward: 5000, condition: () => safeNumber(gameData.totalEarned) >= 100000 },
+            farm10: { name: "🌱 Садовод", reward: 3000, condition: () => safeNumber(gameData.upgrades.farmTree) >= 10 }
         };
+        
+        // СОХРАНЕНИЕ В ОБЛАКО TELEGRAM (МЕЖДУ УСТРОЙСТВАМИ)
+        function syncToCloud() {
+            if (!tg.CloudStorage) {
+                document.getElementById('syncStatus').innerHTML = "⚠️ Облако не поддерживается";
+                return;
+            }
+            if (isSyncing) {
+                pendingSync = true;
+                return;
+            }
+            isSyncing = true;
+            const cloudData = {
+                bananas: safeNumber(gameData.bananas), level: safeNumber(gameData.level), exp: safeNumber(gameData.exp),
+                totalClicks: safeNumber(gameData.totalClicks), totalEarned: safeNumber(gameData.totalEarned),
+                prestigeCount: safeNumber(gameData.prestigeCount), maxEnergy: safeNumber(gameData.maxEnergy), energy: safeNumber(gameData.energy),
+                clickPower1: safeNumber(gameData.clickPower1), clickPower5: safeNumber(gameData.clickPower5),
+                clickPower10: safeNumber(gameData.clickPower10), clickPower25: safeNumber(gameData.clickPower25),
+                clickPower50: safeNumber(gameData.clickPower50), clickMastery: safeNumber(gameData.clickMastery),
+                explosive: safeNumber(gameData.explosive), farmIncome: safeNumber(gameData.farmIncome),
+                upgrades: gameData.upgrades, achievements: gameData.achievements,
+                dailyStreak: safeNumber(gameData.dailyStreak), lastDaily: gameData.lastDaily,
+                ownedSkins: gameData.ownedSkins, activeSkin: gameData.activeSkin,
+                tasks: gameData.tasks, combo: safeNumber(gameData.combo), lastClickTime: safeNumber(gameData.lastClickTime)
+            };
+            tg.CloudStorage.setItem('minionClickerCloud_' + userId, JSON.stringify(cloudData), () => {
+                document.getElementById('syncStatus').innerHTML = "✅ Сохранено в облаке";
+                setTimeout(() => {
+                    if (document.getElementById('syncStatus').innerHTML.includes("✅"))
+                        document.getElementById('syncStatus').innerHTML = "🔄 Синхронизировано";
+                }, 2000);
+                isSyncing = false;
+                if (pendingSync) {
+                    pendingSync = false;
+                    syncToCloud();
+                }
+            });
+        }
+        
+        // ЗАГРУЗКА ИЗ ОБЛАКА TELEGRAM
+        function loadFromCloud() {
+            if (!tg.CloudStorage) return;
+            isSyncing = true;
+            tg.CloudStorage.getItem('minionClickerCloud_' + userId, (err, val) => {
+                if (!err && val) {
+                    try {
+                        const cloud = JSON.parse(val);
+                        if (cloud && typeof cloud.bananas === 'number') {
+                            let changed = false;
+                            for (let key in cloud) {
+                                if (key !== 'upgrades' && key !== 'achievements' && key !== 'ownedSkins') {
+                                    if (gameData[key] !== cloud[key]) changed = true;
+                                    gameData[key] = cloud[key];
+                                }
+                            }
+                            if (cloud.upgrades) Object.assign(gameData.upgrades, cloud.upgrades);
+                            if (cloud.achievements) Object.assign(gameData.achievements, cloud.achievements);
+                            if (cloud.ownedSkins) gameData.ownedSkins = cloud.ownedSkins;
+                            if (cloud.activeSkin) gameData.activeSkin = cloud.activeSkin;
+                            if (changed) updateUI();
+                            document.getElementById('syncStatus').innerHTML = "☁️ Загружено из облака";
+                        }
+                    } catch(e) {}
+                }
+                isSyncing = false;
+                restartAutoClicker();
+                updateFarmIncome();
+                updateUI();
+            });
+        }
+        
+        function saveToLocal() { 
+            gameData.lastOnline = Date.now(); 
+            localStorage.setItem('minionClicker_' + userId, JSON.stringify(gameData));
+            syncToCloud();
+        }
+        
+        function loadFromLocal() {
+            const saved = localStorage.getItem('minionClicker_' + userId);
+            if(saved) try { Object.assign(gameData, JSON.parse(saved)); } catch(e){}
+            if(!gameData.upgrades) gameData.upgrades = {};
+            if(!gameData.ownedSkins) gameData.ownedSkins = ['default'];
+            if(!gameData.achievements) gameData.achievements = {};
+            if(safeNumber(gameData.energy) > safeNumber(gameData.maxEnergy)) gameData.energy = gameData.maxEnergy;
+            updateUI();
+        }
         
         function checkAchievements() {
             for (let [id, ach] of Object.entries(achievementsList))
                 if (!gameData.achievements[id] && ach.condition()) {
-                    gameData.achievements[id] = true; gameData.bananas += ach.reward;
-                    showToast(`🏆 Достижение "${ach.name}"! +${ach.reward} 🍌`, "#FFD700"); syncToCloud();
+                    gameData.achievements[id] = true; gameData.bananas = safeNumber(gameData.bananas) + ach.reward;
+                    gameData.totalEarned = safeNumber(gameData.totalEarned) + ach.reward;
+                    showToast(`🏆 Достижение "${ach.name}"! +${ach.reward} 🍌`, "#FFD700");
+                    saveToLocal();
                 }
         }
+        
         function renderAchievements() {
             const container = document.getElementById('achievementsList');
             container.innerHTML = '';
@@ -365,7 +456,7 @@
             if (upgradeId === 'auto' && safeNumber(gameData.prestigeCount) < 5) { showToast("❌ Автокликер доступен после 5 перерождений!", "#E74C3C"); return; }
             const cost = getUpgradeCost(upgradeId, level);
             if (safeNumber(gameData.bananas) >= cost) {
-                gameData.bananas -= cost;
+                gameData.bananas = safeNumber(gameData.bananas) - cost;
                 if (upgradeId === 'click1') gameData.clickPower1++;
                 else if (upgradeId === 'click5') gameData.clickPower5++;
                 else if (upgradeId === 'click10') gameData.clickPower10++;
@@ -398,8 +489,9 @@
                 else if (upgradeId === 'farmFertilizer') { gameData.upgrades.farmFertilizer++; updateFarmIncome(); }
                 else if (upgradeId === 'farmGreenhouse') { gameData.upgrades.farmGreenhouse++; updateFarmIncome(); }
                 else if (upgradeId === 'farmAuto') { gameData.upgrades.farmAuto++; updateFarmIncome(); }
-                updateUI(); syncToCloud(); showToast(`✅ ${upgradeId} улучшена!`, "#2ECC71");
-                if (!gameData.tasks.task2) { gameData.tasks.task2 = true; syncToCloud(); }
+                updateUI(); saveToLocal();
+                showToast(`✅ ${upgradeId} улучшена!`, "#2ECC71");
+                if (!gameData.tasks.task2) { gameData.tasks.task2 = true; saveToLocal(); }
             } else showToast(`❌ Нужно ${cost.toLocaleString()} 🍌`, "#E74C3C");
         }
         
@@ -407,15 +499,16 @@
             if (gameData.ownedSkins.includes(skinId)) {
                 gameData.activeSkin = skinId;
                 document.getElementById('minionImg').src = skins[skinId].img;
-                showToast(`✅ Скин ${skins[skinId].name} активирован!`, "#2ECC71"); syncToCloud(); return;
+                showToast(`✅ Скин ${skins[skinId].name} активирован!`, "#2ECC71");
+                saveToLocal(); return;
             }
             const skin = skins[skinId];
             if (safeNumber(gameData.bananas) >= skin.price) {
-                gameData.bananas -= skin.price;
+                gameData.bananas = safeNumber(gameData.bananas) - skin.price;
                 gameData.ownedSkins.push(skinId);
                 gameData.activeSkin = skinId;
                 document.getElementById('minionImg').src = skin.img;
-                updateUI(); syncToCloud();
+                updateUI(); saveToLocal();
                 showToast(`✅ Скин ${skin.name} куплен!`, "#2ECC71");
             } else showToast(`❌ Нужно ${skin.price} 🍌`, "#E74C3C");
         }
@@ -431,8 +524,8 @@
                 farmInterval = setInterval(() => {
                     let harvest = safeNumber(gameData.farmIncome);
                     if (safeNumber(gameData.upgrades.farmAuto) > 0) harvest *= (1 + safeNumber(gameData.upgrades.farmAuto) * 0.1);
-                    gameData.bananas += Math.floor(harvest);
-                    updateUI(); syncToCloud();
+                    gameData.bananas = safeNumber(gameData.bananas) + Math.floor(harvest);
+                    updateUI(); saveToLocal();
                     showToast(`🌱 Ферма принесла +${Math.floor(harvest)} 🍌!`, "#2ECC71");
                 }, 10000);
             }
@@ -442,7 +535,8 @@
             if (safeNumber(gameData.energy) <= 0) { showToast("❌ Нет энергии!", "#E74C3C"); return; }
             const now = Date.now();
             if (now - safeNumber(gameData.lastClickTime) > 3000) gameData.combo = 0;
-            gameData.combo++; gameData.lastClickTime = now;
+            gameData.combo = safeNumber(gameData.combo) + 1;
+            gameData.lastClickTime = now;
             if (comboTimeout) clearTimeout(comboTimeout);
             comboTimeout = setTimeout(() => { gameData.combo = 0; updateUI(); }, 3000);
             
@@ -451,7 +545,7 @@
             if (safeNumber(gameData.upgrades.mega) > 0 && Math.random() < safeNumber(gameData.upgrades.mega) * 0.02) comboMult *= 2;
             if (safeNumber(gameData.upgrades.inspiration) > 0 && Math.random() < safeNumber(gameData.upgrades.inspiration) * 0.01) comboMult *= 3;
             
-            let power = safeNumber(getTotalClickPower()) * safeNumber(getPrestigeMultiplier()) * comboMult;
+            let power = getTotalClickPower() * getPrestigeMultiplier() * comboMult;
             let gain = Math.floor(power * (1 + safeNumber(gameData.upgrades.bonus)*0.05 + safeNumber(gameData.referralBonusPercent)/100 + safeNumber(gameData.upgrades.alchemy)*0.01));
             gain = Math.max(1, gain);
             
@@ -484,7 +578,7 @@
             if (safeNumber(gameData.upgrades.holyBanana) > 0 && Math.random() < safeNumber(gameData.upgrades.holyBanana) * 0.01) {
                 gameData.bananas += 10000; showToast("✨ СВЯТОЙ БАНАН! +10,000 🍌", "#FFD700");
             }
-            updateUI(); syncToCloud(); showFloating(gain, isCritical);
+            updateUI(); saveToLocal(); showFloating(gain, isCritical);
             if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
             if (!gameData.tasks.task1 && safeNumber(gameData.bananas) >= 1000) gameData.tasks.task1 = true;
             if (!gameData.tasks.task3 && safeNumber(gameData.level) >= 5) gameData.tasks.task3 = true;
@@ -502,7 +596,7 @@
         function doPrestige() {
             const reqLevel = getRequiredLevel(), reqBananas = getRequiredBananas();
             if (safeNumber(gameData.level) >= reqLevel && safeNumber(gameData.bananas) >= reqBananas && confirm(`Переродиться? Нужен уровень ${reqLevel} и ${reqBananas.toLocaleString()} 🍌. Бонус x2 навсегда!`)) {
-                gameData.prestigeCount++;
+                gameData.prestigeCount = safeNumber(gameData.prestigeCount) + 1;
                 gameData.bananas = safeNumber(gameData.bananas) - reqBananas;
                 gameData.level = 1;
                 gameData.exp = 0;
@@ -510,8 +604,9 @@
                 gameData.clickMastery = 0; gameData.explosive = 0;
                 gameData.maxEnergy = 100; gameData.energy = 100;
                 gameData.upgrades = { energy:0, regen:0, bonus:0, offline:0, crit:0, auto:0, luck:0, shield:0, double:0, mega:0, efficiency:0, recovery:0, vampire:0, bank:0, investment:0, luckyClick:0, alchemy:0, speed:0, inspiration:0, holyBanana:0, farmTree:0, farmHarvest:0, farmFertilizer:0, farmGreenhouse:0, farmAuto:0 };
-                gameData.combo = 0; updateFarmIncome();
-                updateUI(); restartAutoClicker(); syncToCloud();
+                gameData.combo = 0;
+                updateFarmIncome();
+                updateUI(); restartAutoClicker(); saveToLocal();
                 showToast(`✨ ПЕРЕРОЖДЕНИЕ! x${getPrestigeMultiplier()} к силе!`, "#8E44AD");
                 checkAchievements();
             } else {
@@ -536,16 +631,18 @@
             }
             document.getElementById('wheelRewards').innerHTML = wheelRewards.map(r => `<span style="background:#2C3E50; padding:2px 6px; border-radius:10px;">+${r}🍌</span>`).join('');
         }
+        
         function spinWheel() {
             if (safeNumber(gameData.bananas) < 5000) { showToast(`❌ Нужно 5000 🍌 для крутки!`, "#E74C3C"); return; }
-            gameData.bananas -= 5000;
+            gameData.bananas = safeNumber(gameData.bananas) - 5000;
             const wheel = document.getElementById('wheel');
             const randomIndex = Math.floor(Math.random() * wheelRewards.length);
             const reward = wheelRewards[randomIndex];
             const segmentAngle = 360 / wheelRewards.length;
             wheel.style.transform = `rotate(${360*5 + (360 - (randomIndex * segmentAngle + segmentAngle/2))}deg)`;
             setTimeout(() => {
-                gameData.bananas += reward; updateUI(); syncToCloud();
+                gameData.bananas = safeNumber(gameData.bananas) + reward;
+                updateUI(); saveToLocal();
                 showToast(`🎡 Колесо принесло +${reward} 🍌!`, "#2ECC71");
                 wheel.style.transform = ''; initWheel();
             }, 3000);
@@ -561,7 +658,7 @@
                 const box = document.createElement('div'); box.className = 'banana-box'; box.innerText = '📦';
                 box.onclick = () => {
                     let reward = currentGameDifficulty === 'easy' ? 100 : currentGameDifficulty === 'medium' ? 250 : 600;
-                    if (i === hiddenIndex) { gameData.bananas += reward; updateUI(); syncToCloud(); showToast(`🎉 +${reward} 🍌!`, "#2ECC71"); }
+                    if (i === hiddenIndex) { gameData.bananas = safeNumber(gameData.bananas) + reward; updateUI(); saveToLocal(); showToast(`🎉 +${reward} 🍌!`, "#2ECC71"); }
                     else showToast(`❌ Пусто!`, "#E74C3C");
                     modal.classList.add('hidden'); overlay.classList.add('hidden');
                 };
@@ -578,8 +675,11 @@
             else { showToast("❌ Бонус уже получен!", "#E74C3C"); return; }
             const rewards = [100,200,500,1000,2000,5000,10000];
             const reward = rewards[streak];
-            gameData.bananas += reward; gameData.dailyStreak = streak+1; gameData.lastDaily = now;
-            updateUI(); syncToCloud(); showToast(`🎁 +${reward} 🍌 (день ${streak+1})`, "#2ECC71");
+            gameData.bananas = safeNumber(gameData.bananas) + reward;
+            gameData.dailyStreak = streak+1;
+            gameData.lastDaily = now;
+            updateUI(); saveToLocal();
+            showToast(`🎁 +${reward} 🍌 (день ${streak+1})`, "#2ECC71");
         }
         
         function claimOfflineManual() {
@@ -587,23 +687,10 @@
             let rate = 0.1 + safeNumber(gameData.upgrades.offline)*0.05 + safeNumber(gameData.upgrades.investment)*0.02 + safeNumber(gameData.farmIncome);
             let earn = Math.floor(sec * rate);
             if (safeNumber(gameData.upgrades.bank) > 0) earn += Math.floor(safeNumber(gameData.bananas) * 0.0005 * safeNumber(gameData.upgrades.bank));
-            if (earn>0) { gameData.bananas += earn; updateUI(); syncToCloud(); showToast(`🎁 +${earn} 🍌`, "#2ECC71"); }
+            if (earn>0) { gameData.bananas = safeNumber(gameData.bananas) + earn; updateUI(); saveToLocal(); showToast(`🎁 +${earn} 🍌`, "#2ECC71"); }
             else showToast("📭 Нет офлайн дохода", "#7F8C8D");
             gameData.lastOnline = now; saveToLocal();
         }
-        
-        function saveToLocal() { gameData.lastOnline = Date.now(); localStorage.setItem('minionClicker_'+userId, JSON.stringify(gameData)); }
-        function loadFromLocal() {
-            const saved = localStorage.getItem('minionClicker_'+userId);
-            if(saved) try { Object.assign(gameData, JSON.parse(saved)); } catch(e){}
-            if(!gameData.upgrades) gameData.upgrades={};
-            if(!gameData.ownedSkins) gameData.ownedSkins=['default'];
-            if(!gameData.achievements) gameData.achievements={};
-            if(safeNumber(gameData.energy) > safeNumber(gameData.maxEnergy)) gameData.energy = gameData.maxEnergy;
-            updateUI();
-        }
-        function syncToCloud() { if(tg.CloudStorage) tg.CloudStorage.setItem('minionClickerCloud_'+userId, JSON.stringify(gameData),()=>{}); }
-        function loadFromCloud() { if(tg.CloudStorage) tg.CloudStorage.getItem('minionClickerCloud_'+userId, (err,val)=>{ if(!err&&val) try { Object.assign(gameData, JSON.parse(val)); updateUI(); saveToLocal(); } catch(e){} restartAutoClicker(); }); }
         
         function renderUpgradesList(containerId, upgradesList) {
             const container = document.getElementById(containerId); if (!container) return;
@@ -622,7 +709,7 @@
             const reqLevel = getRequiredLevel(), reqBananas = getRequiredBananas();
             document.getElementById('bananas').innerText = Math.floor(safeNumber(gameData.bananas)).toLocaleString();
             document.getElementById('level').innerText = safeNumber(gameData.level);
-            document.getElementById('clickPower').innerText = Math.floor(getTotalClickPower()*getPrestigeMultiplier()*getComboMultiplier());
+            document.getElementById('clickPower').innerText = Math.floor(getTotalClickPower() * getPrestigeMultiplier() * getComboMultiplier());
             document.getElementById('prestigeCount').innerText = safeNumber(gameData.prestigeCount);
             document.getElementById('energy').innerText = Math.floor(safeNumber(gameData.energy));
             document.getElementById('maxEnergy').innerText = safeNumber(gameData.maxEnergy);
@@ -644,7 +731,7 @@
             document.getElementById('prestigeMultProfile').innerHTML = getPrestigeMultiplier();
             document.getElementById('comboMult').innerHTML = getComboMultiplier();
             document.getElementById('comboCounter').innerHTML = `🔥 x${getComboMultiplier()}`;
-            const offlineRate = 0.1+safeNumber(gameData.upgrades.offline)*0.05 + safeNumber(gameData.upgrades.investment)*0.02 + safeNumber(gameData.farmIncome);
+            const offlineRate = 0.1 + safeNumber(gameData.upgrades.offline)*0.05 + safeNumber(gameData.upgrades.investment)*0.02 + safeNumber(gameData.farmIncome);
             document.getElementById('offlineRateProfile').innerHTML = offlineRate.toFixed(2);
             const passiveIncome = (safeNumber(gameData.upgrades.auto) * (0.1+safeNumber(gameData.upgrades.offline)*0.05)) + (safeNumber(gameData.upgrades.bank) * safeNumber(gameData.bananas) * 0.0001) + safeNumber(gameData.farmIncome);
             document.getElementById('passiveIncome').innerHTML = passiveIncome.toFixed(1);
@@ -728,22 +815,27 @@
             div.style.top = (window.innerHeight/2)+'px';
             document.body.appendChild(div); setTimeout(()=>div.remove(),600);
         }
+        
         function showToast(msg,bg){
             const toast = document.createElement('div'); toast.className='toast';
             toast.innerText = msg; toast.style.background = bg;
             document.body.appendChild(toast); setTimeout(()=>toast.remove(),2000);
         }
+        
         function createFloatingBananas(){ setInterval(()=>{ const b=document.createElement('div'); b.className='banana-particle'; b.style.left=Math.random()*window.innerWidth+'px'; b.style.width=(20+Math.random()*30)+'px'; b.style.height=(20+Math.random()*30)+'px'; document.body.appendChild(b); setTimeout(()=>b.remove(),8000); },15000); }
         
         function init(){
-            loadFromLocal(); loadFromCloud(); createFloatingBananas(); updateFarmIncome();
+            loadFromLocal();
+            loadFromCloud();
+            createFloatingBananas();
+            updateFarmIncome();
             setInterval(()=>{
                 if(safeNumber(gameData.energy) < safeNumber(gameData.maxEnergy)){
                     let regen = 1 + safeNumber(gameData.upgrades.regen)*0.5 + safeNumber(gameData.upgrades.recovery)*0.3;
-                    gameData.energy = Math.min(safeNumber(gameData.maxEnergy), safeNumber(gameData.energy)+regen); updateUI();
+                    gameData.energy = Math.min(safeNumber(gameData.maxEnergy), safeNumber(gameData.energy)+regen);
+                    updateUI();
                 }
             },1000);
-            setInterval(()=>syncToCloud(),30000);
             restartAutoClicker(); initWheel();
         }
         
